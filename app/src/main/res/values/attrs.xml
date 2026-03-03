@@ -2,18 +2,18 @@
 <resources>
     <declare-styleable name="NoteView">
         <!-- Размеры -->
-        <attr name="height" format="dimension"/>
-        <attr name="section_height" format="dimension"/>
+<!--        <attr name="height" format="dimension"/>-->
+<!--        <attr name="section_height" format="dimension"/>-->
 
-        <attr name="title_size" format="dimension"/>
-        <attr name="description_size" format="dimension"/>
-        <attr name="date_size" format="dimension"/>
+<!--        <attr name="title_size" format="dimension"/>-->
+<!--        <attr name="description_size" format="dimension"/>-->
+<!--        <attr name="date_size" format="dimension"/>-->
 
         <!-- Отступы -->
-        <attr name="title_vertical_padding" format="dimension"/>
-        <attr name="description_vertical_padding" format="dimension"/>
-        <attr name="date_vertical_padding" format="dimension"/>
-        <attr name="content_horizontal_padding" format="dimension"/>
+<!--        <attr name="title_vertical_padding" format="dimension"/>-->
+<!--        <attr name="description_vertical_padding" format="dimension"/>-->
+<!--        <attr name="date_vertical_padding" format="dimension"/>-->
+<!--        <attr name="content_horizontal_padding" format="dimension"/>-->
 
         <!-- Цвета -->
         <attr name="background_color" format="color" />
@@ -21,5 +21,11 @@
         <attr name="title_color" format="color" />
         <attr name="description_color" format="color" />
         <attr name="date_color" format="color" />
+
+        <!-- Текст -->
+        <attr name="title" format="string"/>
+        <attr name="description" format="string"/>
+        <attr name="date" format="string"/>
+        <attr name="importance" format="boolean"/>
     </declare-styleable>
 </resources>
