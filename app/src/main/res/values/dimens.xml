@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+<!-- Note View -->
     <!-- Размеры -->
     <dimen name="note_view_height">300dp</dimen>
-    <dimen name="note_view_section_height">64dp</dimen>
+    <dimen name="note_section_height">64dp</dimen>
 
     <dimen name="note_title_size">20sp</dimen>
     <dimen name="note_description_size">16sp</dimen>
@@ -13,4 +14,5 @@
     <dimen name="note_description_vertical_padding">24dp</dimen>
     <dimen name="note_content_horizontal_padding">12dp</dimen>
     <dimen name="note_date_vertical_padding">12dp</dimen>
+<!--  -->
 </resources>

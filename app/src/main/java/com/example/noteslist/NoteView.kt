@@ -18,27 +18,27 @@ class NoteView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr, defStyleRes) {
 
     // Defaults
-    private val defaultHeight = 200f
-    private val defaultSectionHeight = 50f
-    private val defaultTitleTextSize = 20f
-    private val defaultDescriptionTextSize = 50f
-    private val defaultDateTextSize = 20f
+    private var defaultHeight = 200f
+    private var defaultSectionHeight = 50f
+    private var defaultTitleTextSize = 20f
+    private var defaultDescriptionTextSize = 50f
+    private var defaultDateTextSize = 20f
 
-    private val defaultTitleVerticalPadding = 20f
-    private val defaultDescriptionVerticalPadding = 24f
-    private val defaultDateVerticalPadding = 20f
-    private val defaultHorizontalPadding = 14f
+    private var defaultTitleVerticalPadding = 20f
+    private var defaultDescriptionVerticalPadding = 24f
+    private var defaultDateVerticalPadding = 20f
+    private var defaultHorizontalPadding = 14f
 
-    private val defaultBackgroundColor = Color.WHITE
-    private val defaultSectionColor = Color.BLUE
-    private val defaultTitleColor = Color.BLACK
-    private val defaultDescriptionColor = Color.GRAY
-    private val defaultDateColor = Color.GRAY
+    private var defaultBackgroundColor = Color.WHITE
+    private var defaultSectionColor = Color.BLUE
+    private var defaultTitleColor = Color.BLACK
+    private var defaultDescriptionColor = Color.GRAY
+    private var defaultDateColor = Color.GRAY
 
-    private var defaultTitle = "Заголовок"
-    private var defaultDescription = "Описание"
-    private var defaultDate = "01.01.2025"
-    private var defaultImportance = false
+    private val defaultTitle = "Заголовок"
+    private val defaultDescription = "Описание"
+    private val defaultDate = "01.01.2025"
+    private val defaultImportance = false
 
     // State
     private var viewHeight = defaultHeight
@@ -77,6 +77,44 @@ class NoteView @JvmOverloads constructor(
     private val dateTextPaint = Paint().apply { isAntiAlias = true; textAlign = Paint.Align.CENTER }
 
     init {
+        val resources = context.resources
+        resources.apply {
+            defaultHeight = resources.getDimension(R.dimen.note_view_height)
+            defaultSectionHeight = resources.getDimension(R.dimen.note_section_height)
+            defaultTitleTextSize = resources.getDimensionPixelSize(R.dimen.note_title_size).toFloat()
+            defaultDescriptionTextSize = resources.getDimensionPixelSize(R.dimen.note_description_size).toFloat()
+            defaultDateTextSize = resources.getDimensionPixelSize(R.dimen.note_date_size).toFloat()
+
+            defaultTitleVerticalPadding = resources.getDimension(R.dimen.note_title_vertical_padding)
+            defaultDescriptionVerticalPadding = resources.getDimension(R.dimen.note_description_vertical_padding)
+            defaultDateVerticalPadding = resources.getDimension(R.dimen.note_date_vertical_padding)
+            defaultHorizontalPadding = resources.getDimension(R.dimen.note_content_horizontal_padding)
+
+            defaultBackgroundColor = resources.getColor(R.color.note_background)
+            defaultSectionColor = resources.getColor(R.color.note_section)
+            defaultTitleColor = resources.getColor(R.color.note_title)
+            defaultDescriptionColor = resources.getColor(R.color.note_description)
+            defaultDateColor = resources.getColor(R.color.note_date)
+        }
+
+        viewHeight = defaultHeight
+        sectionHeight = defaultSectionHeight
+        titleTextSize = defaultTitleTextSize
+        descriptionTextSize = defaultDescriptionTextSize
+        dateTextSize = defaultDateTextSize
+
+        titleVerticalPadding = defaultTitleVerticalPadding
+        descriptionVerticalPadding = defaultDescriptionVerticalPadding
+        dateVerticalPadding = defaultDateVerticalPadding
+        horizontalPadding = defaultHorizontalPadding
+
+        backgroundColor = defaultBackgroundColor
+        sectionColor = defaultSectionColor
+        titleColor = defaultTitleColor
+        descriptionColor = defaultDescriptionColor
+        dateColor = defaultDateColor
+
+        initAttrs(attrs, defStyleAttr, defStyleRes)
         initPaints()
     }
 
@@ -84,7 +122,12 @@ class NoteView @JvmOverloads constructor(
         attrs?.let {
             val typedArray = context.obtainStyledAttributes(it, R.styleable.NoteView, defStyleAttr, defStyleRes)
             try {
-
+                title = typedArray.getString(R.styleable.NoteView_title) ?: defaultTitle
+                description = typedArray.getString(R.styleable.NoteView_description) ?: defaultDescription
+                date = typedArray.getString(R.styleable.NoteView_date) ?: defaultDate
+                importance = typedArray.getBoolean(R.styleable.NoteView_importance, defaultImportance)
+            } finally {
+                typedArray.recycle()
             }
         }
     }
@@ -92,7 +135,7 @@ class NoteView @JvmOverloads constructor(
     private fun initPaints() {
         titleTextPaint.apply {
             style = Paint.Style.FILL
-            color = titleTextColor
+            color = titleColor
             textSize = this@NoteView.titleTextSize
         }
         backgroundPaint.apply {
@@ -102,7 +145,7 @@ class NoteView @JvmOverloads constructor(
         }
         sectionPaint.apply {
             style = Paint.Style.FILL
-            color = titleSectionColor
+            color = sectionColor
         }
     }
 
@@ -125,7 +168,7 @@ class NoteView @JvmOverloads constructor(
         center.x = (leftPadding + contentWidth / 2).toInt()
         center.y = (topPadding + contentHeight / 2).toInt()
 
-        val sectionHeight = (titlePadding * 2 + titleTextSize)
+        val sectionHeight = (titleVerticalPadding * 2 + titleTextSize)
 
         val leftX = (leftPadding)
         val topY = (topPadding)
