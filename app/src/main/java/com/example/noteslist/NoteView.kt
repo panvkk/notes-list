@@ -30,9 +30,9 @@ class NoteView @JvmOverloads constructor(
     private var defaultDescriptionTextSize = 50f
     private var defaultDateTextSize = 20f
 
-    private var defaultTitleVerticalPadding = 20f
-    private var defaultDescriptionVerticalPadding = 24f
-    private var defaultDateVerticalPadding = 20f
+    private var defaultTitleTopPadding = 20f
+    private var defaultDescriptionTopPadding = 24f
+    private var defaultDateBottomPadding = 20f
     private var defaultHorizontalPadding = 14f
 
     private var defaultBackgroundColor = Color.WHITE
@@ -53,9 +53,9 @@ class NoteView @JvmOverloads constructor(
     private var descriptionTextSize = defaultDescriptionTextSize
     private var dateTextSize = defaultDateTextSize
 
-    private var titleVerticalPadding = defaultTitleVerticalPadding
-    private var descriptionVerticalPadding = defaultDescriptionVerticalPadding
-    private var dateVerticalPadding = defaultDateVerticalPadding
+    private var titleTopPadding = defaultTitleTopPadding
+    private var descriptionTopPadding = defaultDescriptionTopPadding
+    private var dateBottomPadding = defaultDateBottomPadding
     private var horizontalPadding = defaultHorizontalPadding
 
     private var backgroundColor = defaultBackgroundColor
@@ -72,19 +72,19 @@ class NoteView @JvmOverloads constructor(
     // Геометрия
     private val cardPath = Path()
     private var center = Point()
+    private var textWidth = 0
     private var titlePoint = Point()
     private var descriptionPoint = Point()
     private var datePoint = Point()
     private var cardRect = RectF()
     private var sectionRect = RectF()
-    private var shadowRadius = 10f
 
     // Paint
     private val backgroundPaint = Paint().apply { isAntiAlias = true }
     private val sectionPaint = Paint().apply { isAntiAlias = true }
-    private val titleTextPaint = Paint().apply { isAntiAlias = true; textAlign = Paint.Align.LEFT }
+    private val titleTextPaint = TextPaint().apply { isAntiAlias = true; textAlign = Paint.Align.LEFT }
     private val descriptionTextPaint = TextPaint().apply { isAntiAlias = true; textAlign = Paint.Align.LEFT }
-    private val dateTextPaint = Paint().apply { isAntiAlias = true; textAlign = Paint.Align.LEFT }
+    private val dateTextPaint = TextPaint().apply { isAntiAlias = true; textAlign = Paint.Align.LEFT }
 
     init {
         val resources = context.resources
@@ -95,9 +95,9 @@ class NoteView @JvmOverloads constructor(
             defaultDescriptionTextSize = resources.getDimensionPixelSize(R.dimen.note_description_size).toFloat()
             defaultDateTextSize = resources.getDimensionPixelSize(R.dimen.note_date_size).toFloat()
 
-            defaultTitleVerticalPadding = resources.getDimension(R.dimen.note_title_vertical_padding)
-            defaultDescriptionVerticalPadding = resources.getDimension(R.dimen.note_description_vertical_padding)
-            defaultDateVerticalPadding = resources.getDimension(R.dimen.note_date_vertical_padding)
+            defaultTitleTopPadding = resources.getDimension(R.dimen.note_title_top_padding)
+            defaultDescriptionTopPadding = resources.getDimension(R.dimen.note_description_top_padding)
+            defaultDateBottomPadding = resources.getDimension(R.dimen.note_date_bottom_padding)
             defaultHorizontalPadding = resources.getDimension(R.dimen.note_content_horizontal_padding)
 
             defaultBackgroundColor = resources.getColor(R.color.note_background)
@@ -113,9 +113,9 @@ class NoteView @JvmOverloads constructor(
         descriptionTextSize = defaultDescriptionTextSize
         dateTextSize = defaultDateTextSize
 
-        titleVerticalPadding = defaultTitleVerticalPadding
-        descriptionVerticalPadding = defaultDescriptionVerticalPadding
-        dateVerticalPadding = defaultDateVerticalPadding
+        titleTopPadding = defaultTitleTopPadding
+        descriptionTopPadding = defaultDescriptionTopPadding
+        dateBottomPadding = defaultDateBottomPadding
         horizontalPadding = defaultHorizontalPadding
 
         backgroundColor = defaultBackgroundColor
@@ -170,6 +170,11 @@ class NoteView @JvmOverloads constructor(
             color = titleColor
             textSize = this@NoteView.titleTextSize
         }
+        dateTextPaint.apply {
+            style = Paint.Style.FILL
+            color = dateColor
+            textSize = this@NoteView.dateTextSize
+        }
         backgroundPaint.apply {
             style = Paint.Style.FILL
             color = backgroundColor
@@ -183,9 +188,11 @@ class NoteView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         updateGeometry()
+
         drawNoteCard(canvas)
         drawTitle(canvas)
         drawDescription(canvas)
+        drawDate(canvas)
     }
 
     private fun updateGeometry() {
@@ -194,10 +201,10 @@ class NoteView @JvmOverloads constructor(
         val rightPadding = paddingRight.toFloat()
         val bottomPadding = paddingBottom.toFloat()
 
-        val leftX = (leftPadding)
-        val topY = (topPadding)
-        val rightX = (width - rightPadding.toInt()).toFloat()
-        val bottomY = topPadding + viewHeight // TODO(Надо что-то поменять тут)
+        val leftX = leftPadding
+        val topY = topPadding
+        val rightX = width - rightPadding
+        val bottomY = topPadding + viewHeight
 
         val contentWidth = width - leftPadding.toInt() - rightPadding.toInt()
         val contentHeight = height - topPadding.toInt() - bottomPadding.toInt()
@@ -211,35 +218,47 @@ class NoteView @JvmOverloads constructor(
         cardRect.set(leftX, topY, rightX, bottomY)
         sectionRect.set(leftX, topY, rightX, topY + sectionHeight)
 
-        val titleCenterY = (sectionHeight / 2) + (titleTextPaint.fontMetrics.ascent + titleTextPaint.fontMetrics.descent) / 2 + titleVerticalPadding
-        val descriptionCenterY = (descriptionTextPaint.fontMetrics.ascent + descriptionTextPaint.fontMetrics.descent) / 2 + sectionHeight + descriptionVerticalPadding
 
         // Текст
+        val titleCenterY = (sectionHeight / 2) + (titleTextPaint.fontMetrics.ascent + titleTextPaint.fontMetrics.descent) / 2 
+        val descriptionCenterY = (descriptionTextPaint.fontMetrics.ascent + descriptionTextPaint.fontMetrics.descent) / 2 + sectionHeight + descriptionTopPadding
+        val dateCenterY = (dateTextPaint.fontMetrics.ascent + dateTextPaint.fontMetrics.descent) / 2 - dateBottomPadding
+
+        textWidth = (width - paddingLeft - paddingRight - 2 * horizontalPadding).toInt()
+
         titlePoint = Point((leftX + horizontalPadding).toInt(), (topY + titleCenterY).toInt())
         descriptionPoint = Point((leftX + horizontalPadding).toInt(), (topY + descriptionCenterY).toInt())
+        datePoint = Point((leftX + horizontalPadding).toInt(), (bottomY + dateCenterY).toInt())
     }
 
     private fun drawTitle(canvas: Canvas) {
-        canvas.drawText(
-            title,
-            titlePoint.x.toFloat(),
-            titlePoint.y.toFloat(),
-            titleTextPaint
-        )
+        val staticLayout = StaticLayout.Builder.obtain(title, 0, title.length, titleTextPaint, textWidth)
+            .setAlignment(Alignment.ALIGN_NORMAL)
+            .setMaxLines(1)
+            .build()
+
+        canvas.save()
+        canvas.translate(titlePoint.x.toFloat(), titlePoint.y.toFloat())
+        staticLayout.draw(canvas)
+        canvas.restore()
+//        canvas.drawText(title, titlePoint.x.toFloat(), titlePoint.y.toFloat(), titleTextPaint)
+
     }
 
     private fun drawDescription(canvas: Canvas) {
-        // TODO( Доделать здесь )
-        val contentWidth = (width - paddingLeft - paddingRight - 2 * horizontalPadding).toInt()
-        val staticLayout = StaticLayout.Builder.obtain(description, 0, description.length, descriptionTextPaint, contentWidth)
+        val staticLayout = StaticLayout.Builder.obtain(description, 0, description.length, descriptionTextPaint, textWidth)
             .setAlignment(Alignment.ALIGN_NORMAL)
             .setLineSpacing(0f, 1f)
             .build()
 
         canvas.save()
-        canvas.translate(paddingLeft.toFloat(), paddingRight.toFloat())
+        canvas.translate(descriptionPoint.x.toFloat(), descriptionPoint.y.toFloat())
         staticLayout.draw(canvas)
         canvas.restore()
+    }
+
+    private fun drawDate(canvas: Canvas) {
+        canvas.drawText(date, datePoint.x.toFloat(), datePoint.y.toFloat(), dateTextPaint)
     }
 
     private fun drawNoteCard(canvas: Canvas) {
