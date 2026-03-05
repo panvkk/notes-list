@@ -3,11 +3,17 @@ package com.example.noteslist
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Outline
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.Point
 import android.graphics.RectF
+import android.text.Layout.Alignment
+import android.text.StaticLayout
+import android.text.TextPaint
 import android.util.AttributeSet
 import android.view.View
+import android.view.ViewOutlineProvider
 import kotlin.apply
 
 class NoteView @JvmOverloads constructor(
@@ -64,7 +70,11 @@ class NoteView @JvmOverloads constructor(
     private var importance = defaultImportance
 
     // Геометрия
+    private val cardPath = Path()
     private var center = Point()
+    private var titlePoint = Point()
+    private var descriptionPoint = Point()
+    private var datePoint = Point()
     private var cardRect = RectF()
     private var sectionRect = RectF()
     private var shadowRadius = 10f
@@ -72,9 +82,9 @@ class NoteView @JvmOverloads constructor(
     // Paint
     private val backgroundPaint = Paint().apply { isAntiAlias = true }
     private val sectionPaint = Paint().apply { isAntiAlias = true }
-    private val titleTextPaint = Paint().apply { isAntiAlias = true; textAlign = Paint.Align.CENTER }
-    private val descriptionTextPaint = Paint().apply { isAntiAlias = true; textAlign = Paint.Align.CENTER }
-    private val dateTextPaint = Paint().apply { isAntiAlias = true; textAlign = Paint.Align.CENTER }
+    private val titleTextPaint = Paint().apply { isAntiAlias = true; textAlign = Paint.Align.LEFT }
+    private val descriptionTextPaint = TextPaint().apply { isAntiAlias = true; textAlign = Paint.Align.LEFT }
+    private val dateTextPaint = Paint().apply { isAntiAlias = true; textAlign = Paint.Align.LEFT }
 
     init {
         val resources = context.resources
@@ -114,6 +124,23 @@ class NoteView @JvmOverloads constructor(
         descriptionColor = defaultDescriptionColor
         dateColor = defaultDateColor
 
+        // Определяем Outline, чтобы canvas был обрезан и родительский контейнер рисовал правильный elevation
+        outlineProvider = object : ViewOutlineProvider() {
+            override fun getOutline(view: View?, outline: Outline?) {
+                val radius = resources.getDimension(R.dimen.note_round_radius)
+
+                val leftX = paddingLeft
+                val topY = paddingTop
+                val rightX = width - paddingRight
+                val bottomY = paddingTop + viewHeight.toInt()
+
+                outline?.setRoundRect(leftX, topY, rightX, bottomY, radius)
+            }
+        }
+        // Обрезка по контуру
+        clipToOutline = true
+
+
         initAttrs(attrs, defStyleAttr, defStyleRes)
         initPaints()
     }
@@ -133,6 +160,11 @@ class NoteView @JvmOverloads constructor(
     }
 
     private fun initPaints() {
+        descriptionTextPaint.apply {
+            style = Paint.Style.FILL
+            color = descriptionColor
+            textSize = this@NoteView.descriptionTextSize
+        }
         titleTextPaint.apply {
             style = Paint.Style.FILL
             color = titleColor
@@ -141,7 +173,6 @@ class NoteView @JvmOverloads constructor(
         backgroundPaint.apply {
             style = Paint.Style.FILL
             color = backgroundColor
-//            setShadowLayer()
         }
         sectionPaint.apply {
             style = Paint.Style.FILL
@@ -153,7 +184,8 @@ class NoteView @JvmOverloads constructor(
         super.onDraw(canvas)
         updateGeometry()
         drawNoteCard(canvas)
-//        drawTitle(canvas)
+        drawTitle(canvas)
+        drawDescription(canvas)
     }
 
     private fun updateGeometry() {
@@ -162,36 +194,58 @@ class NoteView @JvmOverloads constructor(
         val rightPadding = paddingRight.toFloat()
         val bottomPadding = paddingBottom.toFloat()
 
+        val leftX = (leftPadding)
+        val topY = (topPadding)
+        val rightX = (width - rightPadding.toInt()).toFloat()
+        val bottomY = topPadding + viewHeight // TODO(Надо что-то поменять тут)
+
         val contentWidth = width - leftPadding.toInt() - rightPadding.toInt()
         val contentHeight = height - topPadding.toInt() - bottomPadding.toInt()
 
         center.x = (leftPadding + contentWidth / 2).toInt()
         center.y = (topPadding + contentHeight / 2).toInt()
 
-        val sectionHeight = (titleVerticalPadding * 2 + titleTextSize)
+        cardPath.set(Path())
 
-        val leftX = (leftPadding)
-        val topY = (topPadding)
-        val rightX = (width - rightPadding.toInt()).toFloat()
-        val bottomY = (height - bottomPadding.toInt()).toFloat()
+        // Фон
+        cardRect.set(leftX, topY, rightX, bottomY)
+        sectionRect.set(leftX, topY, rightX, topY + sectionHeight)
 
-        sectionRect.set(leftX, topY, rightX, topY + sectionHeight + 50f) // эти 50f закроются фоном
-        cardRect.set(leftX, topY + sectionHeight, rightX, bottomY)
+        val titleCenterY = (sectionHeight / 2) + (titleTextPaint.fontMetrics.ascent + titleTextPaint.fontMetrics.descent) / 2 + titleVerticalPadding
+        val descriptionCenterY = (descriptionTextPaint.fontMetrics.ascent + descriptionTextPaint.fontMetrics.descent) / 2 + sectionHeight + descriptionVerticalPadding
+
+        // Текст
+        titlePoint = Point((leftX + horizontalPadding).toInt(), (topY + titleCenterY).toInt())
+        descriptionPoint = Point((leftX + horizontalPadding).toInt(), (topY + descriptionCenterY).toInt())
     }
 
     private fun drawTitle(canvas: Canvas) {
         canvas.drawText(
-            "isdfhai",
-            center.x.toFloat(),
-            center.y.toFloat(),
+            title,
+            titlePoint.x.toFloat(),
+            titlePoint.y.toFloat(),
             titleTextPaint
         )
     }
 
+    private fun drawDescription(canvas: Canvas) {
+        // TODO( Доделать здесь )
+        val contentWidth = (width - paddingLeft - paddingRight - 2 * horizontalPadding).toInt()
+        val staticLayout = StaticLayout.Builder.obtain(description, 0, description.length, descriptionTextPaint, contentWidth)
+            .setAlignment(Alignment.ALIGN_NORMAL)
+            .setLineSpacing(0f, 1f)
+            .build()
+
+        canvas.save()
+        canvas.translate(paddingLeft.toFloat(), paddingRight.toFloat())
+        staticLayout.draw(canvas)
+        canvas.restore()
+    }
+
     private fun drawNoteCard(canvas: Canvas) {
-        // Добавляем верхнюю секцию для заголовка
-        canvas.drawRoundRect(sectionRect, 50f, 50f, sectionPaint)
         // Добавляем фон
-        canvas.drawRoundRect(cardRect, 50f, 50f, backgroundPaint)
+        canvas.drawRect(cardRect, backgroundPaint)
+        // Добавляем верхнюю секцию для заголовка
+        canvas.drawRect(sectionRect, sectionPaint)
     }
 }
