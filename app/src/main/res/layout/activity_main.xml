@@ -12,14 +12,6 @@
         android:elevation="8dp"
         app:title="Пойти в универ"
         app:description="Завтра нужно появиться в универе (очень)"
-        app:date="10.03.2025"/>
-<!--    <TextView-->
-<!--        android:id="@+id/textView"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:text="hi"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent" />-->
+        app:date="10.03.2025"
+        app:importance="true"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

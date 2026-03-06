@@ -7,4 +7,5 @@
     <color name="note_title">#00060A</color>
     <color name="note_description">#3F3B3C</color>
     <color name="note_date">#3F3B3C</color>
+    <color name="note_importance_star_color">#F7E445</color>
 </resources>
