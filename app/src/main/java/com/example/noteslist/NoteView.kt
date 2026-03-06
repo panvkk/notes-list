@@ -6,12 +6,11 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Outline
 import android.graphics.Paint
-import android.graphics.Path
 import android.graphics.Point
+import android.graphics.PointF
 import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Typeface
-import android.graphics.drawable.Drawable
 import android.text.Layout.Alignment
 import android.text.StaticLayout
 import android.text.TextPaint
@@ -36,10 +35,11 @@ class NoteView @JvmOverloads constructor(
     private var defaultDescriptionTextSize = 50f
     private var defaultDateTextSize = 20f
     private var defaultStarSize = 20f
+    private var defaultReadPointSize = 20f
 
     private var defaultTitleTopPadding = 20f
     private var defaultDescriptionTopPadding = 24f
-    private var defaultDateBottomPadding = 20f
+    private var defaultContentBottomPadding = 20f
     private var defaultHorizontalPadding = 14f
 
     private var defaultBackgroundColor = Color.WHITE
@@ -48,6 +48,7 @@ class NoteView @JvmOverloads constructor(
     private var defaultDescriptionColor = Color.GRAY
     private var defaultDateColor = Color.GRAY
     private var defaultStarColor = Color.YELLOW
+    private var defaultReadPointColor = Color.GREEN
 
     private var defaultStarBitmap: Bitmap? = null
 
@@ -55,6 +56,8 @@ class NoteView @JvmOverloads constructor(
     private val defaultDescription = "Описание"
     private val defaultDate = "01.01.2025"
     private val defaultImportance = false
+    private val defaultIsRead = false
+    private val defaultCornerRadius = 10f
 
     // State
     private var viewHeight = defaultHeight
@@ -63,10 +66,11 @@ class NoteView @JvmOverloads constructor(
     private var descriptionTextSize = defaultDescriptionTextSize
     private var dateTextSize = defaultDateTextSize
     private var starSize = defaultStarSize
+    private var readPointSize = defaultReadPointSize
 
     private var titleTopPadding = defaultTitleTopPadding
     private var descriptionTopPadding = defaultDescriptionTopPadding
-    private var dateBottomPadding = defaultDateBottomPadding
+    private var contentBottomPadding = defaultContentBottomPadding
     private var horizontalPadding = defaultHorizontalPadding
 
     private var backgroundColor = defaultBackgroundColor
@@ -75,11 +79,14 @@ class NoteView @JvmOverloads constructor(
     private var descriptionColor = defaultDescriptionColor
     private var dateColor = defaultDateColor
     private var starColor = defaultStarColor
+    private var readPointColor = defaultReadPointColor
 
     private var title = defaultTitle
     private var description = defaultDescription
     private var date = defaultDate
     private var importance = defaultImportance
+    private var isRead = false
+    private var cornerRadius = 10f
 
     // Геометрия
     private var maxTextWidth = 0
@@ -90,6 +97,7 @@ class NoteView @JvmOverloads constructor(
     private var starRect = Rect()
     private var backgroundRect = RectF()
     private var sectionRect = RectF()
+    private var readPoint = PointF()
 
     private var starBitmap = defaultStarBitmap
 
@@ -100,6 +108,7 @@ class NoteView @JvmOverloads constructor(
     private val descriptionTextPaint = TextPaint().apply { isAntiAlias = true; textAlign = Paint.Align.LEFT }
     private val dateTextPaint = TextPaint().apply { isAntiAlias = true; textAlign = Paint.Align.LEFT }
     private val starPaint = Paint().apply { isAntiAlias = true }
+    private val readPointPaint = Paint().apply { isAntiAlias = true }
 
     // Text Layout
     private var titleLayout: StaticLayout? = null
@@ -114,18 +123,12 @@ class NoteView @JvmOverloads constructor(
             defaultDescriptionTextSize = resources.getDimensionPixelSize(R.dimen.note_description_size).toFloat()
             defaultDateTextSize = resources.getDimensionPixelSize(R.dimen.note_date_size).toFloat()
             defaultStarSize = resources.getDimensionPixelSize(R.dimen.note_star_size).toFloat()
+            defaultReadPointSize = resources.getDimensionPixelSize(R.dimen.note_read_point_size).toFloat()
 
             defaultTitleTopPadding = resources.getDimension(R.dimen.note_title_top_padding)
             defaultDescriptionTopPadding = resources.getDimension(R.dimen.note_description_top_padding)
-            defaultDateBottomPadding = resources.getDimension(R.dimen.note_date_bottom_padding)
+            defaultContentBottomPadding = resources.getDimension(R.dimen.note_content_bottom_padding)
             defaultHorizontalPadding = resources.getDimension(R.dimen.note_content_horizontal_padding)
-
-            defaultBackgroundColor = resources.getColor(R.color.note_background)
-            defaultSectionColor = resources.getColor(R.color.note_section)
-            defaultTitleColor = resources.getColor(R.color.note_title)
-            defaultDescriptionColor = resources.getColor(R.color.note_description)
-            defaultDateColor = resources.getColor(R.color.note_date)
-            defaultStarColor = resources.getColor(R.color.note_importance_star_color)
 
             defaultStarBitmap = resources.getDrawable(R.drawable.star_icon).toBitmap()
         }
@@ -136,49 +139,53 @@ class NoteView @JvmOverloads constructor(
         descriptionTextSize = defaultDescriptionTextSize
         dateTextSize = defaultDateTextSize
         starSize = defaultStarSize
+        readPointSize = defaultReadPointSize
 
         titleTopPadding = defaultTitleTopPadding
         descriptionTopPadding = defaultDescriptionTopPadding
-        dateBottomPadding = defaultDateBottomPadding
+        contentBottomPadding = defaultContentBottomPadding
         horizontalPadding = defaultHorizontalPadding
 
-        backgroundColor = defaultBackgroundColor
-        sectionColor = defaultSectionColor
-        titleColor = defaultTitleColor
-        descriptionColor = defaultDescriptionColor
-        dateColor = defaultDateColor
-        starColor = defaultStarColor
-
         starBitmap = defaultStarBitmap
+
+
+        initAttrs(attrs, defStyleAttr, defStyleRes)
+        initPaints()
+
 
         // Определяем Outline, чтобы canvas был обрезан и родительский контейнер рисовал правильный elevation
         outlineProvider = object : ViewOutlineProvider() {
             override fun getOutline(view: View?, outline: Outline?) {
-                val radius = resources.getDimension(R.dimen.note_round_radius)
-
                 val leftX = paddingLeft
                 val topY = paddingTop
                 val rightX = width - paddingRight
                 val bottomY = paddingTop + viewHeight.toInt()
 
-                outline?.setRoundRect(leftX, topY, rightX, bottomY, radius)
+                outline?.setRoundRect(leftX, topY, rightX, bottomY, cornerRadius)
             }
         }
         // Обрезка по контуру
         clipToOutline = true
-
-        initAttrs(attrs, defStyleAttr, defStyleRes)
-        initPaints()
     }
 
     private fun initAttrs(attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) {
         attrs?.let {
             val typedArray = context.obtainStyledAttributes(it, R.styleable.NoteView, defStyleAttr, defStyleRes)
             try {
+                cornerRadius = typedArray.getDimension(R.styleable.NoteView_noteCornerRadius, defaultCornerRadius)
+                backgroundColor = typedArray.getColor(R.styleable.NoteView_noteBackgroundColor,defaultBackgroundColor)
+                sectionColor = typedArray.getColor(R.styleable.NoteView_noteSectionColor,defaultSectionColor)
+                titleColor = typedArray.getColor(R.styleable.NoteView_noteTitleColor, defaultTitleColor)
+                descriptionColor = typedArray.getColor(R.styleable.NoteView_noteDescriptionColor, defaultDescriptionColor)
+                dateColor = typedArray.getColor(R.styleable.NoteView_noteDateColor, defaultDateColor)
+                starColor = typedArray.getColor(R.styleable.NoteView_noteStarColor, defaultStarColor)
+                readPointColor = typedArray.getColor(R.styleable.NoteView_noteReadPointColor, defaultReadPointColor)
+
                 title = typedArray.getString(R.styleable.NoteView_title) ?: defaultTitle
                 description = typedArray.getString(R.styleable.NoteView_description) ?: defaultDescription
                 date = typedArray.getString(R.styleable.NoteView_date) ?: defaultDate
                 importance = typedArray.getBoolean(R.styleable.NoteView_importance, defaultImportance)
+                isRead = typedArray.getBoolean(R.styleable.NoteView_isRead, defaultIsRead)
             } finally {
                 typedArray.recycle()
             }
@@ -213,6 +220,12 @@ class NoteView @JvmOverloads constructor(
         starPaint.apply {
             style = Paint.Style.FILL
             color = starColor
+        }
+        readPointPaint.apply {
+            style = Paint.Style.FILL
+            color = readPointColor
+            strokeCap = Paint.Cap.ROUND
+            strokeWidth = readPointSize
         }
     }
 
@@ -259,6 +272,7 @@ class NoteView @JvmOverloads constructor(
         drawDate(canvas)
 
         if(importance) drawStar(canvas)
+        if(isRead) drawReadPoint(canvas)
     }
 
     private fun updateGeometry() { // TODO(Он не должен вызываться каждый OnDraw, наверное)
@@ -279,21 +293,25 @@ class NoteView @JvmOverloads constructor(
         val titleCenterY = (topY + sectionHeight/ 2 - titleLayoutHeight / 2).toInt()
         val titleCenterX = (if(importance) leftX + 2 * horizontalPadding + starSize
             else leftX + horizontalPadding).toInt()
-        val descriptionCenterY = (sectionHeight + descriptionTopPadding - descriptionLayoutHeight / 2).toInt()
+        val descriptionCenterY = (sectionHeight + descriptionTopPadding - descriptionLayoutHeight / 2).toInt() // TODO( Нужно пофиксиить прыгающий пэддинг описания )
         val descriptionCenterX = (leftX + horizontalPadding).toInt()
 
-        val dateCenterY = (bottomY + (dateTextPaint.fontMetrics.ascent - dateTextPaint.fontMetrics.descent) / 2 - dateBottomPadding).toInt()
+        val dateCenterY = (bottomY + (dateTextPaint.fontMetrics.ascent - dateTextPaint.fontMetrics.descent) / 2 - contentBottomPadding).toInt()
         val dateCenterX = (leftX + horizontalPadding).toInt()
 
-        titlePoint = Point(titleCenterX, titleCenterY)
-        descriptionPoint = Point(descriptionCenterX, descriptionCenterY)
-        datePoint = Point(dateCenterX, dateCenterY)
+        titlePoint.set(titleCenterX, titleCenterY)
+        descriptionPoint.set(descriptionCenterX, descriptionCenterY)
+        datePoint.set(dateCenterX, dateCenterY)
 
         // Иконки
         val starCenterX = (leftX + horizontalPadding).toInt()
         val starCenterY = (topY + sectionHeight / 2 - starSize / 2).toInt()
-        starPoint = Point(starCenterX, starCenterY)
+        starPoint.set(starCenterX, starCenterY)
         starRect.set(0, 0, starSize.toInt(), starSize.toInt())
+
+        val readCenterX = rightX - horizontalPadding - readPointSize / 2
+        val readCenterY = bottomY - contentBottomPadding - readPointSize / 2
+        readPoint.set(readCenterX, readCenterY)
     }
 
     private fun drawTitle(canvas: Canvas) {
@@ -330,4 +348,11 @@ class NoteView @JvmOverloads constructor(
             }
         }
     }
+
+    private fun drawReadPoint(canvas: Canvas) {
+        canvas.withTranslation(readPoint.x, readPoint.y) {
+            this.drawPoint(0f, 0f, readPointPaint)
+        }
+    }
+
 }

@@ -11,7 +11,8 @@
         android:layout_margin="16dp"
         android:elevation="8dp"
         app:title="Пойти в универ"
-        app:description="Завтра нужно появиться в универе (очень)"
+        app:description="Завтра нужно появиться в универе (очень) аааа фывафывафыва"
         app:date="10.03.2025"
-        app:importance="true"/>
+        app:importance="true"
+        style="@style/NoteViewStyle.NotRead"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
