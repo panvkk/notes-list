@@ -9,11 +9,12 @@
     <dimen name="note_title_size">20sp</dimen>
     <dimen name="note_description_size">16sp</dimen>
     <dimen name="note_date_size">14sp</dimen>
+    <dimen name="note_star_size">24dp</dimen>
 
     <!-- Отступы -->
     <dimen name="note_title_top_padding">16dp</dimen>
-    <dimen name="note_description_top_padding">12dp</dimen>
+    <dimen name="note_description_top_padding">20dp</dimen>
     <dimen name="note_content_horizontal_padding">12dp</dimen>
-    <dimen name="note_date_bottom_padding">12dp</dimen>
+    <dimen name="note_date_bottom_padding">10dp</dimen>
 <!--  -->
 </resources>
