@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+<!--  TODO(Что-то сделать со стилями, потому что в них нет смысла)  -->
     <style name="NoteViewStyle" parent="CardView">
         <item name="noteBackgroundColor">#FAFDFF</item>
         <item name="noteSectionColor">#6CD07A</item>
@@ -7,6 +8,7 @@
         <item name="noteDescriptionColor">#3F3B3C</item>
         <item name="noteDateColor">#3F3B3C</item>
         <item name="noteStarColor">#F7E445</item>
+        <item name="noteTextReadColor">#b2a9b1</item>
         <item name="title">Заголовок</item>
         <item name="description">Какое-то длинное описание</item>
         <item name="date">01.01.2026</item>

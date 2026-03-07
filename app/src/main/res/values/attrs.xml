@@ -10,6 +10,7 @@
         <attr name="noteDateColor" format="color" />
         <attr name="noteStarColor" format="color"/>
         <attr name="noteReadPointColor" format="color"/>
+        <attr name="noteTextReadColor" format="color"/>
 
         <!-- Текст -->
         <attr name="title" format="string"/>
