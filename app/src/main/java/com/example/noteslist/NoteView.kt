@@ -11,10 +11,12 @@ import android.graphics.PointF
 import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Typeface
+import android.os.Build
 import android.text.Layout.Alignment
 import android.text.StaticLayout
 import android.text.TextPaint
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewOutlineProvider
 import androidx.core.graphics.drawable.toBitmap
@@ -27,7 +29,6 @@ class NoteView @JvmOverloads constructor(
     defStyleAttr: Int = 0,
     defStyleRes: Int = 0
 ) : View(context, attrs, defStyleAttr, defStyleRes) {
-
     // Defaults
     private var defaultHeight = 200f
     private var defaultSectionHeight = 50f
@@ -49,6 +50,7 @@ class NoteView @JvmOverloads constructor(
     private var defaultDateColor = Color.GRAY
     private var defaultStarColor = Color.YELLOW
     private var defaultReadPointColor = Color.GREEN
+    private var defaultTextReadColor = Color.GRAY
 
     private var defaultStarBitmap: Bitmap? = null
 
@@ -80,12 +82,20 @@ class NoteView @JvmOverloads constructor(
     private var dateColor = defaultDateColor
     private var starColor = defaultStarColor
     private var readPointColor = defaultReadPointColor
+    private var textReadColor = defaultTextReadColor
 
     private var title = defaultTitle
     private var description = defaultDescription
     private var date = defaultDate
     private var importance = defaultImportance
-    private var isRead = false
+    private var _isRead = defaultIsRead
+    private var isRead: Boolean
+        get() = _isRead
+        set(value) {
+            _isRead = value
+            updatePaints()
+            invalidate()
+        }
     private var cornerRadius = 10f
 
     // Геометрия
@@ -180,6 +190,7 @@ class NoteView @JvmOverloads constructor(
                 dateColor = typedArray.getColor(R.styleable.NoteView_noteDateColor, defaultDateColor)
                 starColor = typedArray.getColor(R.styleable.NoteView_noteStarColor, defaultStarColor)
                 readPointColor = typedArray.getColor(R.styleable.NoteView_noteReadPointColor, defaultReadPointColor)
+                textReadColor = typedArray.getColor(R.styleable.NoteView_noteTextReadColor, defaultTextReadColor)
 
                 title = typedArray.getString(R.styleable.NoteView_title) ?: defaultTitle
                 description = typedArray.getString(R.styleable.NoteView_description) ?: defaultDescription
@@ -202,7 +213,11 @@ class NoteView @JvmOverloads constructor(
             style = Paint.Style.FILL
             color = titleColor
             textSize = this@NoteView.titleTextSize
-            setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD))
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                setTypeface(Typeface.create(Typeface.DEFAULT, 900, false))
+            } else {
+                setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD))
+            }
         }
         dateTextPaint.apply {
             style = Paint.Style.FILL
@@ -229,6 +244,20 @@ class NoteView @JvmOverloads constructor(
         }
     }
 
+    private fun updatePaints() {
+        if(isRead) {
+            titleTextPaint.apply { color = textReadColor }
+            descriptionTextPaint.apply { color = textReadColor }
+            dateTextPaint.apply { color = textReadColor }
+            sectionPaint.apply { color = backgroundColor }
+        } else {
+            titleTextPaint.apply { color = titleColor }
+            descriptionTextPaint.apply { color = descriptionColor }
+            dateTextPaint.apply { color = dateColor }
+            sectionPaint.apply { color = sectionColor }
+        }
+    }
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val availableWidth = MeasureSpec.getSize(widthMeasureSpec)
 
@@ -237,7 +266,11 @@ class NoteView @JvmOverloads constructor(
             maxTextWidth = maxTextAvailableWidth
             updateTextLayouts()
         }
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        val viewContentHeight = context.resources.getDimensionPixelSize(R.dimen.note_view_height)
+        val fixedViewHeight = viewContentHeight + paddingTop + paddingBottom
+        val newHeightMeasureSpec = MeasureSpec.makeMeasureSpec(fixedViewHeight, MeasureSpec.EXACTLY)
+
+        super.onMeasure(widthMeasureSpec, newHeightMeasureSpec)
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -293,7 +326,7 @@ class NoteView @JvmOverloads constructor(
         val titleCenterY = (topY + sectionHeight/ 2 - titleLayoutHeight / 2).toInt()
         val titleCenterX = (if(importance) leftX + 2 * horizontalPadding + starSize
             else leftX + horizontalPadding).toInt()
-        val descriptionCenterY = (sectionHeight + descriptionTopPadding - descriptionLayoutHeight / 2).toInt() // TODO( Нужно пофиксиить прыгающий пэддинг описания )
+        val descriptionCenterY = (sectionHeight + descriptionTopPadding).toInt()
         val descriptionCenterX = (leftX + horizontalPadding).toInt()
 
         val dateCenterY = (bottomY + (dateTextPaint.fontMetrics.ascent - dateTextPaint.fontMetrics.descent) / 2 - contentBottomPadding).toInt()
@@ -355,4 +388,10 @@ class NoteView @JvmOverloads constructor(
         }
     }
 
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        when(event.action) {
+            MotionEvent.ACTION_DOWN -> { isRead = !isRead }
+        }
+        return super.onTouchEvent(event)
+    }
 }
