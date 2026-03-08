@@ -4,6 +4,7 @@
     <!-- Размеры -->
     <dimen name="note_view_height">160dp</dimen>
     <dimen name="note_section_height">48dp</dimen>
+    <dimen name="description_fade_width">70dp</dimen>
 
     <dimen name="note_title_size">20sp</dimen>
     <dimen name="note_description_size">16sp</dimen>
