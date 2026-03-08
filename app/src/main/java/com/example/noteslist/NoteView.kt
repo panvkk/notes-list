@@ -4,21 +4,27 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.LinearGradient
 import android.graphics.Outline
 import android.graphics.Paint
 import android.graphics.Point
 import android.graphics.PointF
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
 import android.graphics.RectF
+import android.graphics.Shader
 import android.graphics.Typeface
 import android.os.Build
 import android.text.Layout.Alignment
 import android.text.StaticLayout
 import android.text.TextPaint
+import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewOutlineProvider
+import androidx.collection.floatListOf
 import androidx.core.graphics.drawable.toBitmap
 import kotlin.apply
 import androidx.core.graphics.withTranslation
@@ -37,6 +43,7 @@ class NoteView @JvmOverloads constructor(
     private var defaultDateTextSize = 20f
     private var defaultStarSize = 20f
     private var defaultReadPointSize = 20f
+    private var defaultDescriptionFadeWidth = 20f
 
     private var defaultTitleTopPadding = 20f
     private var defaultDescriptionTopPadding = 24f
@@ -69,6 +76,7 @@ class NoteView @JvmOverloads constructor(
     private var dateTextSize = defaultDateTextSize
     private var starSize = defaultStarSize
     private var readPointSize = defaultReadPointSize
+    private var descriptionFadeWidth = defaultDescriptionFadeWidth
 
     private var titleTopPadding = defaultTitleTopPadding
     private var descriptionTopPadding = defaultDescriptionTopPadding
@@ -84,12 +92,12 @@ class NoteView @JvmOverloads constructor(
     private var readPointColor = defaultReadPointColor
     private var textReadColor = defaultTextReadColor
 
-    private var title = defaultTitle
-    private var description = defaultDescription
-    private var date = defaultDate
-    private var importance = defaultImportance
+    var title = defaultTitle
+    var description = defaultDescription
+    var date = defaultDate
+    var importance = defaultImportance
     private var _isRead = defaultIsRead
-    private var isRead: Boolean
+    var isRead: Boolean
         get() = _isRead
         set(value) {
             _isRead = value
@@ -108,6 +116,7 @@ class NoteView @JvmOverloads constructor(
     private var backgroundRect = RectF()
     private var sectionRect = RectF()
     private var readPoint = PointF()
+    private var descriptionFadeRect = RectF()
 
     private var starBitmap = defaultStarBitmap
 
@@ -116,6 +125,7 @@ class NoteView @JvmOverloads constructor(
     private val sectionPaint = Paint().apply { isAntiAlias = true }
     private val titleTextPaint = TextPaint().apply { isAntiAlias = true; textAlign = Paint.Align.LEFT }
     private val descriptionTextPaint = TextPaint().apply { isAntiAlias = true; textAlign = Paint.Align.LEFT }
+    private val descriptionFadePaint = Paint().apply { isAntiAlias = true }
     private val dateTextPaint = TextPaint().apply { isAntiAlias = true; textAlign = Paint.Align.LEFT }
     private val starPaint = Paint().apply { isAntiAlias = true }
     private val readPointPaint = Paint().apply { isAntiAlias = true }
@@ -134,6 +144,7 @@ class NoteView @JvmOverloads constructor(
             defaultDateTextSize = resources.getDimensionPixelSize(R.dimen.note_date_size).toFloat()
             defaultStarSize = resources.getDimensionPixelSize(R.dimen.note_star_size).toFloat()
             defaultReadPointSize = resources.getDimensionPixelSize(R.dimen.note_read_point_size).toFloat()
+            defaultDescriptionFadeWidth = resources.getDimensionPixelSize(R.dimen.description_fade_width).toFloat()
 
             defaultTitleTopPadding = resources.getDimension(R.dimen.note_title_top_padding)
             defaultDescriptionTopPadding = resources.getDimension(R.dimen.note_description_top_padding)
@@ -150,6 +161,7 @@ class NoteView @JvmOverloads constructor(
         dateTextSize = defaultDateTextSize
         starSize = defaultStarSize
         readPointSize = defaultReadPointSize
+        descriptionFadeWidth = defaultDescriptionFadeWidth
 
         titleTopPadding = defaultTitleTopPadding
         descriptionTopPadding = defaultDescriptionTopPadding
@@ -279,14 +291,16 @@ class NoteView @JvmOverloads constructor(
 
         if(maxTextWidth > 0) {
             updateTextLayouts()
-            updateGeometry()
         }
+        updateGeometry()
     }
 
     private fun updateTextLayouts() {
         descriptionLayout = StaticLayout.Builder.obtain(description, 0, description.length, descriptionTextPaint, maxTextWidth)
             .setAlignment(Alignment.ALIGN_NORMAL)
             .setLineSpacing(0f, 1f)
+            .setMaxLines(2)
+            .setEllipsize(TextUtils.TruncateAt.END)
             .build()
 
         titleLayout = StaticLayout.Builder.obtain(title, 0, title.length, titleTextPaint, maxTextWidth)
@@ -297,18 +311,18 @@ class NoteView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        updateGeometry()
 
         drawNoteCard(canvas)
         drawTitle(canvas)
         drawDescription(canvas)
         drawDate(canvas)
+        drawDescriptionFadeRect(canvas)
 
         if(importance) drawStar(canvas)
         if(isRead) drawReadPoint(canvas)
     }
 
-    private fun updateGeometry() { // TODO(Он не должен вызываться каждый OnDraw, наверное)
+    private fun updateGeometry() {
 
         val leftX = paddingLeft.toFloat()
         val topY = paddingTop.toFloat()
@@ -323,18 +337,18 @@ class NoteView @JvmOverloads constructor(
         val titleLayoutHeight = titleLayout?.height ?: 0
         val descriptionLayoutHeight = descriptionLayout?.height ?: 0
 
-        val titleCenterY = (topY + sectionHeight/ 2 - titleLayoutHeight / 2).toInt()
-        val titleCenterX = (if(importance) leftX + 2 * horizontalPadding + starSize
+        val titleTopY = (topY + sectionHeight/ 2 - titleLayoutHeight / 2).toInt()
+        val titleLeftX = (if(importance) leftX + 2 * horizontalPadding + starSize
             else leftX + horizontalPadding).toInt()
-        val descriptionCenterY = (sectionHeight + descriptionTopPadding).toInt()
-        val descriptionCenterX = (leftX + horizontalPadding).toInt()
+        val descriptionTopY = (sectionHeight + descriptionTopPadding).toInt()
+        val descriptionLeftX = (leftX + horizontalPadding).toInt()
 
         val dateCenterY = (bottomY + (dateTextPaint.fontMetrics.ascent - dateTextPaint.fontMetrics.descent) / 2 - contentBottomPadding).toInt()
-        val dateCenterX = (leftX + horizontalPadding).toInt()
+        val dateLeftX = (leftX + horizontalPadding).toInt()
 
-        titlePoint.set(titleCenterX, titleCenterY)
-        descriptionPoint.set(descriptionCenterX, descriptionCenterY)
-        datePoint.set(dateCenterX, dateCenterY)
+        titlePoint.set(titleLeftX, titleTopY)
+        descriptionPoint.set(descriptionLeftX, descriptionTopY)
+        datePoint.set(dateLeftX, dateCenterY)
 
         // Иконки
         val starCenterX = (leftX + horizontalPadding).toInt()
@@ -345,6 +359,22 @@ class NoteView @JvmOverloads constructor(
         val readCenterX = rightX - horizontalPadding - readPointSize / 2
         val readCenterY = bottomY - contentBottomPadding - readPointSize / 2
         readPoint.set(readCenterX, readCenterY)
+
+        // Фейд в конце описания
+        descriptionFadeRect.set(
+            rightX - descriptionFadeWidth,
+            descriptionTopY + descriptionLayoutHeight / 2f,
+            rightX - horizontalPadding,
+            descriptionTopY + descriptionLayoutHeight.toFloat()
+            )
+        descriptionFadePaint.apply {
+            shader = LinearGradient(
+                descriptionFadeRect.left, 0f, descriptionFadeRect.right, 0f,
+                intArrayOf(Color.TRANSPARENT, backgroundColor),
+                floatArrayOf(0f, 0.6f),
+                Shader.TileMode.CLAMP
+            )
+        }
     }
 
     private fun drawTitle(canvas: Canvas) {
@@ -386,6 +416,9 @@ class NoteView @JvmOverloads constructor(
         canvas.withTranslation(readPoint.x, readPoint.y) {
             this.drawPoint(0f, 0f, readPointPaint)
         }
+    }
+    private fun drawDescriptionFadeRect(canvas: Canvas) {
+        canvas.drawRect(descriptionFadeRect, descriptionFadePaint)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
