@@ -5,6 +5,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.children
 import com.example.noteslist.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -28,6 +29,12 @@ class MainActivity : AppCompatActivity() {
             val isExpanded = noteStack1.isExpanded
             if(!isExpanded) {
                 noteStack1.isExpanded = true
+            }
+        }
+        val isNoteStack1Expanded = noteStack1.isExpanded
+        if(isNoteStack1Expanded) {
+            for (noteView in noteStack1.children.filterIsInstance<NoteView>()) {
+                noteView.setOnClickListener { noteView.isRead = !noteView.isRead }
             }
         }
     }
