@@ -350,7 +350,7 @@ class NoteView @JvmOverloads constructor(
         descriptionPoint.set(descriptionLeftX, descriptionTopY)
         datePoint.set(dateLeftX, dateCenterY)
 
-        // Иконки
+        // Иконки (важно/не важно и прочитано/не прочитано)
         val starCenterX = (leftX + horizontalPadding).toInt()
         val starCenterY = (topY + sectionHeight / 2 - starSize / 2).toInt()
         starPoint.set(starCenterX, starCenterY)
@@ -361,20 +361,27 @@ class NoteView @JvmOverloads constructor(
         readPoint.set(readCenterX, readCenterY)
 
         // Фейд в конце описания
-        descriptionFadeRect.set(
-            rightX - descriptionFadeWidth,
-            descriptionTopY + descriptionLayoutHeight / 2f,
-            rightX - horizontalPadding,
-            descriptionTopY + descriptionLayoutHeight.toFloat()
+        val lastLineIndex = (descriptionLayout?.lineCount ?: 1) - 1
+        val isEllipsized = (descriptionLayout?.getEllipsisCount(lastLineIndex) ?: 0) > 0
+        if(isEllipsized) {
+            descriptionFadeRect.set(
+                rightX - descriptionFadeWidth,
+                descriptionTopY + descriptionLayoutHeight / 2f,
+                rightX - horizontalPadding,
+                descriptionTopY + descriptionLayoutHeight.toFloat()
             )
-        descriptionFadePaint.apply {
-            shader = LinearGradient(
-                descriptionFadeRect.left, 0f, descriptionFadeRect.right, 0f,
-                intArrayOf(Color.TRANSPARENT, backgroundColor),
-                floatArrayOf(0f, 0.6f),
-                Shader.TileMode.CLAMP
-            )
+            descriptionFadePaint.apply {
+                shader = LinearGradient(
+                    descriptionFadeRect.left, 0f, descriptionFadeRect.right, 0f,
+                    intArrayOf(Color.TRANSPARENT, backgroundColor),
+                    floatArrayOf(0f, 0.6f),
+                    Shader.TileMode.CLAMP
+                )
+            }
+        } else {
+            descriptionFadeRect.setEmpty()
         }
+
     }
 
     private fun drawTitle(canvas: Canvas) {
@@ -419,12 +426,5 @@ class NoteView @JvmOverloads constructor(
     }
     private fun drawDescriptionFadeRect(canvas: Canvas) {
         canvas.drawRect(descriptionFadeRect, descriptionFadePaint)
-    }
-
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        when(event.action) {
-            MotionEvent.ACTION_DOWN -> { isRead = !isRead }
-        }
-        return super.onTouchEvent(event)
     }
 }
