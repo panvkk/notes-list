@@ -22,5 +22,13 @@ class MainActivity : AppCompatActivity() {
 
         val note1 = findViewById<NoteView>(R.id.note_1)
         note1.setOnClickListener { note1.isRead = !note1.isRead }
+
+        val noteStack1 = findViewById<NoteStackView>(R.id.note_stack_1)
+        noteStack1.setOnClickListener {
+            val isExpanded = noteStack1.isExpanded
+            if(!isExpanded) {
+                noteStack1.isExpanded = true
+            }
+        }
     }
 }
