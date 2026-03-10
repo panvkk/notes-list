@@ -1,7 +1,6 @@
 package com.example.noteslist
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.LinearGradient
@@ -9,12 +8,11 @@ import android.graphics.Outline
 import android.graphics.Paint
 import android.graphics.Point
 import android.graphics.PointF
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Shader
 import android.graphics.Typeface
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
@@ -23,10 +21,8 @@ import android.text.StaticLayout
 import android.text.TextPaint
 import android.text.TextUtils
 import android.util.AttributeSet
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewOutlineProvider
-import androidx.collection.floatListOf
 import androidx.core.graphics.drawable.toBitmap
 import kotlin.apply
 import androidx.core.graphics.withTranslation
@@ -66,7 +62,7 @@ class NoteView @JvmOverloads constructor(
     private var defaultReadPointColor = Color.GREEN
     private var defaultTextReadColor = Color.GRAY
 
-    private var defaultStarBitmap: Bitmap? = null
+    private var defaultStarDrawable: Drawable? = null
 
     private val defaultTitle = "Заголовок"
     private val defaultDescription = "Описание"
@@ -118,14 +114,12 @@ class NoteView @JvmOverloads constructor(
     private var titlePoint = Point()
     private var descriptionPoint = Point()
     private var datePoint = Point()
-    private var starPoint = Point()
-    private var starRect = Rect()
     private var backgroundRect = RectF()
     private var sectionRect = RectF()
     private var readPoint = PointF()
     private var descriptionFadeRect = RectF()
 
-    private var starBitmap = defaultStarBitmap
+    private var starDrawable = defaultStarDrawable
 
     // Paint
     private val backgroundPaint = Paint().apply { isAntiAlias = true }
@@ -134,7 +128,6 @@ class NoteView @JvmOverloads constructor(
     private val descriptionTextPaint = TextPaint().apply { isAntiAlias = true; textAlign = Paint.Align.LEFT }
     private val descriptionFadePaint = Paint().apply { isAntiAlias = true }
     private val dateTextPaint = TextPaint().apply { isAntiAlias = true; textAlign = Paint.Align.LEFT }
-    private val starPaint = Paint().apply { isAntiAlias = true }
     private val readPointPaint = Paint().apply { isAntiAlias = true }
 
     // Text Layout
@@ -158,7 +151,7 @@ class NoteView @JvmOverloads constructor(
             defaultContentBottomPadding = resources.getDimension(R.dimen.note_content_bottom_padding)
             defaultHorizontalPadding = resources.getDimension(R.dimen.note_content_horizontal_padding)
 
-            defaultStarBitmap = resources.getDrawable(R.drawable.star_icon).toBitmap()
+            defaultStarDrawable = resources.getDrawable(R.drawable.star_icon).mutate()
         }
 
         viewHeight = defaultHeight
@@ -175,7 +168,7 @@ class NoteView @JvmOverloads constructor(
         contentBottomPadding = defaultContentBottomPadding
         horizontalPadding = defaultHorizontalPadding
 
-        starBitmap = defaultStarBitmap
+        starDrawable = defaultStarDrawable
 
 
         initAttrs(attrs, defStyleAttr, defStyleRes)
@@ -250,10 +243,6 @@ class NoteView @JvmOverloads constructor(
         sectionPaint.apply {
             style = Paint.Style.FILL
             color = sectionColor
-        }
-        starPaint.apply {
-            style = Paint.Style.FILL
-            color = starColor
         }
         readPointPaint.apply {
             style = Paint.Style.FILL
@@ -358,10 +347,14 @@ class NoteView @JvmOverloads constructor(
         datePoint.set(dateLeftX, dateCenterY)
 
         // Иконки (важно/не важно и прочитано/не прочитано)
-        val starCenterX = (leftX + horizontalPadding).toInt()
-        val starCenterY = (topY + sectionHeight / 2 - starSize / 2).toInt()
-        starPoint.set(starCenterX, starCenterY)
-        starRect.set(0, 0, starSize.toInt(), starSize.toInt())
+        val starLeft = (leftX + horizontalPadding).toInt()
+        val starTop = (topY + sectionHeight / 2 - starSize / 2).toInt()
+        starDrawable?.setBounds(
+            starLeft,
+            starTop,
+            (starLeft + starSize).toInt(),
+            (starTop + starSize).toInt()
+        )
 
         val readCenterX = rightX - horizontalPadding - readPointSize / 2
         val readCenterY = bottomY - contentBottomPadding - readPointSize / 2
@@ -419,11 +412,8 @@ class NoteView @JvmOverloads constructor(
     }
 
     private fun drawStar(canvas: Canvas) {
-        starBitmap?.let {
-            canvas.withTranslation(starPoint.x.toFloat(), starPoint.y.toFloat()) {
-                this.drawBitmap(it, null, starRect, starPaint)
-            }
-        }
+        starDrawable?.setTint(starColor)
+        starDrawable?.draw(canvas)
     }
 
     private fun drawReadPoint(canvas: Canvas) {
