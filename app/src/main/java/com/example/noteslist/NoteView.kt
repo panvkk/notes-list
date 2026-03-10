@@ -16,6 +16,8 @@ import android.graphics.RectF
 import android.graphics.Shader
 import android.graphics.Typeface
 import android.os.Build
+import android.os.Bundle
+import android.os.Parcelable
 import android.text.Layout.Alignment
 import android.text.StaticLayout
 import android.text.TextPaint
@@ -35,6 +37,11 @@ class NoteView @JvmOverloads constructor(
     defStyleAttr: Int = 0,
     defStyleRes: Int = 0
 ) : View(context, attrs, defStyleAttr, defStyleRes) {
+    companion object {
+        private const val KEY_SUPER_STATE = "superState"
+        private const val KEY_IS_READ = "isRead"
+    }
+
     // Defaults
     private var defaultHeight = 200f
     private var defaultSectionHeight = 50f
@@ -426,5 +433,28 @@ class NoteView @JvmOverloads constructor(
     }
     private fun drawDescriptionFadeRect(canvas: Canvas) {
         canvas.drawRect(descriptionFadeRect, descriptionFadePaint)
+    }
+
+    // Сохранение состояния
+    override fun onSaveInstanceState(): Parcelable {
+        val state = Bundle()
+        state.putParcelable(KEY_SUPER_STATE, super.onSaveInstanceState())
+        state.putBoolean(KEY_IS_READ, isRead)
+        return state
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        if(state is Bundle) {
+            val superState = state.getParcelable<Parcelable>(KEY_SUPER_STATE)
+            super.onRestoreInstanceState(superState)
+
+            val isReadState = state.getBoolean(KEY_IS_READ)
+            _isRead = isReadState
+
+            // обновляем, так как isRead мог измениться
+            updatePaints()
+        } else {
+            super.onRestoreInstanceState(state)
+        }
     }
 }
