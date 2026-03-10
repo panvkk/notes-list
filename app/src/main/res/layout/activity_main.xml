@@ -4,9 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
 
     <com.example.noteslist.NoteView
+        android:id="@+id/note_1"
         style="@style/NoteViewStyle.NotRead"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -18,4 +20,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:title="Пойти в универ"
         android:layout_marginTop="10dp"/>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
