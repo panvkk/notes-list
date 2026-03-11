@@ -8,9 +8,15 @@ class NoteViewHolder(private val binding: ItemNoteViewBinding)
     : RecyclerView.ViewHolder(binding.root) {
 
     fun bind(note: ViewTyped.Note) {
-        binding.noteView.title = note.title
-        binding.noteView.description = note.description
-        binding.noteView.date = note.date
-        binding.noteView.importance = note.isImportant
+        binding.noteView.apply {
+            title = note.title
+            description = note.description
+            date = note.date
+            importance = note.isImportant
+
+            setOnClickListener {
+                isRead = !isRead
+            }
+        }
     }
 }
