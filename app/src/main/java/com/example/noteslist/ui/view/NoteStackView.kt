@@ -175,8 +175,11 @@ class NoteStackView @JvmOverloads constructor(
             if (!isExpanded) {
                 var counter = 0
                 // Оставляем только самые важные элементы сверху
-                val upperChildren = it.slice(0..<stackMaxVisible)
-                    .reversed()
+                val upperChildren = if(stackMaxVisible < childCount) {
+                    it.slice(0..<stackMaxVisible)
+                } else {
+                    it
+                }.reversed()
                 for (i in upperChildren) {
                     val child = getChildAt(i)
                     if (child.isGone) continue
