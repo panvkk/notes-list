@@ -130,6 +130,7 @@ class NoteStackView @JvmOverloads constructor(
                 }
                 totalHeight += getChildAt(0).measuredHeight
                 totalHeight += (stackSpacing * stackMaxVisible).toInt()
+                totalHeight += shadowPadding * 2
             } else {
                 for(i in childIndexes) {
                     val child = getChildAt(i)
@@ -145,10 +146,10 @@ class NoteStackView @JvmOverloads constructor(
                     totalHeight += totalChildHeight
                 }
                 totalHeight += (collapseButtonHeight + verticalPadding).toInt()
+                totalHeight += (maxChildElevation * childCount).toInt()         // место под elevation
             }
         }
 
-        totalHeight += shadowPadding * 2
 
         val measuredWidth = resolveSize(MeasureSpec.getSize(widthMeasureSpec), widthMeasureSpec)
         val measuredHeight = resolveSize(totalHeight, heightMeasureSpec)
@@ -164,14 +165,16 @@ class NoteStackView @JvmOverloads constructor(
 
         childIndexes?.let {
             if (!isExpanded) {
-                for (i in childIndexes) {
-                    if(i + 1 > stackMaxVisible) break
-
+                var counter = 0
+                // Оставляем только самые важные элементы сверху
+                val upperChildren = it.slice(0..<stackMaxVisible)
+                    .reversed()
+                for (i in upperChildren) {
                     val child = getChildAt(i)
                     if (child.isGone) continue
 
                     val lp = child.layoutParams as MarginLayoutParams
-                    val childWidth = child.measuredWidth - stackSpacing * i
+                    val childWidth = child.measuredWidth - stackSpacing * counter
                     val childHeight = child.measuredHeight
 
                     val left = childLeft + lp.leftMargin
@@ -179,14 +182,15 @@ class NoteStackView @JvmOverloads constructor(
                     val right = (left + childWidth).toInt()
                     val bottom = top + childHeight
 
-                    child.translationZ += translationZFactor * i // для того чтобы карточки нормально накладывались друг на друга, с elevation
+                    child.translationZ += translationZFactor * counter // для того чтобы карточки нормально накладывались друг на друга, с elevation
 
                     child.layout(left, top, right, bottom)
                     childLeft += stackSpacing.toInt()
                     childTop += stackSpacing.toInt()
+                    counter++
                 }
             } else {
-                for (i in childIndexes) {
+                for (i in it) {
                     val child = getChildAt(i)
                     if (child.isGone) continue
 
@@ -202,7 +206,7 @@ class NoteStackView @JvmOverloads constructor(
                     val bottom = top + childHeight
 
                     child.layout(left, top, right, bottom)
-                    childTop += childTotalHeight
+                    childTop += childTotalHeight + maxChildElevation.toInt()
                 }
             }
         }
@@ -218,7 +222,7 @@ class NoteStackView @JvmOverloads constructor(
     }
 
     private fun updateGeometry() {
-        val shadowPadding = (maxChildElevation + translationZFactor * stackMaxVisible).toInt() // чтобы кнопка не прыгала относительно контента
+        val shadowPadding = maxChildElevation.toInt() // чтобы кнопка не прыгала относительно контента
 
         // Геометрия кнопки сворачивания
         val left = paddingLeft + shadowPadding
@@ -273,7 +277,7 @@ class NoteStackView @JvmOverloads constructor(
 
                 if (date1 == null || date2 == null) throw Throwable("Error while parse: Date can not be null")
 
-                if (date1 > date2) i1 else i2
+                date2.compareTo(date1)
             })
         } catch (e: Exception) {
             Log.e("NoteStackView", e.message ?: "")

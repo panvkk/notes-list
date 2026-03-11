@@ -45,20 +45,17 @@
                     style="@style/NoteViewStyle.NotRead"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
                     android:elevation="8dp"
                     app:date="10.02.2025"
                     app:description="Завтра нужно появиться в универе (очень) аааа фывафывафыва"
                     app:importance="false"
                     app:title="Ваще не свежее" />
 
-
                 <com.example.noteslist.NoteView
                     android:id="@+id/note_4"
                     style="@style/NoteViewStyle.NotRead"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
                     android:elevation="8dp"
                     app:date="08.03.2026"
                     app:description="Завтра нужно появиться в универе (очень) аааа фывафывафыва"
@@ -70,7 +67,6 @@
                     style="@style/NoteViewStyle.NotRead"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
                     android:elevation="8dp"
                     app:date="10.03.2025"
                     app:description="Завтра нужно появиться в универе (очень) аааа фывафывафыва"
