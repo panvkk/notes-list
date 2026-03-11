@@ -11,6 +11,7 @@ import android.os.Parcelable
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import com.example.noteslist.R
@@ -114,9 +115,13 @@ class NoteStackView @JvmOverloads constructor(
     override fun shouldDelayChildPressedState(): Boolean = false
 
     override fun onFinishInflate() {
-        childIndexes = MutableList(childCount) { index -> index }
-        sortIndexes()
+        updateChildIndexes()
         super.onFinishInflate()
+    }
+
+    override fun onViewAdded(child: View?) {
+        super.onViewAdded(child)
+        updateChildIndexes()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -175,11 +180,11 @@ class NoteStackView @JvmOverloads constructor(
             if (!isExpanded) {
                 var counter = 0
                 // Оставляем только самые важные элементы сверху
-                val upperChildren = if(stackMaxVisible < childCount) {
-                    it.slice(0..<stackMaxVisible)
-                } else {
-                    it
-                }.reversed()
+                val upperChildren = if(stackMaxVisible + 1 < childCount) {
+                        it.slice(0..<stackMaxVisible)
+                    } else {
+                        it
+                    }.reversed()
                 for (i in upperChildren) {
                     val child = getChildAt(i)
                     if (child.isGone) continue
@@ -295,6 +300,11 @@ class NoteStackView @JvmOverloads constructor(
         } catch (e: Exception) {
             Log.e("NoteStackView", e.message ?: "")
         }
+    }
+
+    private fun updateChildIndexes() {
+        childIndexes = MutableList(childCount) { index -> index }
+        sortIndexes()
     }
 
     // Сохранение состояния

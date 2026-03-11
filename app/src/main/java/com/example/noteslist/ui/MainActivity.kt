@@ -52,7 +52,9 @@ class MainActivity : AppCompatActivity() {
         notes.forEach { note ->
             if(note.isImportant) {
                 if(notImportantNotes.isNotEmpty()) {
-                    viewTypedData.add(ViewTyped.NoteStack(notImportantNotes))
+                    val noteStackChildren = notImportantNotes.toList()
+                    val noteStack = ViewTyped.NoteStack(noteStackChildren)
+                    viewTypedData.add(noteStack)
                     notImportantNotes.clear()
                 }
                 viewTypedData.add(note)
@@ -60,6 +62,9 @@ class MainActivity : AppCompatActivity() {
                 notImportantNotes.add(note)
             }
         }
+        if(notImportantNotes.isNotEmpty())
+            viewTypedData.add(ViewTyped.NoteStack(notImportantNotes))
+
         return viewTypedData
     }
 
