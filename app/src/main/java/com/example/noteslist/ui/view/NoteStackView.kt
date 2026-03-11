@@ -39,9 +39,9 @@ class NoteStackView @JvmOverloads constructor(
     private var defaultCollapseButtonText = ""
     private var defaultMaxChildElevation = 20f
 
-    private var stackSpacing = 20f
-    private var stackMaxVisible = 3
-    private var maxChildElevation = 20f
+    var stackSpacing = 20f
+    var stackMaxVisible = 3
+    var maxChildElevation = 20f
     private var verticalPadding = defaultVerticalPadding
     private var collapseButtonHeight = defaultCollapseButtonHeight
     private var collapseButtonSize = defaultCollapseButtonSize
