@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Point
 import android.graphics.Rect
+import android.text.Layout
 import android.util.AttributeSet
 import android.util.Log
 import android.view.ViewGroup
@@ -19,6 +20,9 @@ class NoteStackView @JvmOverloads constructor(
     defStyleAttr: Int = 0,
     defStyleRes: Int = 0
 ) : ViewGroup(context, attrs, defStyleAttr, defStyleRes) {
+
+    private val translationZFactor = 0.1f
+
     private var defaultStackSpacing = 20f
     private var defaultStackMaxVisible = 3
     private var defaultCollapseButtonHeight = 20f
@@ -26,9 +30,11 @@ class NoteStackView @JvmOverloads constructor(
     private var defaultCollapseButtonColor = Color.GRAY
     private var defaultCollapseButtonSize = 20f
     private var defaultCollapseButtonText = ""
+    private var defaultMaxChildElevation = 20f
 
     private var stackSpacing = 20f
     private var stackMaxVisible = 3
+    private var maxChildElevation = 20f
     private var verticalPadding = defaultVerticalPadding
     private var collapseButtonHeight = defaultCollapseButtonHeight
     private var collapseButtonSize = defaultCollapseButtonSize
@@ -40,7 +46,6 @@ class NoteStackView @JvmOverloads constructor(
         set(value) {
             _isExpanded = value
             requestLayout()
-            if(value) updateGeometry()
             invalidate()
         }
 
@@ -72,6 +77,9 @@ class NoteStackView @JvmOverloads constructor(
         initAttrs(attrs, defStyleAttr, defStyleRes)
         initPaints()
         setWillNotDraw(false)
+
+        clipChildren = false // чтобы не обрезалась тень
+        clipToPadding = false
     }
 
     private fun initPaints() {
@@ -79,6 +87,7 @@ class NoteStackView @JvmOverloads constructor(
             style = Paint.Style.FILL
             color = collapseButtonColor
             textSize = this@NoteStackView.collapseButtonSize
+            textAlign = Paint.Align.LEFT
         }
     }
 
@@ -88,6 +97,7 @@ class NoteStackView @JvmOverloads constructor(
             try {
                 stackSpacing = typedArray.getDimension(R.styleable.NoteStackView_stackSpacing, defaultStackSpacing)
                 stackMaxVisible = typedArray.getInteger(R.styleable.NoteStackView_stackMaxVisible, defaultStackMaxVisible)
+                maxChildElevation = typedArray.getDimension(R.styleable.NoteStackView_stackMaxChildElevation, defaultMaxChildElevation)
             } finally {
                 typedArray.recycle()
             }
@@ -104,19 +114,29 @@ class NoteStackView @JvmOverloads constructor(
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         var totalHeight = paddingTop + paddingBottom
+        val maxChildTranslationZ = stackMaxVisible * translationZFactor
+        val shadowPadding = (maxChildElevation + maxChildTranslationZ).toInt()
 
         childIndexes?.let {
             if(!isExpanded) {
                 for(i in childIndexes) {
                     val child = getChildAt(i)
-                    measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0)
+                    measureChildWithMargins(
+                        child,
+                        widthMeasureSpec, shadowPadding * 2,
+                        heightMeasureSpec, shadowPadding * 2
+                    )
                 }
                 totalHeight += getChildAt(0).measuredHeight
                 totalHeight += (stackSpacing * stackMaxVisible).toInt()
             } else {
                 for(i in childIndexes) {
                     val child = getChildAt(i)
-                    measureChildWithMargins(child, widthMeasureSpec, 0 ,heightMeasureSpec, 0)
+                    measureChildWithMargins(
+                        child,
+                        widthMeasureSpec, shadowPadding * 2,
+                        heightMeasureSpec, shadowPadding * 2
+                    )
 
                     val lp = child.layoutParams as MarginLayoutParams
                     val totalChildHeight = child.measuredHeight + lp.topMargin + lp.bottomMargin
@@ -127,18 +147,25 @@ class NoteStackView @JvmOverloads constructor(
             }
         }
 
+        totalHeight += shadowPadding * 2
+
         val measuredWidth = resolveSize(MeasureSpec.getSize(widthMeasureSpec), widthMeasureSpec)
         val measuredHeight = resolveSize(totalHeight, heightMeasureSpec)
         setMeasuredDimension(measuredWidth, measuredHeight)
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        var childLeft = paddingLeft
-        var childTop = paddingTop
+        val maxChildTranslationZ = stackMaxVisible * translationZFactor
+        val shadowPadding = (maxChildElevation + maxChildTranslationZ).toInt()
+
+        var childLeft = paddingLeft + shadowPadding
+        var childTop = paddingTop + shadowPadding
 
         childIndexes?.let {
             if (!isExpanded) {
                 for (i in childIndexes) {
+                    if(i + 1 > stackMaxVisible) break
+
                     val child = getChildAt(i)
                     if (child.isGone) continue
 
@@ -150,6 +177,8 @@ class NoteStackView @JvmOverloads constructor(
                     val top = childTop + lp.topMargin
                     val right = (left + childWidth).toInt()
                     val bottom = top + childHeight
+
+                    child.translationZ += translationZFactor * i // для того чтобы карточки нормально накладывались друг на друга, с elevation
 
                     child.layout(left, top, right, bottom)
                     childLeft += stackSpacing.toInt()
@@ -178,11 +207,17 @@ class NoteStackView @JvmOverloads constructor(
         }
     }
 
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        updateGeometry()
+        super.onSizeChanged(w, h, oldw, oldh)
+    }
+
     override fun onDraw(canvas: Canvas) {
         drawCollapseButton(canvas)
     }
 
     private fun updateGeometry() {
+        // Геометрия кнопки сворачивания
         val left = paddingLeft
         val top = (measuredHeight - collapseButtonHeight).toInt()
         val right = measuredWidth
@@ -192,8 +227,8 @@ class NoteStackView @JvmOverloads constructor(
     }
 
     private fun drawCollapseButton(canvas: Canvas) {
-        canvas.withTranslation(collapseButtonRect.left.toFloat(), collapseButtonRect.top.toFloat()) {
-            this.drawText(
+        if(isExpanded) {
+            canvas.drawText(
                 collapseButtonText,
                 collapseButtonPoint.x.toFloat(),
                 collapseButtonPoint.y.toFloat(),

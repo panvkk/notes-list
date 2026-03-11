@@ -32,8 +32,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
         val isNoteStack1Expanded = noteStack1.isExpanded
-        if(isNoteStack1Expanded) {
-            for (noteView in noteStack1.children.filterIsInstance<NoteView>()) {
+        for (noteView in noteStack1.children.filterIsInstance<NoteView>()) {
+            if(isNoteStack1Expanded) {
                 noteView.setOnClickListener { noteView.isRead = !noteView.isRead }
             }
         }
