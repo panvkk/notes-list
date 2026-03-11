@@ -1,23 +1,21 @@
-package com.example.noteslist.ui.adapters.delegates
+package com.example.noteslist.ui.recycler.adapters.delegates
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.data.ViewTyped
-import com.example.noteslist.databinding.ItemNoteStackViewBinding
 import com.example.noteslist.databinding.ItemNoteViewBinding
-import com.example.noteslist.ui.holders.NoteStackViewHolder
-import com.example.noteslist.ui.holders.NoteViewHolder
+import com.example.noteslist.ui.recycler.holders.NoteViewHolder
 
-class NoteStackDelegate : AdapterDelegate<ViewTyped> {
+class NoteDelegate : AdapterDelegate<ViewTyped> {
     override fun isForViewType(items: List<ViewTyped>, position: Int): Boolean {
-        return items[position] is ViewTyped.NoteStack
+        return items[position] is ViewTyped.Note
     }
 
     override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        val binding = ItemNoteStackViewBinding.inflate(inflater)
-        return NoteStackViewHolder(binding)
+        val binding = ItemNoteViewBinding.inflate(inflater)
+        return NoteViewHolder(binding)
     }
 
     override fun onBindViewHolder(
@@ -26,6 +24,6 @@ class NoteStackDelegate : AdapterDelegate<ViewTyped> {
         holder: RecyclerView.ViewHolder
     ) {
         val note = items[position]
-        (holder as? NoteStackViewHolder)?.bind(note as ViewTyped.NoteStack)
+        (holder as? NoteViewHolder)?.bind(note as ViewTyped.Note)
     }
 }

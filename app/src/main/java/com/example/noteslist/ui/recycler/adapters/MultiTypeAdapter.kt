@@ -1,9 +1,9 @@
-package com.example.noteslist.ui.adapters
+package com.example.noteslist.ui.recycler.adapters
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.data.ViewTyped
-import com.example.noteslist.ui.adapters.delegates.AdapterDelegate
+import com.example.noteslist.ui.recycler.adapters.delegates.AdapterDelegate
 
 class MultiTypeAdapter(
     private val delegates: List<AdapterDelegate<ViewTyped>>
