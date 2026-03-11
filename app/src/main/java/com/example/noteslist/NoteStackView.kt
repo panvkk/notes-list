@@ -9,6 +9,7 @@ import android.graphics.Rect
 import android.text.Layout
 import android.util.AttributeSet
 import android.util.Log
+import android.view.MotionEvent
 import android.view.ViewGroup
 import androidx.core.graphics.withTranslation
 import androidx.core.view.isGone
@@ -217,8 +218,10 @@ class NoteStackView @JvmOverloads constructor(
     }
 
     private fun updateGeometry() {
+        val shadowPadding = (maxChildElevation + translationZFactor * stackMaxVisible).toInt() // чтобы кнопка не прыгала относительно контента
+
         // Геометрия кнопки сворачивания
-        val left = paddingLeft
+        val left = paddingLeft + shadowPadding
         val top = (measuredHeight - collapseButtonHeight).toInt()
         val right = measuredWidth
         val bottom = measuredHeight
@@ -236,22 +239,44 @@ class NoteStackView @JvmOverloads constructor(
             )
         }
     }
-    private fun sortIndexes() {
-        childIndexes?.let {
-            try {
-                it.sortWith(Comparator { i1, i2 ->
-                    val child1 = getChildAt(i1) as NoteView
-                    val child2 = getChildAt(i2) as NoteView
-                    val date1 = child1.date.toLocalDate()
-                    val date2 = child2.date.toLocalDate()
 
-                    if (date1 == null || date2 == null) throw Throwable("Error while parse: Date can not be null")
+    // Перехват нажатия, если стэк свёрнут
+    override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
+        if(!isExpanded) return true
+        return super.onInterceptTouchEvent(ev)
+    }
 
-                    if (date1 > date2) i1 else i2
-                })
-            } catch (e: Exception) {
-                Log.e("NoteStackView", e.message ?: "")
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        event?.let {
+            val x = event.x.toInt()
+            val y = event.y.toInt()
+            if(collapseButtonRect.contains(x, y)) {
+                when(event.action) {
+                    MotionEvent.ACTION_DOWN -> return true
+                    MotionEvent.ACTION_UP -> {
+                        isExpanded = false
+                        return true
+                    }
+                }
             }
+        }
+        return super.onTouchEvent(event)
+    }
+
+    private fun sortIndexes() {
+        try {
+            childIndexes?.sortWith(Comparator { i1, i2 ->
+                val child1 = getChildAt(i1) as NoteView
+                val child2 = getChildAt(i2) as NoteView
+                val date1 = child1.date.toLocalDate()
+                val date2 = child2.date.toLocalDate()
+
+                if (date1 == null || date2 == null) throw Throwable("Error while parse: Date can not be null")
+
+                if (date1 > date2) i1 else i2
+            })
+        } catch (e: Exception) {
+            Log.e("NoteStackView", e.message ?: "")
         }
     }
 
