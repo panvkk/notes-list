@@ -6,12 +6,12 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Point
 import android.graphics.Rect
-import android.text.Layout
+import android.os.Bundle
+import android.os.Parcelable
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.ViewGroup
-import androidx.core.graphics.withTranslation
 import androidx.core.view.isGone
 import com.example.noteslist.core.toLocalDate
 
@@ -21,6 +21,11 @@ class NoteStackView @JvmOverloads constructor(
     defStyleAttr: Int = 0,
     defStyleRes: Int = 0
 ) : ViewGroup(context, attrs, defStyleAttr, defStyleRes) {
+
+    companion object {
+        const val KEY_SUPER_STATE = "superState"
+        const val KEY_IS_EXPANDED = "isExpanded"
+    }
 
     private val translationZFactor = 0.1f
 
@@ -281,6 +286,26 @@ class NoteStackView @JvmOverloads constructor(
             })
         } catch (e: Exception) {
             Log.e("NoteStackView", e.message ?: "")
+        }
+    }
+
+    // Сохранение состояния
+    override fun onSaveInstanceState(): Parcelable {
+        val state = Bundle()
+        state.putParcelable(KEY_SUPER_STATE, super.onSaveInstanceState())
+        state.putBoolean(KEY_IS_EXPANDED, isExpanded)
+        return state
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        if(state is Bundle) {
+            val superState = state.getParcelable<Parcelable>(KEY_SUPER_STATE)
+            super.onRestoreInstanceState(superState)
+
+            val isExpandedState = state.getBoolean(KEY_IS_EXPANDED)
+            isExpanded = isExpandedState
+        } else {
+            super.onRestoreInstanceState(state)
         }
     }
 
