@@ -23,6 +23,6 @@
     <dimen name="note_stack_collapse_button_text_size">20sp</dimen>
 
     <!-- Отступы -->
-    <dimen name="note_stack_vertical_padding">16dp</dimen>
+    <dimen name="note_stack_vertical_padding">8dp</dimen>
     <!--  -->
 </resources>
