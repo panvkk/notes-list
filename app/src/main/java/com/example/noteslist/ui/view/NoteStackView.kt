@@ -134,7 +134,7 @@ class NoteStackView @JvmOverloads constructor(
                         heightMeasureSpec, shadowPadding * 2
                     )
                 }
-                totalHeight += getChildAt(0).measuredHeight
+                if(childCount != 0) totalHeight += getChildAt(0).measuredHeight
                 totalHeight += (stackSpacing * stackMaxVisible).toInt()
                 totalHeight += shadowPadding * 2
             } else {
@@ -163,6 +163,8 @@ class NoteStackView @JvmOverloads constructor(
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+        if(childCount == 0 ) return
+
         val maxChildTranslationZ = stackMaxVisible * translationZFactor
         val shadowPadding = (maxChildElevation + maxChildTranslationZ).toInt()
 
