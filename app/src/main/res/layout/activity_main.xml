@@ -36,15 +36,16 @@
                 android:id="@+id/note_stack_1"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:stackMaxVisible="3"
-                app:stackSpacing="20dp">
+                app:stackMaxVisible="2"
+                app:stackSpacing="20dp"
+                app:stackMaxChildElevation="16dp">
 
                 <com.example.noteslist.NoteView
                     android:id="@+id/note_2"
                     style="@style/NoteViewStyle.NotRead"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="16dp"
+                    android:layout_marginTop="16dp"
                     android:elevation="8dp"
                     app:date="10.02.2025"
                     app:description="Завтра нужно появиться в универе (очень) аааа фывафывафыва"
@@ -57,7 +58,7 @@
                     style="@style/NoteViewStyle.NotRead"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="16dp"
+                    android:layout_marginTop="16dp"
                     android:elevation="8dp"
                     app:date="10.03.2025"
                     app:description="Завтра нужно появиться в универе (очень) аааа фывафывафыва"
@@ -70,7 +71,7 @@
                     style="@style/NoteViewStyle.NotRead"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="16dp"
+                    android:layout_marginTop="16dp"
                     android:elevation="8dp"
                     app:date="08.03.2026"
                     app:description="Завтра нужно появиться в универе (очень) аааа фывафывафыва"
