@@ -14,6 +14,7 @@ class NoteDelegate : AdapterDelegate<ViewTyped> {
 
     override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
+        // parent для обработки margins, которые указаны в xml
         val binding = ItemNoteViewBinding.inflate(inflater, parent, false)
         return NoteViewHolder(binding)
     }
