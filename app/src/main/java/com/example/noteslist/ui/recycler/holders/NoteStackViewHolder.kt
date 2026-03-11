@@ -1,4 +1,4 @@
-package com.example.noteslist.ui.holders
+package com.example.noteslist.ui.recycler.holders
 
 import android.view.ViewGroup
 import android.widget.LinearLayout

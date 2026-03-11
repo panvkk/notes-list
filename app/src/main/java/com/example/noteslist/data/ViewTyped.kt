@@ -8,6 +8,6 @@ sealed interface ViewTyped {
         val isImportant: Boolean,
         val date: String
     ) : ViewTyped
-    data class NoteStack(val notes: List<Note>) : ViewTyped
 
+    data class NoteStack(val notes: List<Note>) : ViewTyped
 }
