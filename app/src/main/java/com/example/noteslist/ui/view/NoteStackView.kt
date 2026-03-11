@@ -1,4 +1,4 @@
-package com.example.noteslist
+package com.example.noteslist.ui.view
 
 import android.content.Context
 import android.graphics.Canvas
@@ -13,6 +13,7 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.ViewGroup
 import androidx.core.view.isGone
+import com.example.noteslist.R
 import com.example.noteslist.core.toLocalDate
 
 class NoteStackView @JvmOverloads constructor(
