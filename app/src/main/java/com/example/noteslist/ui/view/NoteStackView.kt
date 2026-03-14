@@ -158,7 +158,7 @@ class NoteStackView @JvmOverloads constructor(
                     val lp = child.layoutParams as MarginLayoutParams
                     val totalChildHeight = child.measuredHeight + lp.topMargin + lp.bottomMargin
 
-                    totalHeight += totalChildHeight
+                    totalHeight += totalChildHeight + verticalPadding.toInt()
                 }
                 totalHeight += (collapseButtonHeight + verticalPadding).toInt()
             }
@@ -182,9 +182,7 @@ class NoteStackView @JvmOverloads constructor(
                 // Оставляем только самые важные элементы сверху
                 val upperChildren = if(stackMaxVisible + 1 < childCount) {
                         it.slice(0..<stackMaxVisible)
-                    } else {
-                        it
-                    }.reversed()
+                    } else { it }.reversed()
                 for (i in upperChildren) {
                     val child = getChildAt(i)
                     if (child.isGone) continue
@@ -222,7 +220,7 @@ class NoteStackView @JvmOverloads constructor(
                     val bottom = top + childHeight
 
                     child.layout(left, top, right, bottom)
-                    childTop += childTotalHeight + maxChildElevation.toInt()
+                    childTop += childTotalHeight + verticalPadding.toInt()
                 }
             }
         }
