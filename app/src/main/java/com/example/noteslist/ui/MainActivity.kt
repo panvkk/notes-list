@@ -35,22 +35,21 @@ class MainActivity : AppCompatActivity() {
 
         val notes = getData()
         val viewTypedData = getViewTypedData(notes)
-        val sharedPool = RecyclerView.RecycledViewPool()
         val recyclerItemsMargin = resources.getDimensionPixelSize(R.dimen.recycler_item_margin)
 
         with(binding.recyclerView) {
-            adapter = setupAdapter(viewTypedData, sharedPool)
+            adapter = setupAdapter(viewTypedData)
             layoutManager = StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL)
             clipChildren = false
             clipToPadding = false
+
             addItemDecoration(NoteItemDecoration(recyclerItemsMargin))
-            setRecycledViewPool(sharedPool)
         }
     }
 
-    private fun setupAdapter(data: List<ViewTyped>, viewPool: RecyclerView.RecycledViewPool) : MultiTypeAdapter {
+    private fun setupAdapter(data: List<ViewTyped>) : MultiTypeAdapter {
         val delegates = listOf(NoteDelegate(), NoteStackDelegate())
-        val adapter = MultiTypeAdapter(delegates, viewPool)
+        val adapter = MultiTypeAdapter(delegates)
         adapter.setNewData(data)
         return adapter
     }

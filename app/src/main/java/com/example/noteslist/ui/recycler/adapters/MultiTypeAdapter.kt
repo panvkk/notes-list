@@ -7,12 +7,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.R
 import com.example.noteslist.data.ViewTyped
 import com.example.noteslist.ui.recycler.adapters.delegates.AdapterDelegate
+import com.example.noteslist.ui.recycler.adapters.delegates.pool.NoteViewPool
 import com.example.noteslist.ui.recycler.holders.NoteStackViewHolder
 import com.example.noteslist.ui.recycler.holders.NoteViewHolder
 
 class MultiTypeAdapter(
-    private val delegates: List<AdapterDelegate<ViewTyped>>,
-    private val viewPool: RecyclerView.RecycledViewPool
+    private val delegates: List<AdapterDelegate<ViewTyped>>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var items: List<ViewTyped> = emptyList()
 
@@ -40,7 +40,7 @@ class MultiTypeAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return delegates[viewType].onCreateViewHolder(parent, this, viewPool)
+        return delegates[viewType].onCreateViewHolder(parent)
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {

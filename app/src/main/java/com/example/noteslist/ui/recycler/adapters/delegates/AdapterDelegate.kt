@@ -8,11 +8,7 @@ interface AdapterDelegate<T> {
     fun isForViewType(items: List<T>, position: Int) : Boolean
     fun isForViewType(item: Any) : Boolean
 
-    fun onCreateViewHolder(
-        parent: ViewGroup,
-        adapter: MultiTypeAdapter? = null,
-        viewPool: RecyclerView.RecycledViewPool? = null
-    ) : RecyclerView.ViewHolder
+    fun onCreateViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder
 
     fun onBindViewHolder(
         items: List<T>,
