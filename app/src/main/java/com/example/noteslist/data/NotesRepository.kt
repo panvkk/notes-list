@@ -43,4 +43,13 @@ class NotesRepository {
             true,
             "18.05.2026")
         )
+
+    fun getExpandedNotes() : List<ViewTyped.Note> {
+        val data = getNotes()
+        val expandedData: MutableList<ViewTyped.Note> = mutableListOf()
+        for(i in 1..100) {
+            expandedData.addAll(data.toList())
+        }
+        return expandedData
+    }
 }

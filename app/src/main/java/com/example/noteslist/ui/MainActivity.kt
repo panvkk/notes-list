@@ -5,14 +5,17 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.noteslist.R
 import com.example.noteslist.data.NotesRepository
 import com.example.noteslist.data.ViewTyped
 import com.example.noteslist.databinding.ActivityMainBinding
+import com.example.noteslist.ui.recycler.NoteItemDecoration
 import com.example.noteslist.ui.recycler.adapters.MultiTypeAdapter
 import com.example.noteslist.ui.recycler.adapters.delegates.NoteDelegate
 import com.example.noteslist.ui.recycler.adapters.delegates.NoteStackDelegate
+import java.util.Collections.emptyList
 
 class MainActivity : AppCompatActivity() {
 
@@ -32,15 +35,22 @@ class MainActivity : AppCompatActivity() {
 
         val notes = getData()
         val viewTypedData = getViewTypedData(notes)
+        val sharedPool = RecyclerView.RecycledViewPool()
+        val recyclerItemsMargin = resources.getDimensionPixelSize(R.dimen.recycler_item_margin)
+
         with(binding.recyclerView) {
-            adapter = setupAdapter(viewTypedData)
+            adapter = setupAdapter(viewTypedData, sharedPool)
             layoutManager = StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL)
+            clipChildren = false
+            clipToPadding = false
+            addItemDecoration(NoteItemDecoration(recyclerItemsMargin))
+            setRecycledViewPool(sharedPool)
         }
     }
 
-    private fun setupAdapter(data: List<ViewTyped>) : MultiTypeAdapter {
+    private fun setupAdapter(data: List<ViewTyped>, viewPool: RecyclerView.RecycledViewPool) : MultiTypeAdapter {
         val delegates = listOf(NoteDelegate(), NoteStackDelegate())
-        val adapter = MultiTypeAdapter(delegates)
+        val adapter = MultiTypeAdapter(delegates, viewPool)
         adapter.setNewData(data)
         return adapter
     }
@@ -70,6 +80,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun getData() : List<ViewTyped.Note> {
         val repository = NotesRepository()
-        return repository.getNotes()
+        return repository.getExpandedNotes()
     }
 }

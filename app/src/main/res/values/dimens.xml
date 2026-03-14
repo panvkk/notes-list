@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="recycler_item_margin">16dp</dimen>
 <!-- Note View -->
     <!-- Размеры -->
     <dimen name="note_view_height">160dp</dimen>

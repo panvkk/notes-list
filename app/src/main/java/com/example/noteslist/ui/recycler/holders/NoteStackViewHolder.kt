@@ -1,50 +1,55 @@
 package com.example.noteslist.ui.recycler.holders
 
-import android.view.LayoutInflater
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
-import com.example.noteslist.R
 import com.example.noteslist.data.ViewTyped
 import com.example.noteslist.databinding.ItemNoteStackViewBinding
-import com.example.noteslist.databinding.ItemNoteViewBinding
 import com.example.noteslist.ui.view.NoteView
+import androidx.core.view.isNotEmpty
+import com.example.noteslist.R
+import com.example.noteslist.databinding.ItemNoteViewBinding
+import com.example.noteslist.ui.recycler.adapters.MultiTypeAdapter
 
-class NoteStackViewHolder(private val binding: ItemNoteStackViewBinding)
-    : RecyclerView.ViewHolder(binding.root) {
+class NoteStackViewHolder(
+    private val binding: ItemNoteStackViewBinding,
+    private val adapter: MultiTypeAdapter,
+    private val viewPool: RecyclerView.RecycledViewPool,
+    private val parent: ViewGroup
+) : RecyclerView.ViewHolder(binding.root) {
 
     fun bind(noteStack: ViewTyped.NoteStack) {
-        binding.noteStackView.removeAllViews()
+        recycleChildren()
 
+        binding.noteStackView.isExpanded = false
         noteStack.notes.forEach { note ->
-            // Вот это очень плохо, при каждом биндинге инфлейтится новая вьюха
-            // по-хорошему, для NoteStackViewHolder нужно использовать вьюхолдеры простых NoteView
-            // но нету времени на написание ViewPool
-            val noteView = LayoutInflater.from(binding.root.context)
-                .inflate(R.layout.item_note_view, binding.noteStackView, false)
-                    as NoteView
+            val type = adapter.getItemViewTypeForModel(note)
 
-            noteView.apply {
-                title = note.title
-                description = note.description
-                date = note.date
-                importance = note.isImportant
+            val vh = (viewPool.getRecycledView(type)
+                ?: adapter.createViewHolder(parent, type))
+                    as NoteViewHolder
 
-                layoutParams = LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-                setOnClickListener {
-                    isRead = !isRead
-                }
-            }
+            vh.bind(note)
+            vh.itemView.setTag(R.id.noteViewHolderTag, vh)
 
-            binding.noteStackView.addView(noteView)
+            binding.noteStackView.addView(vh.itemView)
         }
+    }
 
+    fun recycleChildren() {
         binding.noteStackView.apply {
-            setOnClickListener {
-                if(!isExpanded) isExpanded = true
+            while(this.isNotEmpty()) {
+                val child = this.getChildAt(0)
+                val vh = child.getTag(R.id.noteViewHolderTag) as? NoteViewHolder
+
+                this.removeView(child)
+
+                if(vh != null) {
+                    child.translationZ = 0f // После NoteStack остаётся дополнительный подъём, который будет лишним в списке
+                    setIsRecyclable(true)
+                    viewPool.putRecycledView(vh)
+                }
             }
         }
     }
