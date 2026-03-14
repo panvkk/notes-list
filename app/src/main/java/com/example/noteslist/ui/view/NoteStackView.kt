@@ -270,11 +270,21 @@ class NoteStackView @JvmOverloads constructor(
         event?.let {
             val x = event.x.toInt()
             val y = event.y.toInt()
-            if(collapseButtonRect.contains(x, y)) {
+            if(isExpanded) {
+                if(collapseButtonRect.contains(x, y)) {
+                    when(event.action) {
+                        MotionEvent.ACTION_DOWN -> return true
+                        MotionEvent.ACTION_UP -> {
+                            isExpanded = false
+                            return true
+                        }
+                    }
+                }
+            } else {
                 when(event.action) {
                     MotionEvent.ACTION_DOWN -> return true
                     MotionEvent.ACTION_UP -> {
-                        isExpanded = false
+                        isExpanded = true
                         return true
                     }
                 }
