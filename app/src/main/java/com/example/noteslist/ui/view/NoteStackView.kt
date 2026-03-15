@@ -49,11 +49,10 @@ class NoteStackView @JvmOverloads constructor(
     private var collapseButtonSize = defaultCollapseButtonSize
     private var collapseButtonColor = defaultCollapseButtonColor
     private var collapseButtonText = defaultCollapseButtonText
-    private var _isExpanded = false
-    var isExpanded: Boolean
-        get() = _isExpanded
+    var isExpanded: Boolean = false
         set(value) {
-            _isExpanded = value
+            if(field == value) return
+            field = value
             requestLayout()
             invalidate()
         }

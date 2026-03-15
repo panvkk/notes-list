@@ -22,7 +22,7 @@ class DateTitleDelegate : AdapterDelegate<ViewTyped> {
 
     override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        val binding = ItemDateTitleBinding.inflate(inflater)
+        val binding = ItemDateTitleBinding.inflate(inflater, parent, false)
         return DateTitleViewHolder(binding)
     }
 

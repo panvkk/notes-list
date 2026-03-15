@@ -100,6 +100,7 @@ class NoteView @JvmOverloads constructor(
             if(field == value) return
             field = value
             updateTextLayouts()
+            requestLayout()
             invalidate()
         }
     var description: String = defaultDescription
@@ -107,6 +108,7 @@ class NoteView @JvmOverloads constructor(
             if(field == value) return
             field = value
             updateTextLayouts()
+            requestLayout()
             invalidate()
         }
     var date: String = defaultDate

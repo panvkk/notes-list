@@ -35,7 +35,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         val viewTypedData = mainViewModel.getViewTypedData()
-//        val viewTypedData = getViewTypedData(getData())
         val recyclerItemsHorizontalMargin = resources.getDimensionPixelSize(R.dimen.recycler_item_horizontal_margin)
         val recyclerItemsVerticalMargin = resources.getDimensionPixelSize(R.dimen.recycler_item_vertical_margin)
 
@@ -58,32 +57,4 @@ class MainActivity : AppCompatActivity() {
         adapter.setNewData(data)
         return adapter
     }
-
-    private fun getViewTypedData(notes: List<ViewTyped.Note>) : List<ViewTyped> {
-        val viewTypedData = mutableListOf<ViewTyped>()
-        val notImportantNotes = mutableListOf<ViewTyped.Note>()
-        notes.forEach { note ->
-            if(note.isImportant) {
-                if(notImportantNotes.isNotEmpty()) {
-                    val noteStackChildren = notImportantNotes.toList()
-                    val noteStack = ViewTyped.NoteStack(noteStackChildren)
-                    viewTypedData.add(noteStack)
-                    notImportantNotes.clear()
-                }
-                viewTypedData.add(note)
-            } else {
-                notImportantNotes.add(note)
-            }
-        }
-        if(notImportantNotes.isNotEmpty())
-            viewTypedData.add(ViewTyped.NoteStack(notImportantNotes))
-
-        return viewTypedData
-    }
-
-    private fun getData() : List<ViewTyped.Note> {
-        val repository = NotesRepository()
-        return repository.getExpandedNotes()
-    }
-
 }
