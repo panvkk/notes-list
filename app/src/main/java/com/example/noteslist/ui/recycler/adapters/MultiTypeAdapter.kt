@@ -25,15 +25,6 @@ class MultiTypeAdapter(
         throw IllegalAccessException("No delegate found for position $position")
     }
 
-    fun getItemViewTypeForModel(item: Any) : Int {
-        for((index,delegate) in delegates.withIndex()) {
-            if(delegate.isForViewType(item)) {
-                return index
-            }
-        }
-        throw IllegalAccessException("No delegate found for item type ${item::class.simpleName}")
-    }
-
     private fun getDelegateForPosition(position: Int) : AdapterDelegate<ViewTyped> {
         val viewTyped = getItemViewType(position)
         return delegates[viewTyped]

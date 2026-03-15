@@ -5,7 +5,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.noteslist.R
 import com.example.noteslist.data.NotesRepository
@@ -13,13 +12,15 @@ import com.example.noteslist.data.ViewTyped
 import com.example.noteslist.databinding.ActivityMainBinding
 import com.example.noteslist.ui.recycler.NoteItemDecoration
 import com.example.noteslist.ui.recycler.adapters.MultiTypeAdapter
+import com.example.noteslist.ui.recycler.adapters.delegates.DateTitleDelegate
 import com.example.noteslist.ui.recycler.adapters.delegates.NoteDelegate
 import com.example.noteslist.ui.recycler.adapters.delegates.NoteStackDelegate
-import java.util.Collections.emptyList
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var binding: ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
+
+    private val mainViewModel = MainViewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,9 +34,10 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        val notes = getData()
-        val viewTypedData = getViewTypedData(notes)
-        val recyclerItemsMargin = resources.getDimensionPixelSize(R.dimen.recycler_item_margin)
+        val viewTypedData = mainViewModel.getViewTypedData()
+//        val viewTypedData = getViewTypedData(getData())
+        val recyclerItemsHorizontalMargin = resources.getDimensionPixelSize(R.dimen.recycler_item_horizontal_margin)
+        val recyclerItemsVerticalMargin = resources.getDimensionPixelSize(R.dimen.recycler_item_vertical_margin)
 
         with(binding.recyclerView) {
             adapter = setupAdapter(viewTypedData)
@@ -43,17 +45,19 @@ class MainActivity : AppCompatActivity() {
             clipChildren = false
             clipToPadding = false
 
-            addItemDecoration(NoteItemDecoration(recyclerItemsMargin))
+            addItemDecoration(NoteItemDecoration(
+                recyclerItemsVerticalMargin,
+                recyclerItemsHorizontalMargin
+            ))
         }
     }
 
     private fun setupAdapter(data: List<ViewTyped>) : MultiTypeAdapter {
-        val delegates = listOf(NoteDelegate(), NoteStackDelegate())
+        val delegates = listOf(NoteDelegate(), NoteStackDelegate(), DateTitleDelegate())
         val adapter = MultiTypeAdapter(delegates)
         adapter.setNewData(data)
         return adapter
     }
-
 
     private fun getViewTypedData(notes: List<ViewTyped.Note>) : List<ViewTyped> {
         val viewTypedData = mutableListOf<ViewTyped>()
@@ -81,4 +85,5 @@ class MainActivity : AppCompatActivity() {
         val repository = NotesRepository()
         return repository.getExpandedNotes()
     }
+
 }

@@ -1,16 +1,11 @@
 package com.example.noteslist.ui.recycler.holders
 
-import android.util.Log
-import android.view.ViewGroup
-import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.data.ViewTyped
 import com.example.noteslist.databinding.ItemNoteStackViewBinding
-import com.example.noteslist.ui.view.NoteView
 import androidx.core.view.isNotEmpty
 import com.example.noteslist.R
 import com.example.noteslist.databinding.ItemNoteViewBinding
-import com.example.noteslist.ui.recycler.adapters.MultiTypeAdapter
 import com.example.noteslist.ui.recycler.adapters.delegates.pool.NoteViewPool
 
 class NoteStackViewHolder(
@@ -29,7 +24,7 @@ class NoteStackViewHolder(
                 title = note.title
                 description = note.description
                 date = note.date
-                importance = note.isImportant
+                isImportant = note.isImportant
             }
             child.root.setTag(R.id.noteBindingTag, child)
             binding.noteStackView.addView(child.noteView)
@@ -44,6 +39,7 @@ class NoteStackViewHolder(
                 this.removeView(child)
                 val binding = child.getTag(R.id.noteBindingTag) as? ItemNoteViewBinding
                 if(binding != null) {
+                    binding.noteView.translationZ = 0f
                     viewPool.putView(binding)
                 }
             }

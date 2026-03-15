@@ -8,7 +8,7 @@ import com.example.noteslist.databinding.ItemNoteViewBinding
 import com.example.noteslist.ui.recycler.adapters.MultiTypeAdapter
 import com.example.noteslist.ui.recycler.holders.NoteViewHolder
 
-class NoteDelegate : AdapterDelegate<ViewTyped> {
+class NoteDelegate() : AdapterDelegate<ViewTyped> {
     override fun isForViewType(items: List<ViewTyped>, position: Int): Boolean {
         return items[position] is ViewTyped.Note
     }
