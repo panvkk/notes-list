@@ -41,8 +41,6 @@ class MultiTypeAdapter(
     override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
         if(holder is NoteStackViewHolder) {
             holder.recycleChildren()
-            // Артефакты пропали, но тени обрезаются
-            holder.resetHardwareAccelerationCache()
         }
         super.onViewRecycled(holder)
     }

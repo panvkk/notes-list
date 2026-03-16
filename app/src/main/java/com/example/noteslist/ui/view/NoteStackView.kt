@@ -87,8 +87,7 @@ class NoteStackView @JvmOverloads constructor(
         initPaints()
         setWillNotDraw(false)
 
-        clipChildren = false // чтобы не обрезалась тень
-        clipToPadding = false
+        clipToPadding = false // чтобы не обрезалась тень
     }
 
     private fun initPaints() {

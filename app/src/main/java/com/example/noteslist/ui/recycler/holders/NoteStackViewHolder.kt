@@ -30,8 +30,6 @@ class NoteStackViewHolder(
             child.root.setTag(R.id.noteBindingTag, child)
             binding.noteStackView.addView(child.noteView)
         }
-
-        onRebound()
     }
 
     fun recycleChildren() {
@@ -46,25 +44,6 @@ class NoteStackViewHolder(
                     viewPool.putView(binding)
                 }
             }
-        }
-    }
-
-    private fun onRebound() {
-        binding.noteStackView.apply {
-            invalidateOutline()
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                forceLayout()
-            }
-            invalidate()
-        }
-    }
-
-    fun resetHardwareAccelerationCache() {
-        // был баг, что когда вьюхолдер переиспользовался, рисовалась старая его версия
-        // судя по всему, она просто бралась из кэша GPU
-        binding.noteStackView.apply {
-            setLayerType(View.LAYER_TYPE_NONE, null) // Сбрасываем слой
-            setLayerType(View.LAYER_TYPE_HARDWARE, null) // Возвращаем обратно
         }
     }
 }
