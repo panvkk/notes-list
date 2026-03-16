@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Point
 import android.graphics.Rect
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
@@ -144,7 +145,7 @@ class NoteStackView @JvmOverloads constructor(
                 }
                 if(childCount != 0) totalHeight += getChildAt(0).measuredHeight
                 val visibleChildrenCount = min(stackMaxVisible, childCount)
-                totalHeight += (stackSpacing * visibleChildrenCount).toInt()
+                totalHeight += (stackSpacing * (visibleChildrenCount - 1)).toInt()
             } else {
                 for(i in childIndexes) {
                     val child = getChildAt(i)
@@ -179,7 +180,7 @@ class NoteStackView @JvmOverloads constructor(
             if (!isExpanded) {
                 var counter = 0
                 // Оставляем только самые важные элементы сверху
-                val upperChildren = if(stackMaxVisible + 1 < childCount) {
+                val upperChildren = if(stackMaxVisible < childCount) {
                         it.slice(0..<stackMaxVisible)
                     } else { it }.reversed()
                 for (i in upperChildren) {

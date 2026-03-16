@@ -1,5 +1,8 @@
 package com.example.noteslist.ui.recycler.holders
 
+import android.os.Build
+import android.view.View
+import androidx.core.view.ViewCompat.setLayerType
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.data.ViewTyped
 import com.example.noteslist.databinding.ItemNoteStackViewBinding
@@ -14,8 +17,6 @@ class NoteStackViewHolder(
 ) : RecyclerView.ViewHolder(binding.root) {
 
     fun bind(noteStack: ViewTyped.NoteStack) {
-        recycleChildren()
-
         binding.noteStackView.isExpanded = false
         noteStack.notes.forEach { note ->
             val child = viewPool.getView(binding.noteStackView)
@@ -29,6 +30,8 @@ class NoteStackViewHolder(
             child.root.setTag(R.id.noteBindingTag, child)
             binding.noteStackView.addView(child.noteView)
         }
+
+        onRebound()
     }
 
     fun recycleChildren() {
@@ -43,6 +46,25 @@ class NoteStackViewHolder(
                     viewPool.putView(binding)
                 }
             }
+        }
+    }
+
+    private fun onRebound() {
+        binding.noteStackView.apply {
+            invalidateOutline()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                forceLayout()
+            }
+            invalidate()
+        }
+    }
+
+    fun resetHardwareAccelerationCache() {
+        // был баг, что когда вьюхолдер переиспользовался, рисовалась старая его версия
+        // судя по всему, она просто бралась из кэша GPU
+        binding.noteStackView.apply {
+            setLayerType(View.LAYER_TYPE_NONE, null) // Сбрасываем слой
+            setLayerType(View.LAYER_TYPE_HARDWARE, null) // Возвращаем обратно
         }
     }
 }
