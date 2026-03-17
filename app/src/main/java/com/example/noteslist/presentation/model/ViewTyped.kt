@@ -1,7 +1,4 @@
-package com.example.noteslist.data
-
-import java.time.LocalDate
-
+package com.example.noteslist.presentation.model
 
 sealed interface ViewTyped {
     data class Note(

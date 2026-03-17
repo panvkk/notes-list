@@ -1,4 +1,4 @@
-package com.example.noteslist.ui.recycler
+package com.example.noteslist.presentation.ui.recycler.decoration
 
 import android.graphics.Rect
 import android.view.View

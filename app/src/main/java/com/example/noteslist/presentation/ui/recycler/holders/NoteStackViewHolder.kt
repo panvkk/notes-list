@@ -1,15 +1,12 @@
-package com.example.noteslist.ui.recycler.holders
+package com.example.noteslist.presentation.ui.recycler.holders
 
-import android.os.Build
-import android.view.View
-import androidx.core.view.ViewCompat.setLayerType
 import androidx.recyclerview.widget.RecyclerView
-import com.example.noteslist.data.ViewTyped
+import com.example.noteslist.presentation.model.ViewTyped
 import com.example.noteslist.databinding.ItemNoteStackViewBinding
 import androidx.core.view.isNotEmpty
 import com.example.noteslist.R
 import com.example.noteslist.databinding.ItemNoteViewBinding
-import com.example.noteslist.ui.recycler.adapters.delegates.pool.NoteViewPool
+import com.example.noteslist.presentation.ui.recycler.adapters.delegates.pool.NoteViewPool
 
 class NoteStackViewHolder(
     private val binding: ItemNoteStackViewBinding,

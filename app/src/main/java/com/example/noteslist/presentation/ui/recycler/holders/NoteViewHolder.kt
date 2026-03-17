@@ -1,7 +1,7 @@
-package com.example.noteslist.ui.recycler.holders
+package com.example.noteslist.presentation.ui.recycler.holders
 
 import androidx.recyclerview.widget.RecyclerView
-import com.example.noteslist.data.ViewTyped
+import com.example.noteslist.presentation.model.ViewTyped
 import com.example.noteslist.databinding.ItemNoteViewBinding
 
 class NoteViewHolder(private val binding: ItemNoteViewBinding

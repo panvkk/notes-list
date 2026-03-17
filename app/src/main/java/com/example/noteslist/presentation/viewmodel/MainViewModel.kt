@@ -1,19 +1,24 @@
-package com.example.noteslist.ui
+package com.example.noteslist.presentation.viewmodel
 
 import android.util.Log
-import com.example.noteslist.core.toLocalDate
-import com.example.noteslist.data.NotesRepository
-import com.example.noteslist.data.ViewTyped
+import com.example.noteslist.core.presentation.toLocalDate
+import com.example.noteslist.core.presentation.toStringWithPattern
+import com.example.noteslist.data.local.NotesRepositoryImpl
+import com.example.noteslist.domain.model.NoteModel
+import com.example.noteslist.presentation.model.ViewTyped
+import com.example.noteslist.domain.repository.NotesRepository
+import com.example.noteslist.domain.usecase.NotesUseCase
+import kotlin.collections.forEach
 
 class MainViewModel(
-    private val notesRepository: NotesRepository = NotesRepository()
+    private val notesUseCase: NotesUseCase = NotesUseCase()
 ) {
     companion object {
         private const val TAG = "MainViewModel"
     }
 
     fun getViewTypedData() : List<ViewTyped> {
-        val notes = sortByDate(fetchNotes())
+        val notes = getNotes()
 
         val viewTypedData = mutableListOf<ViewTyped>()
         val notImportantNotes = mutableListOf<ViewTyped.Note>()
@@ -59,23 +64,21 @@ class MainViewModel(
         return viewTypedData
     }
 
-    private fun sortByDate(notes: List<ViewTyped.Note>) : List<ViewTyped.Note> {
-        var sortedNotes: List<ViewTyped.Note> = emptyList()
-        try {
-             sortedNotes = notes.sortedWith { note1, note2 ->
-                val date1 = note1.date.toLocalDate()
-                val date2 = note2.date.toLocalDate()
-                 if (date1 == null || date2 == null) throw Throwable("Error while parse: Date can not be null")
-
-                 date1.compareTo(date2)
-            }
+    private fun getNotes() : List<ViewTyped.Note> {
+        return try {
+            notesUseCase.invoke().map { noteModel -> noteModel.toUiModel() }
         } catch (e: Throwable) {
-            Log.e(TAG, e.message ?: "Unknown Error.")
+            Log.e(TAG, e.message ?: "Unknown Error")
+            emptyList()
         }
-        return sortedNotes
     }
 
-    private fun fetchNotes() : List<ViewTyped.Note> {
-        return notesRepository.getNotes()
-    }
+    private fun NoteModel.toUiModel() = ViewTyped.Note(
+        title = title,
+        description = description,
+        date = date?.toStringWithPattern()
+            ?: throw IllegalStateException("Error while parse: Date cannot be null."),
+        isImportant = isImportant,
+        isRead = isRead
+    )
 }

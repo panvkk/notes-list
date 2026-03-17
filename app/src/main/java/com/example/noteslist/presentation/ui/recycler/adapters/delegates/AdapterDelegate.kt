@@ -1,8 +1,7 @@
-package com.example.noteslist.ui.recycler.adapters.delegates
+package com.example.noteslist.presentation.ui.recycler.adapters.delegates
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.noteslist.ui.recycler.adapters.MultiTypeAdapter
 
 interface AdapterDelegate<T> {
     fun isForViewType(items: List<T>, position: Int) : Boolean

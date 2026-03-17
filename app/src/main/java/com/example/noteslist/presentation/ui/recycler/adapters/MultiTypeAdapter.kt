@@ -1,15 +1,10 @@
-package com.example.noteslist.ui.recycler.adapters
+package com.example.noteslist.presentation.ui.recycler.adapters
 
-import android.content.Context
-import android.util.Log
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.noteslist.R
-import com.example.noteslist.data.ViewTyped
-import com.example.noteslist.ui.recycler.adapters.delegates.AdapterDelegate
-import com.example.noteslist.ui.recycler.adapters.delegates.pool.NoteViewPool
-import com.example.noteslist.ui.recycler.holders.NoteStackViewHolder
-import com.example.noteslist.ui.recycler.holders.NoteViewHolder
+import com.example.noteslist.presentation.model.ViewTyped
+import com.example.noteslist.presentation.ui.recycler.adapters.delegates.AdapterDelegate
+import com.example.noteslist.presentation.ui.recycler.holders.NoteStackViewHolder
 
 class MultiTypeAdapter(
     private val delegates: List<AdapterDelegate<ViewTyped>>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<com.example.noteslist.ui.view.NoteStackView
+<com.example.noteslist.presentation.ui.view.NoteStackView
     android:id="@+id/noteStackView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"

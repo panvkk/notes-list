@@ -1,4 +1,4 @@
-package com.example.noteslist.ui.view
+package com.example.noteslist.presentation.ui.view
 
 import android.content.Context
 import android.graphics.Canvas

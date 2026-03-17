@@ -1,11 +1,11 @@
-package com.example.noteslist.ui.recycler.adapters.delegates
+package com.example.noteslist.presentation.ui.recycler.adapters.delegates
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.noteslist.data.ViewTyped
+import com.example.noteslist.presentation.model.ViewTyped
 import com.example.noteslist.databinding.ItemDateTitleBinding
-import com.example.noteslist.ui.recycler.holders.DateTitleViewHolder
+import com.example.noteslist.presentation.ui.recycler.holders.DateTitleViewHolder
 
 class DateTitleDelegate : AdapterDelegate<ViewTyped> {
 

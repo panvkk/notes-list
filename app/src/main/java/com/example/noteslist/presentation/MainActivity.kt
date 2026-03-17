@@ -1,4 +1,4 @@
-package com.example.noteslist.ui
+package com.example.noteslist.presentation
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
@@ -7,14 +7,14 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.noteslist.R
-import com.example.noteslist.data.NotesRepository
-import com.example.noteslist.data.ViewTyped
+import com.example.noteslist.presentation.model.ViewTyped
 import com.example.noteslist.databinding.ActivityMainBinding
-import com.example.noteslist.ui.recycler.NoteItemDecoration
-import com.example.noteslist.ui.recycler.adapters.MultiTypeAdapter
-import com.example.noteslist.ui.recycler.adapters.delegates.DateTitleDelegate
-import com.example.noteslist.ui.recycler.adapters.delegates.NoteDelegate
-import com.example.noteslist.ui.recycler.adapters.delegates.NoteStackDelegate
+import com.example.noteslist.presentation.ui.recycler.decoration.NoteItemDecoration
+import com.example.noteslist.presentation.ui.recycler.adapters.MultiTypeAdapter
+import com.example.noteslist.presentation.ui.recycler.adapters.delegates.DateTitleDelegate
+import com.example.noteslist.presentation.ui.recycler.adapters.delegates.NoteDelegate
+import com.example.noteslist.presentation.ui.recycler.adapters.delegates.NoteStackDelegate
+import com.example.noteslist.presentation.viewmodel.MainViewModel
 
 class MainActivity : AppCompatActivity() {
 

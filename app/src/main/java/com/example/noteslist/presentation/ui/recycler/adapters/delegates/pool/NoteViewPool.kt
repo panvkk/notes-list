@@ -1,4 +1,4 @@
-package com.example.noteslist.ui.recycler.adapters.delegates.pool
+package com.example.noteslist.presentation.ui.recycler.adapters.delegates.pool
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

@@ -1,4 +1,4 @@
-package com.example.noteslist.ui.view
+package com.example.noteslist.presentation.ui.view
 
 import android.content.Context
 import android.graphics.Canvas
@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Point
 import android.graphics.Rect
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
@@ -16,7 +15,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import com.example.noteslist.R
-import com.example.noteslist.core.toLocalDate
+import com.example.noteslist.core.presentation.toLocalDate
 import kotlin.math.min
 
 class NoteStackView @JvmOverloads constructor(

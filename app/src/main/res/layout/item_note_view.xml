@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.example.noteslist.ui.view.NoteView
+<com.example.noteslist.presentation.ui.view.NoteView
     android:id="@+id/noteView"
     style="@style/NoteViewStyle.NotRead"
     android:layout_width="wrap_content"
