@@ -2,6 +2,7 @@ package com.example.noteslist.presentation.model
 
 sealed interface ViewTyped {
     data class Note(
+        val id: Long,
         val title: String,
         val description: String,
         val isImportant: Boolean,

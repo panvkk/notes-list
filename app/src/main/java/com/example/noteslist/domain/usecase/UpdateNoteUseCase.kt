@@ -1,0 +1,13 @@
+package com.example.noteslist.domain.usecase
+
+import com.example.noteslist.data.local.NotesRepositoryImpl
+import com.example.noteslist.domain.model.NoteModel
+import com.example.noteslist.domain.repository.NotesRepository
+
+class UpdateNoteUseCase(
+    private val repository: NotesRepository = NotesRepositoryImpl()
+) {
+    operator fun invoke(note: NoteModel) : Boolean {
+        return repository.updateNote(note)
+    }
+}
