@@ -1,4 +1,4 @@
-package com.example.noteslist
+package com.example.noteslist.ui.view
 
 import android.content.Context
 import android.graphics.Canvas
@@ -11,8 +11,10 @@ import android.os.Parcelable
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isGone
+import com.example.noteslist.R
 import com.example.noteslist.core.toLocalDate
 
 class NoteStackView @JvmOverloads constructor(
@@ -38,9 +40,9 @@ class NoteStackView @JvmOverloads constructor(
     private var defaultCollapseButtonText = ""
     private var defaultMaxChildElevation = 20f
 
-    private var stackSpacing = 20f
-    private var stackMaxVisible = 3
-    private var maxChildElevation = 20f
+    var stackSpacing = 20f
+    var stackMaxVisible = 3
+    var maxChildElevation = 20f
     private var verticalPadding = defaultVerticalPadding
     private var collapseButtonHeight = defaultCollapseButtonHeight
     private var collapseButtonSize = defaultCollapseButtonSize
@@ -113,9 +115,13 @@ class NoteStackView @JvmOverloads constructor(
     override fun shouldDelayChildPressedState(): Boolean = false
 
     override fun onFinishInflate() {
-        childIndexes = MutableList(childCount) { index -> index }
-        sortIndexes()
+        updateChildIndexes()
         super.onFinishInflate()
+    }
+
+    override fun onViewAdded(child: View?) {
+        super.onViewAdded(child)
+        updateChildIndexes()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -133,7 +139,7 @@ class NoteStackView @JvmOverloads constructor(
                         heightMeasureSpec, shadowPadding * 2
                     )
                 }
-                totalHeight += getChildAt(0).measuredHeight
+                if(childCount != 0) totalHeight += getChildAt(0).measuredHeight
                 totalHeight += (stackSpacing * stackMaxVisible).toInt()
                 totalHeight += shadowPadding * 2
             } else {
@@ -162,6 +168,8 @@ class NoteStackView @JvmOverloads constructor(
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+        if(childCount == 0 ) return
+
         val maxChildTranslationZ = stackMaxVisible * translationZFactor
         val shadowPadding = (maxChildElevation + maxChildTranslationZ).toInt()
 
@@ -172,8 +180,11 @@ class NoteStackView @JvmOverloads constructor(
             if (!isExpanded) {
                 var counter = 0
                 // Оставляем только самые важные элементы сверху
-                val upperChildren = it.slice(0..<stackMaxVisible)
-                    .reversed()
+                val upperChildren = if(stackMaxVisible + 1 < childCount) {
+                        it.slice(0..<stackMaxVisible)
+                    } else {
+                        it
+                    }.reversed()
                 for (i in upperChildren) {
                     val child = getChildAt(i)
                     if (child.isGone) continue
@@ -289,6 +300,11 @@ class NoteStackView @JvmOverloads constructor(
         } catch (e: Exception) {
             Log.e("NoteStackView", e.message ?: "")
         }
+    }
+
+    private fun updateChildIndexes() {
+        childIndexes = MutableList(childCount) { index -> index }
+        sortIndexes()
     }
 
     // Сохранение состояния

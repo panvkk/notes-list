@@ -1,4 +1,4 @@
-package com.example.noteslist
+package com.example.noteslist.ui.view
 
 import android.content.Context
 import android.graphics.Canvas
@@ -8,7 +8,6 @@ import android.graphics.Outline
 import android.graphics.Paint
 import android.graphics.Point
 import android.graphics.PointF
-import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Shader
 import android.graphics.Typeface
@@ -23,9 +22,9 @@ import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewOutlineProvider
-import androidx.core.graphics.drawable.toBitmap
 import kotlin.apply
 import androidx.core.graphics.withTranslation
+import com.example.noteslist.R
 
 class NoteView @JvmOverloads constructor(
     context: Context,
