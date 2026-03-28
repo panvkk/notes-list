@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="NoteViewStyle" parent="CardView">
+        <item name="noteBackgroundColor">#FAFDFF</item>
+        <item name="noteSectionColor">#6CD07A</item>
+        <item name="noteTitleColor">#00060A</item>
+        <item name="noteDescriptionColor">#3F3B3C</item>
+        <item name="noteDateColor">#3F3B3C</item>
+        <item name="noteStarColor">#F7E445</item>
+        <item name="noteTextReadColor">#b2a9b1</item>
+        <item name="title">Заголовок</item>
+        <item name="description">Какое-то длинное описание</item>
+        <item name="date">01.01.2026</item>
+        <item name="importance">true</item>
+        <item name="noteReadPointColor">#32b333</item>
+        <item name="noteCornerRadius">16dp</item>
+    </style>
+    <style name="NoteViewStyle.NotRead" parent="NoteViewStyle">
+        <item name="noteSectionColor">#4DADEF</item>
+        <item name="isRead">false</item>
+    </style>
+    <style name="NoteViewStyle.Read" parent="NoteViewStyle">
+        <item name="isRead">true</item>
+        <item name="noteSectionColor">#FAFDFF</item>
+        <item name="noteTitleColor">#b2a9b1</item>
+        <item name="noteDescriptionColor">#b2a9b1</item>
+        <item name="noteDateColor">#b2a9b1</item>
+        <item name="noteStarColor">#fcf6bf</item>
+    </style>
+</resources>

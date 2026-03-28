@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="NoteView">
+        <attr name="noteCornerRadius" format="dimension"/>
+        <!-- Цвета -->
+        <attr name="noteBackgroundColor" format="color" />
+        <attr name="noteSectionColor" format="color" />
+        <attr name="noteTitleColor" format="color" />
+        <attr name="noteDescriptionColor" format="color" />
+        <attr name="noteDateColor" format="color" />
+        <attr name="noteStarColor" format="color"/>
+        <attr name="noteReadPointColor" format="color"/>
+        <attr name="noteTextReadColor" format="color"/>
+
+        <!-- Текст -->
+        <attr name="title" format="string"/>
+        <attr name="description" format="string"/>
+        <attr name="date" format="string"/>
+
+        <attr name="importance" format="boolean"/>
+        <attr name="isRead" format="boolean"/>
+    </declare-styleable>
+</resources>

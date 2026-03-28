@@ -2,4 +2,11 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="note_section">#4DADEF</color>
+    <color name="note_background">#FAFDFF</color>
+    <color name="note_title">#00060A</color>
+    <color name="note_description">#3F3B3C</color>
+    <color name="note_date">#3F3B3C</color>
+    <color name="note_importance_star_color">#F7E445</color>
+    <color name="note_read_point_color">#32b333</color>
 </resources>
