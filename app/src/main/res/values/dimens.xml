@@ -17,5 +17,12 @@
     <dimen name="note_description_top_padding">8dp</dimen>
     <dimen name="note_content_horizontal_padding">12dp</dimen>
     <dimen name="note_content_bottom_padding">10dp</dimen>
-<!--  -->
+<!-- Note Stack View -->
+    <!-- Размеры -->
+    <dimen name="note_stack_collapse_button_height">32dp</dimen>
+    <dimen name="note_stack_collapse_button_text_size">20sp</dimen>
+
+    <!-- Отступы -->
+    <dimen name="note_stack_vertical_padding">8dp</dimen>
+    <!--  -->
 </resources>
