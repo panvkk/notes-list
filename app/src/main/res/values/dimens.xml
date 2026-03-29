@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="recycler_item_vertical_margin">8dp</dimen>
+    <dimen name="recycler_item_horizontal_margin">16dp</dimen>
 <!-- Note View -->
     <!-- Размеры -->
     <dimen name="note_view_height">160dp</dimen>
@@ -25,4 +27,6 @@
     <!-- Отступы -->
     <dimen name="note_stack_vertical_padding">8dp</dimen>
     <!--  -->
+<!-- Date Title -->
+    <dimen name="date_title_text_size">20sp</dimen>
 </resources>

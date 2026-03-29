@@ -4,7 +4,7 @@
     android:id="@+id/noteStackView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:stackMaxVisible="2"
+    app:stackMaxVisible="3"
     app:stackSpacing="20dp"
     app:stackMaxChildElevation="16dp"
     xmlns:android="http://schemas.android.com/apk/res/android"

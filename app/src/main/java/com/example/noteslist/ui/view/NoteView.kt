@@ -20,6 +20,7 @@ import android.text.StaticLayout
 import android.text.TextPaint
 import android.text.TextUtils
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewOutlineProvider
 import kotlin.apply
@@ -94,15 +95,40 @@ class NoteView @JvmOverloads constructor(
     private var readPointColor = defaultReadPointColor
     private var textReadColor = defaultTextReadColor
 
-    var title = defaultTitle
-    var description = defaultDescription
-    var date = defaultDate
-    var importance = defaultImportance
-    private var _isRead = defaultIsRead
-    var isRead: Boolean
-        get() = _isRead
+    var title: String = defaultTitle
         set(value) {
-            _isRead = value
+            if(field == value) return
+            field = value
+            updateTextLayouts()
+            requestLayout()
+            invalidate()
+        }
+    var description: String = defaultDescription
+        set(value) {
+            if(field == value) return
+            field = value
+            updateTextLayouts()
+            requestLayout()
+            invalidate()
+        }
+    var date: String = defaultDate
+        set(value) {
+            if(field == value) return
+            field = value
+            invalidate()
+        }
+    var isImportant: Boolean = defaultImportance
+        set(value) {
+            if(field == value) return
+            field = value
+            updatePaints()
+            updateGeometry()
+            invalidate()
+        }
+    var isRead: Boolean = defaultIsRead
+        set(value) {
+            if(field == value) return
+            field = value
             updatePaints()
             invalidate()
         }
@@ -206,7 +232,7 @@ class NoteView @JvmOverloads constructor(
                 title = typedArray.getString(R.styleable.NoteView_title) ?: defaultTitle
                 description = typedArray.getString(R.styleable.NoteView_description) ?: defaultDescription
                 date = typedArray.getString(R.styleable.NoteView_date) ?: defaultDate
-                importance = typedArray.getBoolean(R.styleable.NoteView_importance, defaultImportance)
+                isImportant = typedArray.getBoolean(R.styleable.NoteView_importance, defaultImportance)
                 isRead = typedArray.getBoolean(R.styleable.NoteView_isRead, defaultIsRead)
             } finally {
                 typedArray.recycle()
@@ -313,7 +339,7 @@ class NoteView @JvmOverloads constructor(
         drawDate(canvas)
         drawDescriptionFadeRect(canvas)
 
-        if(importance) drawStar(canvas)
+        if(isImportant) drawStar(canvas)
         if(isRead) drawReadPoint(canvas)
     }
 
@@ -333,7 +359,7 @@ class NoteView @JvmOverloads constructor(
         val descriptionLayoutHeight = descriptionLayout?.height ?: 0
 
         val titleTopY = (topY + sectionHeight/ 2 - titleLayoutHeight / 2).toInt()
-        val titleLeftX = (if(importance) leftX + 2 * horizontalPadding + starSize
+        val titleLeftX = (if(isImportant) leftX + 2 * horizontalPadding + starSize
             else leftX + horizontalPadding).toInt()
         val descriptionTopY = (sectionHeight + descriptionTopPadding).toInt()
         val descriptionLeftX = (leftX + horizontalPadding).toInt()
@@ -424,6 +450,17 @@ class NoteView @JvmOverloads constructor(
         canvas.drawRect(descriptionFadeRect, descriptionFadePaint)
     }
 
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        when(event?.action) {
+            MotionEvent.ACTION_DOWN -> return true
+            MotionEvent.ACTION_UP -> {
+                isRead = !isRead
+                return true
+            }
+        }
+        return super.onTouchEvent(event)
+    }
+
     // Сохранение состояния
     override fun onSaveInstanceState(): Parcelable {
         val state = Bundle()
@@ -438,7 +475,7 @@ class NoteView @JvmOverloads constructor(
             super.onRestoreInstanceState(superState)
 
             val isReadState = state.getBoolean(KEY_IS_READ)
-            _isRead = isReadState
+            isRead = isReadState
 
             // обновляем, так как isRead мог измениться
             updatePaints()

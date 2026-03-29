@@ -1,9 +1,15 @@
 package com.example.noteslist.ui.recycler.adapters
 
+import android.content.Context
+import android.util.Log
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.noteslist.R
 import com.example.noteslist.data.ViewTyped
 import com.example.noteslist.ui.recycler.adapters.delegates.AdapterDelegate
+import com.example.noteslist.ui.recycler.adapters.delegates.pool.NoteViewPool
+import com.example.noteslist.ui.recycler.holders.NoteStackViewHolder
+import com.example.noteslist.ui.recycler.holders.NoteViewHolder
 
 class MultiTypeAdapter(
     private val delegates: List<AdapterDelegate<ViewTyped>>
@@ -32,11 +38,17 @@ class MultiTypeAdapter(
         getDelegateForPosition(position).onBindViewHolder(items, position, holder)
     }
 
+    override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
+        if(holder is NoteStackViewHolder) {
+            holder.recycleChildren()
+        }
+        super.onViewRecycled(holder)
+    }
+
     override fun getItemCount() = items.size
 
     fun setNewData(newItems: List<ViewTyped>) {
         items = newItems
         notifyDataSetChanged()
     }
-
 }

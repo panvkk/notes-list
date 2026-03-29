@@ -10,13 +10,17 @@ import com.example.noteslist.R
 import com.example.noteslist.data.NotesRepository
 import com.example.noteslist.data.ViewTyped
 import com.example.noteslist.databinding.ActivityMainBinding
+import com.example.noteslist.ui.recycler.NoteItemDecoration
 import com.example.noteslist.ui.recycler.adapters.MultiTypeAdapter
+import com.example.noteslist.ui.recycler.adapters.delegates.DateTitleDelegate
 import com.example.noteslist.ui.recycler.adapters.delegates.NoteDelegate
 import com.example.noteslist.ui.recycler.adapters.delegates.NoteStackDelegate
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var binding: ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
+
+    private val mainViewModel = MainViewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,46 +34,27 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        val notes = getData()
-        val viewTypedData = getViewTypedData(notes)
+        val viewTypedData = mainViewModel.getViewTypedData()
+        val recyclerItemsHorizontalMargin = resources.getDimensionPixelSize(R.dimen.recycler_item_horizontal_margin)
+        val recyclerItemsVerticalMargin = resources.getDimensionPixelSize(R.dimen.recycler_item_vertical_margin)
+
         with(binding.recyclerView) {
             adapter = setupAdapter(viewTypedData)
             layoutManager = StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL)
+            clipChildren = false
+            clipToPadding = false
+
+            addItemDecoration(NoteItemDecoration(
+                recyclerItemsVerticalMargin,
+                recyclerItemsHorizontalMargin
+            ))
         }
     }
 
     private fun setupAdapter(data: List<ViewTyped>) : MultiTypeAdapter {
-        val delegates = listOf(NoteDelegate(), NoteStackDelegate())
+        val delegates = listOf(NoteDelegate(), NoteStackDelegate(), DateTitleDelegate())
         val adapter = MultiTypeAdapter(delegates)
         adapter.setNewData(data)
         return adapter
-    }
-
-
-    private fun getViewTypedData(notes: List<ViewTyped.Note>) : List<ViewTyped> {
-        val viewTypedData = mutableListOf<ViewTyped>()
-        val notImportantNotes = mutableListOf<ViewTyped.Note>()
-        notes.forEach { note ->
-            if(note.isImportant) {
-                if(notImportantNotes.isNotEmpty()) {
-                    val noteStackChildren = notImportantNotes.toList()
-                    val noteStack = ViewTyped.NoteStack(noteStackChildren)
-                    viewTypedData.add(noteStack)
-                    notImportantNotes.clear()
-                }
-                viewTypedData.add(note)
-            } else {
-                notImportantNotes.add(note)
-            }
-        }
-        if(notImportantNotes.isNotEmpty())
-            viewTypedData.add(ViewTyped.NoteStack(notImportantNotes))
-
-        return viewTypedData
-    }
-
-    private fun getData() : List<ViewTyped.Note> {
-        val repository = NotesRepository()
-        return repository.getNotes()
     }
 }

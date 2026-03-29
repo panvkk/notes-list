@@ -1,50 +1,48 @@
 package com.example.noteslist.ui.recycler.holders
 
-import android.view.LayoutInflater
-import android.view.ViewGroup
-import android.widget.LinearLayout
+import android.os.Build
+import android.view.View
+import androidx.core.view.ViewCompat.setLayerType
 import androidx.recyclerview.widget.RecyclerView
-import com.example.noteslist.R
 import com.example.noteslist.data.ViewTyped
 import com.example.noteslist.databinding.ItemNoteStackViewBinding
+import androidx.core.view.isNotEmpty
+import com.example.noteslist.R
 import com.example.noteslist.databinding.ItemNoteViewBinding
-import com.example.noteslist.ui.view.NoteView
+import com.example.noteslist.ui.recycler.adapters.delegates.pool.NoteViewPool
 
-class NoteStackViewHolder(private val binding: ItemNoteStackViewBinding)
-    : RecyclerView.ViewHolder(binding.root) {
+class NoteStackViewHolder(
+    private val binding: ItemNoteStackViewBinding,
+    private val viewPool: NoteViewPool,
+) : RecyclerView.ViewHolder(binding.root) {
 
     fun bind(noteStack: ViewTyped.NoteStack) {
-        binding.noteStackView.removeAllViews()
-
+        binding.noteStackView.isExpanded = false
         noteStack.notes.forEach { note ->
-            // Вот это очень плохо, при каждом биндинге инфлейтится новая вьюха
-            // по-хорошему, для NoteStackViewHolder нужно использовать вьюхолдеры простых NoteView
-            // но нету времени на написание ViewPool
-            val noteView = LayoutInflater.from(binding.root.context)
-                .inflate(R.layout.item_note_view, binding.noteStackView, false)
-                    as NoteView
+            val child = viewPool.getView(binding.noteStackView)
 
-            noteView.apply {
+            child.noteView.apply {
                 title = note.title
                 description = note.description
                 date = note.date
-                importance = note.isImportant
-
-                layoutParams = LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-                setOnClickListener {
-                    isRead = !isRead
-                }
+                isImportant = note.isImportant
             }
-
-            binding.noteStackView.addView(noteView)
+            child.root.setTag(R.id.noteBindingTag, child)
+            binding.noteStackView.addView(child.noteView)
         }
+    }
 
+    fun recycleChildren() {
         binding.noteStackView.apply {
-            setOnClickListener {
-                if(!isExpanded) isExpanded = true
+            while(this.isNotEmpty()) {
+                val child = this.getChildAt(0)
+
+                this.removeView(child)
+                val binding = child.getTag(R.id.noteBindingTag) as? ItemNoteViewBinding
+                if(binding != null) {
+                    binding.noteView.translationZ = 0f
+                    viewPool.putView(binding)
+                }
             }
         }
     }
