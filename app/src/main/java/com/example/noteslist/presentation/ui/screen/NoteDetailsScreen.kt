@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.example.noteslist.presentation.viewmodel.CreateNoteViewModel
 
 @Composable
-fun CreateNoteScreen(
+fun NoteDetailsScreen(
     modifier: Modifier = Modifier,
     viewModel: CreateNoteViewModel
 ) {
@@ -67,9 +67,9 @@ fun CreateNoteScreen(
 
 @Preview
 @Composable
-fun CreateNoteScreenPreview() {
+fun NoteDetailsScreenPreview() {
     Scaffold { innerPadding ->
-        CreateNoteScreen(
+        NoteDetailsScreen(
             modifier = Modifier.padding(innerPadding),
             CreateNoteViewModel()
         )

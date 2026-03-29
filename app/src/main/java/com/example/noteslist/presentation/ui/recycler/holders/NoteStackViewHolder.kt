@@ -6,12 +6,14 @@ import com.example.noteslist.databinding.ItemNoteStackViewBinding
 import androidx.core.view.isNotEmpty
 import com.example.noteslist.R
 import com.example.noteslist.databinding.ItemNoteViewBinding
-import com.example.noteslist.presentation.ui.recycler.adapters.delegates.pool.NoteViewPool
+import com.example.noteslist.presentation.ui.recycler.adapter.delegates.pool.NoteViewPool
 
 class NoteStackViewHolder(
     private val binding: ItemNoteStackViewBinding,
     private val viewPool: NoteViewPool,
 ) : RecyclerView.ViewHolder(binding.root) {
+
+
 
     fun bind(noteStack: ViewTyped.NoteStack) {
         binding.noteStackView.isExpanded = false

@@ -1,9 +1,9 @@
-package com.example.noteslist.presentation.ui.recycler.adapters
+package com.example.noteslist.presentation.ui.recycler.adapter
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.presentation.model.ViewTyped
-import com.example.noteslist.presentation.ui.recycler.adapters.delegates.AdapterDelegate
+import com.example.noteslist.presentation.ui.recycler.adapter.delegates.AdapterDelegate
 import com.example.noteslist.presentation.ui.recycler.holders.NoteStackViewHolder
 
 class MultiTypeAdapter(

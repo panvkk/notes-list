@@ -1,4 +1,4 @@
-package com.example.noteslist.presentation.ui.recycler.adapters.delegates.pool
+package com.example.noteslist.presentation.ui.recycler.adapter.delegates.pool
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -10,7 +10,7 @@ class NoteViewPool {
     fun getView(parent: ViewGroup) : ItemNoteViewBinding {
         return if(pool.isNotEmpty()) {
             val noteView = pool.first()
-            pool.removeFirst()
+            pool.removeAt(0)
             noteView
         } else {
             val inflater = LayoutInflater.from(parent.context)

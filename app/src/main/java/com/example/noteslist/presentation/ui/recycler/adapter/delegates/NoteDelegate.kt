@@ -1,4 +1,4 @@
-package com.example.noteslist.presentation.ui.recycler.adapters.delegates
+package com.example.noteslist.presentation.ui.recycler.adapter.delegates
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -7,7 +7,7 @@ import com.example.noteslist.presentation.model.ViewTyped
 import com.example.noteslist.databinding.ItemNoteViewBinding
 import com.example.noteslist.presentation.ui.recycler.holders.NoteViewHolder
 
-class NoteDelegate() : AdapterDelegate<ViewTyped> {
+class NoteDelegate : AdapterDelegate<ViewTyped> {
     override fun isForViewType(items: List<ViewTyped>, position: Int): Boolean {
         return items[position] is ViewTyped.Note
     }

@@ -1,11 +1,11 @@
-package com.example.noteslist.presentation.ui.recycler.adapters.delegates
+package com.example.noteslist.presentation.ui.recycler.adapter.delegates
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.presentation.model.ViewTyped
 import com.example.noteslist.databinding.ItemNoteStackViewBinding
-import com.example.noteslist.presentation.ui.recycler.adapters.delegates.pool.NoteViewPool
+import com.example.noteslist.presentation.ui.recycler.adapter.delegates.pool.NoteViewPool
 import com.example.noteslist.presentation.ui.recycler.holders.NoteStackViewHolder
 
 class NoteStackDelegate : AdapterDelegate<ViewTyped> {
