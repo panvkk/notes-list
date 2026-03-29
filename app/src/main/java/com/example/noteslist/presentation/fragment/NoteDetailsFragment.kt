@@ -5,13 +5,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.example.noteslist.databinding.FragmentNoteDetailsBinding
 import com.example.noteslist.databinding.FragmentNotesListBinding
+import com.example.noteslist.presentation.viewmodel.NoteDetailsViewModel
+import kotlin.getValue
 
 class NoteDetailsFragment : Fragment() {
 
     private var _binding: FragmentNoteDetailsBinding? = null
     private val binding get() = _binding!!
+
+    private val viewModel by viewModels<NoteDetailsViewModel> { NoteDetailsViewModel.factory }
 
     private var noteId: Long? = null
 
@@ -42,6 +47,10 @@ class NoteDetailsFragment : Fragment() {
     ): View {
         _binding = FragmentNoteDetailsBinding.inflate(inflater, container, false)
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
     }
 
     override fun onDestroyView() {

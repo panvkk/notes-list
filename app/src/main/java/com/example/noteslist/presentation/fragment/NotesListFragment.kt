@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.noteslist.R
@@ -23,8 +23,7 @@ class NotesListFragment : Fragment() {
     private var _binding: FragmentNotesListBinding? = null
     private val binding get() = _binding!!
 
-    // TODO: Убрать эту дрисню
-    private val mainViewModel = MainViewModel()
+    private val viewModel by viewModels<MainViewModel> { MainViewModel.factory }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,7 +37,7 @@ class NotesListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val viewTypedData = mainViewModel.getViewTypedData()
+        val viewTypedData = viewModel.getViewTypedData()
         val recyclerItemsHorizontalMargin = resources.getDimensionPixelSize(R.dimen.recycler_item_horizontal_margin)
         val recyclerItemsVerticalMargin = resources.getDimensionPixelSize(R.dimen.recycler_item_vertical_margin)
 
@@ -53,13 +52,15 @@ class NotesListFragment : Fragment() {
                 recyclerItemsHorizontalMargin
             ))
         }
+
+        setupListeners()
     }
 
-    private fun setUpListeners() {
+    private fun setupListeners() {
         binding.addNoteButton.setOnClickListener {
-//            findNavController().navigate(
-//                NotesListFragmentDirections
-//            )
+            findNavController().navigate(
+                NotesListFragmentDirections.openDetails()
+            )
         }
     }
 

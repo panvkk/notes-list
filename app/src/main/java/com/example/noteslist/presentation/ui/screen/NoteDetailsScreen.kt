@@ -18,16 +18,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.noteslist.presentation.viewmodel.CreateNoteViewModel
+import com.example.noteslist.presentation.viewmodel.NoteDetailsViewModel
 
 @Composable
 fun NoteDetailsScreen(
     modifier: Modifier = Modifier,
-    viewModel: CreateNoteViewModel
+    viewModel: NoteDetailsViewModel
 ) {
-    val titleInput = viewModel.titleInput.collectAsState().value
-    val descriptionInput = viewModel.descriptionInput.collectAsState().value
-    val isImportant = viewModel.isImportant.collectAsState().value
+    val titleInput = viewModel.noteTitle.collectAsState().value
+    val descriptionInput = viewModel.noteDescription.collectAsState().value
+    val isImportant = viewModel.isNoteImportant.collectAsState().value
 
 
     Column(
@@ -39,19 +39,19 @@ fun NoteDetailsScreen(
     ) {
         TextField(
             value = titleInput,
-            onValueChange = { viewModel.updateTitle(it) },
+            onValueChange = { viewModel.updateNoteTitle(it) },
             modifier = Modifier.fillMaxWidth()
         )
         TextField(
             value = descriptionInput,
-            onValueChange = { viewModel.updateDescription(it) },
+            onValueChange = { viewModel.updateNoteDescription(it) },
             modifier = Modifier.fillMaxWidth()
         )
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(text = "Важно")
             Switch(
                 checked = isImportant,
-                onCheckedChange = { viewModel.updateIsImportant(it) }
+                onCheckedChange = { viewModel.updateIsNoteImportant(it) }
             )
         }
         Row(modifier = Modifier.fillMaxWidth()) {
@@ -69,9 +69,9 @@ fun NoteDetailsScreen(
 @Composable
 fun NoteDetailsScreenPreview() {
     Scaffold { innerPadding ->
-        NoteDetailsScreen(
-            modifier = Modifier.padding(innerPadding),
-            CreateNoteViewModel()
-        )
+//        NoteDetailsScreen(
+//            modifier = Modifier.padding(innerPadding),
+//            NoteDetailsViewModel()
+//        )
     }
 }

@@ -9,4 +9,6 @@ interface NotesRepository {
     fun addNote(title: String, description: String, date: LocalDate, isImportant: Boolean)
 
     fun updateNote(note: NoteModel) : Boolean
+
+    fun findNoteById(id: Long) : NoteModel
 }

@@ -81,6 +81,13 @@ class NotesRepositoryImpl : NotesRepository {
         return false
     }
 
+    override fun findNoteById(id: Long): NoteModel {
+        notes.forEach {
+            if(it.id == id) return it.toDomain()
+        }
+        throw IllegalAccessException("Note by id = $id is not found in list.")
+    }
+
     fun NoteDto.toDomain() = NoteModel(
         id = id,
         title = title,

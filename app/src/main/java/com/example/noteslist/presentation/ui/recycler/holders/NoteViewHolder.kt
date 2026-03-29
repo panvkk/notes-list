@@ -6,17 +6,17 @@ import com.example.noteslist.databinding.ItemNoteViewBinding
 
 class NoteViewHolder(
     private val binding: ItemNoteViewBinding,
-    val onClick: (Int) -> Unit
+//    val onClick: (Int) -> Unit
 ) : RecyclerView.ViewHolder(binding.root) {
 
-    init {
-        binding.noteView.setOnClickListener {
-            val position = bindingAdapterPosition
-            if(position != RecyclerView.NO_POSITION) {
-                onClick(position)
-            }
-        }
-    }
+//    init {
+//        binding.noteView.setOnClickListener {
+//            val position = bindingAdapterPosition
+//            if(position != RecyclerView.NO_POSITION) {
+//                onClick(position)
+//            }
+//        }
+//    }
     fun bind(note: ViewTyped.Note) {
         binding.noteView.apply {
             title = note.title

@@ -6,8 +6,7 @@ import com.example.noteslist.domain.model.NoteModel
 import com.example.noteslist.domain.repository.NotesRepository
 
 class NotesUseCase(
-    // Когда появится DI, тут будет лучше, а пока нарушается независимость domain слоя
-    private val repository: NotesRepository = NotesRepositoryImpl()
+    private val repository: NotesRepository
 ) {
     companion object {
         private const val TAG = "NotesUseCase"

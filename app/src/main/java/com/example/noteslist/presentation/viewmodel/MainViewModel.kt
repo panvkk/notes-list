@@ -1,20 +1,27 @@
 package com.example.noteslist.presentation.viewmodel
 
 import android.util.Log
-import com.example.noteslist.core.presentation.toLocalDate
-import com.example.noteslist.core.presentation.toStringWithPattern
-import com.example.noteslist.data.local.NotesRepositoryImpl
-import com.example.noteslist.domain.model.NoteModel
-import com.example.noteslist.presentation.model.ViewTyped
-import com.example.noteslist.domain.repository.NotesRepository
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.noteslist.NotesListApplication
 import com.example.noteslist.domain.usecase.NotesUseCase
-import kotlin.collections.forEach
+import com.example.noteslist.presentation.mappers.toUiModel
+import com.example.noteslist.presentation.model.ViewTyped
 
 class MainViewModel(
-    private val notesUseCase: NotesUseCase = NotesUseCase()
-) {
+    private val notesUseCase: NotesUseCase
+) : ViewModel() {
     companion object {
         private const val TAG = "MainViewModel"
+
+        val factory = viewModelFactory {
+            initializer {
+                val application = this[APPLICATION_KEY] as NotesListApplication
+                MainViewModel(application.notesUseCase)
+            }
+        }
     }
 
     fun getViewTypedData() : List<ViewTyped> {
@@ -72,13 +79,4 @@ class MainViewModel(
             emptyList()
         }
     }
-
-    private fun NoteModel.toUiModel() = ViewTyped.Note(
-        title = title,
-        description = description,
-        date = date?.toStringWithPattern()
-            ?: throw IllegalStateException("Error while parse: Date cannot be null."),
-        isImportant = isImportant,
-        isRead = isRead
-    )
 }
