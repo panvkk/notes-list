@@ -1,5 +1,6 @@
 package com.example.noteslist.presentation.ui.screen
 
+import android.text.Layout
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,18 +17,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.noteslist.domain.usecase.CreateNoteUseCase
 import com.example.noteslist.presentation.viewmodel.NoteDetailsViewModel
 
 @Composable
 fun NoteDetailsScreen(
-    modifier: Modifier = Modifier,
-    viewModel: NoteDetailsViewModel
+    viewModel: NoteDetailsViewModel,
+    onClickBack: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val titleInput = viewModel.noteTitle.collectAsState().value
-    val descriptionInput = viewModel.noteDescription.collectAsState().value
-    val isImportant = viewModel.isNoteImportant.collectAsState().value
+    val titleInput = viewModel.uiState.collectAsState().value.noteTitle
+    val descriptionInput = viewModel.uiState.collectAsState().value.noteDescription
+    val isImportant = viewModel.uiState.collectAsState().value.isNoteImportant
 
 
     Column(
@@ -47,18 +51,37 @@ fun NoteDetailsScreen(
             onValueChange = { viewModel.updateNoteDescription(it) },
             modifier = Modifier.fillMaxWidth()
         )
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Text(text = "Важно")
+        Row(
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Важно",
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(end = 8.dp)
+                    .align(Alignment.CenterVertically)
+            )
             Switch(
                 checked = isImportant,
                 onCheckedChange = { viewModel.updateIsNoteImportant(it) }
             )
         }
-        Row(modifier = Modifier.fillMaxWidth()) {
-            OutlinedButton(onClick = { viewModel.cancel() }) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            OutlinedButton(
+                onClick = {
+                    viewModel.cancel()
+                    onClickBack()},
+                modifier = Modifier.weight(1f)
+            ) {
                 Text("Отмена")
             }
-            Button(onClick = { viewModel.createNote() }) {
+            Button(
+                onClick = {
+                    viewModel.createNote()
+                    onClickBack()},
+                modifier = Modifier.weight(1f)
+            ) {
                 Text("Создать")
             }
         }
@@ -71,7 +94,7 @@ fun NoteDetailsScreenPreview() {
     Scaffold { innerPadding ->
 //        NoteDetailsScreen(
 //            modifier = Modifier.padding(innerPadding),
-//            NoteDetailsViewModel()
+//
 //        )
     }
 }

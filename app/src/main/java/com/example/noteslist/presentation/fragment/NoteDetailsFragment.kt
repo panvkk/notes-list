@@ -4,17 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.example.noteslist.databinding.FragmentNoteDetailsBinding
-import com.example.noteslist.databinding.FragmentNotesListBinding
+import androidx.navigation.fragment.findNavController
+import com.example.noteslist.presentation.ui.screen.NoteDetailsScreen
 import com.example.noteslist.presentation.viewmodel.NoteDetailsViewModel
-import kotlin.getValue
 
 class NoteDetailsFragment : Fragment() {
-
-    private var _binding: FragmentNoteDetailsBinding? = null
-    private val binding get() = _binding!!
 
     private val viewModel by viewModels<NoteDetailsViewModel> { NoteDetailsViewModel.factory }
 
@@ -45,16 +43,17 @@ class NoteDetailsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentNoteDetailsBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                NoteDetailsScreen(
+                    viewModel = viewModel,
+                    onClickBack = {
+                        findNavController()
+                            .navigate(NoteDetailsFragmentDirections.returnToList())
+                    }
+                )
+            }
+        }
     }
 }

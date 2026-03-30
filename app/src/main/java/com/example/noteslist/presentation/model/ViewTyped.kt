@@ -1,6 +1,10 @@
 package com.example.noteslist.presentation.model
 
-sealed interface ViewTyped {
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
+sealed interface ViewTyped : Parcelable {
     data class Note(
         val id: Long,
         val title: String,

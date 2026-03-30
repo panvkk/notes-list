@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.noteslist.R
@@ -17,6 +19,9 @@ import com.example.noteslist.presentation.ui.recycler.adapter.delegates.NoteDele
 import com.example.noteslist.presentation.ui.recycler.adapter.delegates.NoteStackDelegate
 import com.example.noteslist.presentation.ui.recycler.decoration.NoteItemDecoration
 import com.example.noteslist.presentation.viewmodel.MainViewModel
+import kotlinx.coroutines.flow.forEach
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 class NotesListFragment : Fragment() {
 
@@ -37,12 +42,12 @@ class NotesListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val viewTypedData = viewModel.getViewTypedData()
         val recyclerItemsHorizontalMargin = resources.getDimensionPixelSize(R.dimen.recycler_item_horizontal_margin)
         val recyclerItemsVerticalMargin = resources.getDimensionPixelSize(R.dimen.recycler_item_vertical_margin)
+        val newAdapter = setupAdapter()
 
         with(binding.recyclerView) {
-            adapter = setupAdapter(viewTypedData)
+            adapter = newAdapter
             layoutManager = StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL)
             clipChildren = false
             clipToPadding = false
@@ -52,6 +57,11 @@ class NotesListFragment : Fragment() {
                 recyclerItemsHorizontalMargin
             ))
         }
+
+        viewModel.state
+            .flowWithLifecycle(viewLifecycleOwner.lifecycle)
+            .onEach { notes -> newAdapter.setNewData(notes) }
+            .launchIn(viewLifecycleOwner.lifecycleScope)
 
         setupListeners()
     }
@@ -64,10 +74,9 @@ class NotesListFragment : Fragment() {
         }
     }
 
-    private fun setupAdapter(data: List<ViewTyped>) : MultiTypeAdapter {
+    private fun setupAdapter() : MultiTypeAdapter {
         val delegates = listOf(NoteDelegate(), NoteStackDelegate(), DateTitleDelegate())
         val adapter = MultiTypeAdapter(delegates)
-        adapter.setNewData(data)
         return adapter
     }
 }
