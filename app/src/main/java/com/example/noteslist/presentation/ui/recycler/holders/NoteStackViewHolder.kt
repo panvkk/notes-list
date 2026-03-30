@@ -1,7 +1,7 @@
 package com.example.noteslist.presentation.ui.recycler.holders
 
 import androidx.recyclerview.widget.RecyclerView
-import com.example.noteslist.presentation.model.ViewTyped
+import com.example.noteslist.presentation.model.ViewTypedModel
 import com.example.noteslist.databinding.ItemNoteStackViewBinding
 import androidx.core.view.isNotEmpty
 import com.example.noteslist.R
@@ -10,12 +10,10 @@ import com.example.noteslist.presentation.ui.recycler.adapter.delegates.pool.Not
 
 class NoteStackViewHolder(
     private val binding: ItemNoteStackViewBinding,
-    private val viewPool: NoteViewPool,
+    private val viewPool: NoteViewPool
 ) : RecyclerView.ViewHolder(binding.root) {
 
-
-
-    fun bind(noteStack: ViewTyped.NoteStack) {
+    fun bind(noteStack: ViewTypedModel.NoteStack) {
         binding.noteStackView.isExpanded = false
         noteStack.notes.forEach { note ->
             val child = viewPool.getView(binding.noteStackView)
@@ -25,6 +23,8 @@ class NoteStackViewHolder(
                 description = note.description
                 date = note.date
                 isImportant = note.isImportant
+
+                tag = note.id
             }
             child.root.setTag(R.id.noteBindingTag, child)
             binding.noteStackView.addView(child.noteView)

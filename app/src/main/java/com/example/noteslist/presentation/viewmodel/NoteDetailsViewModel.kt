@@ -14,11 +14,13 @@ import kotlinx.coroutines.flow.update
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.createSavedStateHandle
 import com.example.noteslist.NotesListApplication
+import com.example.noteslist.domain.usecase.UpdateNoteUseCase
 import com.example.noteslist.presentation.model.DetailsUiState
 
 class NoteDetailsViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val createNoteUseCase: CreateNoteUseCase,
+    private val updateNoteUseCase: UpdateNoteUseCase,
     private val findNoteUseCase: FindNoteUseCase
 ) : ViewModel() {
 
@@ -73,6 +75,17 @@ class NoteDetailsViewModel(
         }
     }
 
+//    fun updateNote() {
+//        updateNoteUseCase.invoke(
+//            ViewTyped.Note(
+//                id = _uiState.value.noteId ?: throw IllegalStateException("Note with null id cannot be saved."),
+//                title = _uiState.value.noteTitle,
+//                description = _uiState.value.noteDescription,
+//                isImportant = _uiState.value.isNoteImportant,
+//            )
+//        )
+//    }
+
     fun cancel() {
 
     }
@@ -97,6 +110,7 @@ class NoteDetailsViewModel(
                 NoteDetailsViewModel(
                     createSavedStateHandle(),
                     application.createNoteUseCase,
+                    application.updateNoteUseCase,
                     application.findNoteUseCase
                 )
             }

@@ -5,16 +5,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.noteslist.R
-import com.example.noteslist.presentation.model.ViewTyped
 import com.example.noteslist.databinding.ActivityMainBinding
-import com.example.noteslist.presentation.ui.recycler.decoration.NoteItemDecoration
-import com.example.noteslist.presentation.ui.recycler.adapter.MultiTypeAdapter
-import com.example.noteslist.presentation.ui.recycler.adapter.delegates.DateTitleDelegate
-import com.example.noteslist.presentation.ui.recycler.adapter.delegates.NoteDelegate
-import com.example.noteslist.presentation.ui.recycler.adapter.delegates.NoteStackDelegate
-import com.example.noteslist.presentation.viewmodel.MainViewModel
 
 class MainActivity : AppCompatActivity() {
 

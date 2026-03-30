@@ -6,31 +6,30 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.noteslist.R
 import com.example.noteslist.databinding.FragmentNotesListBinding
-import com.example.noteslist.presentation.model.ViewTyped
 import com.example.noteslist.presentation.ui.recycler.adapter.MultiTypeAdapter
 import com.example.noteslist.presentation.ui.recycler.adapter.delegates.DateTitleDelegate
 import com.example.noteslist.presentation.ui.recycler.adapter.delegates.NoteDelegate
 import com.example.noteslist.presentation.ui.recycler.adapter.delegates.NoteStackDelegate
 import com.example.noteslist.presentation.ui.recycler.decoration.NoteItemDecoration
-import com.example.noteslist.presentation.viewmodel.MainViewModel
-import kotlinx.coroutines.flow.forEach
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import com.example.noteslist.presentation.viewmodel.NotesListViewModel
+import kotlinx.coroutines.launch
 
 class NotesListFragment : Fragment() {
 
     private var _binding: FragmentNotesListBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel by viewModels<MainViewModel> { MainViewModel.factory }
+    private val viewModel by viewModels<NotesListViewModel> { NotesListViewModel.factory }
 
     private val notesAdapter by lazy { setupAdapter() }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -48,7 +47,7 @@ class NotesListFragment : Fragment() {
 
         with(binding.recyclerView) {
             adapter = notesAdapter
-            layoutManager = StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL)
+            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
             clipChildren = false
             clipToPadding = false
 
@@ -59,25 +58,35 @@ class NotesListFragment : Fragment() {
                 ))
             }
         }
-
-        viewModel.state
-            .flowWithLifecycle(viewLifecycleOwner.lifecycle)
-            .onEach { notes -> notesAdapter.setNewData(notes) }
-            .launchIn(viewLifecycleOwner.lifecycleScope)
-
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.viewTypedNotes.collect { newNotes ->
+                    notesAdapter.setNewData(newNotes)
+                }
+            }
+        }
         setupListeners()
     }
 
     private fun setupListeners() {
         binding.addNoteButton.setOnClickListener {
             findNavController().navigate(
-                NotesListFragmentDirections.openDetails()
+                NotesListFragmentDirections.openDetails(-1L)
             )
         }
     }
 
     private fun setupAdapter() : MultiTypeAdapter {
-        val delegates = listOf(NoteDelegate(), NoteStackDelegate(), DateTitleDelegate())
+        val navController = findNavController()
+        val onNoteClick = { noteId: Long ->
+            navController.navigate(NotesListFragmentDirections.openDetails(noteId)) }
+        val onNoteLongClick = { noteId: Long -> viewModel.onNoteLongClick(noteId) }
+
+        val delegates = listOf(
+            NoteDelegate(onNoteClick, onNoteLongClick),
+            NoteStackDelegate(onNoteClick, onNoteLongClick),
+            DateTitleDelegate()
+        )
         val adapter = MultiTypeAdapter(delegates)
         return adapter
     }
