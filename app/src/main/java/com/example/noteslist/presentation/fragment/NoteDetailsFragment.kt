@@ -8,7 +8,9 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.NavArgs
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.example.noteslist.presentation.ui.screen.NoteDetailsScreen
 import com.example.noteslist.presentation.viewmodel.NoteDetailsViewModel
 
@@ -16,26 +18,12 @@ class NoteDetailsFragment : Fragment() {
 
     private val viewModel by viewModels<NoteDetailsViewModel> { NoteDetailsViewModel.factory }
 
+    private val args: NoteDetailsFragmentArgs by navArgs()
     private var noteId: Long? = null
-
-    companion object {
-        const val ARG_NOTE_ID = "arg_note_id"
-
-        fun newInstance(noteId: Long?) : NoteDetailsFragment {
-            return NoteDetailsFragment().apply {
-                arguments = Bundle().apply {
-                    if(noteId != null) {
-                        putLong(ARG_NOTE_ID, noteId)
-                    }
-                }
-            }
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        noteId = arguments?.getLong(ARG_NOTE_ID, -1L).takeIf { it != -1L }
+        noteId = args.noteId.takeIf { it != -1L }
     }
 
     override fun onCreateView(
@@ -55,5 +43,10 @@ class NoteDetailsFragment : Fragment() {
                 )
             }
         }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        viewModel.setCurrentNote(noteId)
     }
 }

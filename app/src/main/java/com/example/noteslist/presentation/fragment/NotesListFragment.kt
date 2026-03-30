@@ -30,6 +30,7 @@ class NotesListFragment : Fragment() {
 
     private val viewModel by viewModels<MainViewModel> { MainViewModel.factory }
 
+    private val notesAdapter by lazy { setupAdapter() }
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -44,23 +45,24 @@ class NotesListFragment : Fragment() {
 
         val recyclerItemsHorizontalMargin = resources.getDimensionPixelSize(R.dimen.recycler_item_horizontal_margin)
         val recyclerItemsVerticalMargin = resources.getDimensionPixelSize(R.dimen.recycler_item_vertical_margin)
-        val newAdapter = setupAdapter()
 
         with(binding.recyclerView) {
-            adapter = newAdapter
+            adapter = notesAdapter
             layoutManager = StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL)
             clipChildren = false
             clipToPadding = false
 
-            addItemDecoration(NoteItemDecoration(
-                recyclerItemsVerticalMargin,
-                recyclerItemsHorizontalMargin
-            ))
+            if(itemDecorationCount == 0) {
+                addItemDecoration(NoteItemDecoration(
+                    recyclerItemsVerticalMargin,
+                    recyclerItemsHorizontalMargin
+                ))
+            }
         }
 
         viewModel.state
             .flowWithLifecycle(viewLifecycleOwner.lifecycle)
-            .onEach { notes -> newAdapter.setNewData(notes) }
+            .onEach { notes -> notesAdapter.setNewData(notes) }
             .launchIn(viewLifecycleOwner.lifecycleScope)
 
         setupListeners()
@@ -78,5 +80,10 @@ class NotesListFragment : Fragment() {
         val delegates = listOf(NoteDelegate(), NoteStackDelegate(), DateTitleDelegate())
         val adapter = MultiTypeAdapter(delegates)
         return adapter
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
