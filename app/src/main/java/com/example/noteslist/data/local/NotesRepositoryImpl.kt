@@ -113,7 +113,8 @@ class NotesRepositoryImpl : NotesRepository {
         title = title,
         description = description,
         isImportant = isImportant,
-        date = date?.toStringWithPattern() ?: throw Throwable("LocalDate is null."),
+        date = date?.toStringWithPattern()
+            ?: throw IllegalArgumentException("LocalDate is null."),
         isRead = isRead
     )
 }

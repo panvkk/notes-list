@@ -1,6 +1,5 @@
 package com.example.noteslist.presentation.viewmodel
 
-import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -16,11 +15,8 @@ import com.example.noteslist.presentation.mappers.toDomain
 import com.example.noteslist.presentation.mappers.toUiModel
 import com.example.noteslist.presentation.model.ViewTypedModel
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.parcelize.Parcelize
 
 class NotesListViewModel(
     private val savedStateHandle: SavedStateHandle,

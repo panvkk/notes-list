@@ -9,7 +9,8 @@ fun NoteModel.toUiModel() = ViewTypedModel.Note(
     id = id,
     title = title,
     description = description,
-    date = date?.toStringWithPattern() ?: throw Throwable("Error while parse: Date cannot be null."),
+    date = date?.toStringWithPattern()
+        ?: throw IllegalStateException("Error while parse: Date cannot be null."),
     isImportant = isImportant,
     isRead = isRead
 )
