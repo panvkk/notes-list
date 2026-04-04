@@ -10,4 +10,9 @@
     <color name="note_importance_star_color">#F7E445</color>
     <color name="note_read_point_color">#32b333</color>
     <color name="note_stack_collapse_button_color">#ff9e999e</color>
+
+    <color name="active_button_color">#1387d7</color>
+    <color name="switch_color">#1387d7</color>
+    <color name="text_field_cursor_color">#1387d7</color>
+    <color name="text_field_label_color">#1387d7</color>
 </resources>

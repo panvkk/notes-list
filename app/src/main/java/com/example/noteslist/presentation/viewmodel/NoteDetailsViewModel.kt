@@ -13,9 +13,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewModelScope
 import com.example.noteslist.NotesListApplication
 import com.example.noteslist.domain.usecase.UpdateNoteUseCase
 import com.example.noteslist.presentation.model.DetailsUiState
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.WhileSubscribed
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 class NoteDetailsViewModel(
     private val savedStateHandle: SavedStateHandle,
@@ -34,6 +39,14 @@ class NoteDetailsViewModel(
 
     private val _uiState = MutableStateFlow(generateInitialState())
     val uiState = _uiState.asStateFlow()
+
+    val isNewNote = _uiState
+        .map { it.noteId == null}
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000L),
+            false
+        )
 
     fun updateNoteTitle(value: String) {
         _uiState.update { it.copy(noteTitle = value) }

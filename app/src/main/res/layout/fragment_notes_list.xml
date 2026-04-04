@@ -22,6 +22,8 @@
         android:contentDescription="@string/add_note_icon_description"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"
+        app:rippleColor="@color/black"
+        android:outlineSpotShadowColor="@color/black"
         android:layout_margin="16dp"
         android:src="@drawable/add_note_icon" />
 
