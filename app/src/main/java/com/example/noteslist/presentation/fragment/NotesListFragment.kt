@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.R
 import com.example.noteslist.databinding.FragmentNotesListBinding
 import com.example.noteslist.presentation.ui.recycler.adapter.MultiTypeAdapter
@@ -70,10 +71,30 @@ class NotesListFragment : Fragment() {
 
     private fun setupListeners() {
         binding.addNoteButton.setOnClickListener {
-            findNavController().navigate(
-                NotesListFragmentDirections.openDetails(-1L)
-            )
+            if(it.alpha > 0f) {
+                findNavController().navigate(
+                    NotesListFragmentDirections.openDetails(-1L)
+                )
+            }
         }
+        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            val animDuration = 200L
+
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                binding.addNoteButton.apply {
+                    clearAnimation()
+                    when(newState) {
+                        RecyclerView.SCROLL_STATE_IDLE -> {
+                            animate().alpha(1f).setDuration(animDuration)
+                        }
+                        RecyclerView.SCROLL_STATE_DRAGGING -> {
+                            animate().alpha(0f).setDuration(animDuration)
+                        }
+                    }
+                }
+            }
+        })
     }
 
     private fun setupAdapter() : MultiTypeAdapter {

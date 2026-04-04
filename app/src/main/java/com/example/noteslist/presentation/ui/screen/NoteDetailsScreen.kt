@@ -163,14 +163,3 @@ fun NoteDetailsScreen(
         }
     }
 }
-
-@Preview
-@Composable
-fun NoteDetailsScreenPreview() {
-//    Scaffold { innerPadding ->
-//        NoteDetailsScreen(
-//            modifier = Modifier.padding(innerPadding),
-//
-//        )
-//    }
-}
