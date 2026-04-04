@@ -4,23 +4,21 @@ import android.os.Bundle
 import androidx.core.os.BundleCompat
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.noteslist.NotesListApplication
 import com.example.noteslist.domain.usecase.CreateNoteUseCase
 import com.example.noteslist.domain.usecase.FindNoteUseCase
+import com.example.noteslist.domain.usecase.UpdateNoteUseCase
+import com.example.noteslist.presentation.mappers.toDomain
+import com.example.noteslist.presentation.mappers.toUiModel
+import com.example.noteslist.presentation.model.DetailsUiState
+import com.example.noteslist.presentation.model.ViewTypedModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.createSavedStateHandle
-import androidx.lifecycle.viewModelScope
-import com.example.noteslist.NotesListApplication
-import com.example.noteslist.domain.usecase.UpdateNoteUseCase
-import com.example.noteslist.presentation.model.DetailsUiState
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.WhileSubscribed
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 
 class NoteDetailsViewModel(
     private val savedStateHandle: SavedStateHandle,
@@ -40,67 +38,56 @@ class NoteDetailsViewModel(
     private val _uiState = MutableStateFlow(generateInitialState())
     val uiState = _uiState.asStateFlow()
 
-    val isNewNote = _uiState
-        .map { it.noteId == null}
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000L),
-            false
-        )
+    private val _isNewNote = MutableStateFlow(true)
+    val isNewNote = _isNewNote.asStateFlow()
 
     fun updateNoteTitle(value: String) {
-        _uiState.update { it.copy(noteTitle = value) }
+        _uiState.update { it.copy(note = it.note.copy(title = value)) }
     }
-
     fun updateNoteDescription(value: String) {
-        _uiState.update { it.copy(noteDescription = value) }
+        _uiState.update { it.copy(note = it.note.copy(description = value)) }
     }
     fun updateIsNoteImportant(value: Boolean) {
-        _uiState.update { it.copy(isNoteImportant = value) }
+        _uiState.update { it.copy(note = it.note.copy(isImportant = value)) }
     }
-
-    fun updateNoteId(value: Long?) {
+    fun updateIsNoteRead(value: Boolean) {
+        _uiState.update { it.copy(note = it.note.copy(isRead = value)) }
+    }
+    private fun setNote(value: ViewTypedModel.Note) {
+        _uiState.update { it.copy(note = value) }
+    }
+    private fun setNoteId(value: Long?) {
         _uiState.update { it.copy(noteId = value) }
+    }
+    private fun updateIsNewNote(value: Boolean) {
+        _isNewNote.value = value
     }
 
     fun setCurrentNote(newNoteId: Long?) {
         if(newNoteId == null) {
-            updateNoteId(null)
+            updateIsNewNote(true)
+            setNoteId(null)
             updateNoteTitle("")
             updateNoteDescription("")
             updateIsNoteImportant(false)
         } else {
-            val newNote = findNoteUseCase.invoke(newNoteId) ?: return
-            updateNoteId(newNote.id)
-            updateNoteTitle(newNote.title)
-            updateNoteDescription(newNote.description)
-            updateIsNoteImportant(newNote.isImportant)
+            updateIsNewNote(false)
+            val newNote = findNoteUseCase.invoke(newNoteId)?.toUiModel() ?: return
+            setNoteId(newNote.id)
+            setNote(newNote)
         }
     }
 
     fun createNote() {
-        _uiState.value.apply {
-            createNoteUseCase.invoke(
-                noteTitle,
-                noteDescription,
-                isNoteImportant
-            )
+        _uiState.value.note.apply {
+            createNoteUseCase.invoke(title, description, isImportant)
         }
     }
 
-//    fun updateNote() {
-//        updateNoteUseCase.invoke(
-//            ViewTyped.Note(
-//                id = _uiState.value.noteId ?: throw IllegalStateException("Note with null id cannot be saved."),
-//                title = _uiState.value.noteTitle,
-//                description = _uiState.value.noteDescription,
-//                isImportant = _uiState.value.isNoteImportant,
-//            )
-//        )
-//    }
+    fun updateNote() {
+        if(_uiState.value.noteId == null) throw IllegalStateException("Note with null id cannot be saved.")
 
-    fun cancel() {
-
+        updateNoteUseCase.invoke(_uiState.value.note.toDomain())
     }
 
     private fun generateInitialState() : DetailsUiState {
@@ -110,7 +97,8 @@ class NoteDetailsViewModel(
 
         return savedState ?: DetailsUiState(
             noteId = null,
-            noteTitle = "", noteDescription = "", isNoteImportant = false)
+            ViewTypedModel.Note(-1, "", "", false, "", false)
+        )
     }
 
     companion object {

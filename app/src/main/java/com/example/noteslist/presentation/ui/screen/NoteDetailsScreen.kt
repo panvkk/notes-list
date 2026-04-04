@@ -11,7 +11,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -25,14 +24,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.fontResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.noteslist.R
 import com.example.noteslist.presentation.viewmodel.NoteDetailsViewModel
 
@@ -42,10 +38,12 @@ fun NoteDetailsScreen(
     onClickBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val titleInput = viewModel.uiState.collectAsState().value.noteTitle
-    val descriptionInput = viewModel.uiState.collectAsState().value.noteDescription
-    val isImportant = viewModel.uiState.collectAsState().value.isNoteImportant
-    val isNewScreen = viewModel.isNewNote.collectAsState().value
+    val titleInput = viewModel.uiState.collectAsState().value.note.title
+    val descriptionInput = viewModel.uiState.collectAsState().value.note.description
+    val isNoteImportant = viewModel.uiState.collectAsState().value.note.isImportant
+    val isNoteRead = viewModel.uiState.collectAsState().value.note.isRead
+    val noteDate = viewModel.uiState.collectAsState().value.note.date
+    val isNewNote = viewModel.isNewNote.collectAsState().value
 
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -92,7 +90,7 @@ fun NoteDetailsScreen(
                     .align(Alignment.CenterVertically)
             )
             Switch(
-                checked = isImportant,
+                checked = isNoteImportant,
                 onCheckedChange = { viewModel.updateIsNoteImportant(it) },
                 colors = SwitchDefaults.colors(
                     checkedBorderColor = colorResource(R.color.active_button_color),
@@ -100,13 +98,39 @@ fun NoteDetailsScreen(
                 )
             )
         }
+        if(!isNewNote) {
+            Row {
+                Text(
+                    text = stringResource(R.string.is_read_switch_title_text),
+                    fontSize = with(LocalDensity.current) { dimensionResource(R.dimen.switch_title_text_size).toSp() },
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .align(Alignment.CenterVertically)
+                )
+                Switch(
+                    checked = isNoteRead,
+                    onCheckedChange = { viewModel.updateIsNoteRead(it) },
+                    colors = SwitchDefaults.colors(
+                        checkedBorderColor = colorResource(R.color.active_button_color),
+                        checkedTrackColor =  colorResource(R.color.active_button_color)
+                    )
+                )
+            }
+            Text(
+                text = stringResource(R.string.creation_date_prefix_text) + noteDate,
+                fontSize = with(LocalDensity.current) { dimensionResource(R.dimen.switch_title_text_size).toSp() },
+                color = colorResource(R.color.note_date),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             OutlinedButton(
-                onClick = {
-                    viewModel.cancel()
-                    onClickBack()},
+                onClick = { onClickBack()},
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
                     .weight(1f)
@@ -120,8 +144,9 @@ fun NoteDetailsScreen(
             }
             Button(
                 onClick = {
-                    viewModel.createNote()
-                    onClickBack()},
+                    if(isNewNote) viewModel.createNote()
+                        else viewModel.updateNote()
+                    onClickBack() },
                 colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.active_button_color)),
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
@@ -129,7 +154,8 @@ fun NoteDetailsScreen(
                     .height(dimensionResource(R.dimen.button_height))
             ) {
                 Text(
-                    text = stringResource(R.string.create_button_text),
+                    text = if(isNewNote) stringResource(R.string.create_button_text)
+                        else stringResource(R.string.update_button_text),
                     fontSize = with(LocalDensity.current) { dimensionResource(R.dimen.button_text_size).toSp() },
                     fontWeight = FontWeight.ExtraBold
                 )

@@ -8,4 +8,7 @@
     <string name="create_button_text">Создать</string>
     <string name="text_field_title_label">Заголовок</string>
     <string name="text_field_description_label">Текст заметки</string>
+    <string name="is_read_switch_title_text">Прочитано</string>
+    <string name="update_button_text">Обновить</string>
+    <string name="creation_date_prefix_text">"Дата создания: "</string>
 </resources>
