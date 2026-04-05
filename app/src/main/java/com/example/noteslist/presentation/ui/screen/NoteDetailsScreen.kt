@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,9 +28,10 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.noteslist.R
+import com.example.noteslist.presentation.model.DetailsScreenError
+import com.example.noteslist.presentation.viewmodel.NavigationEvent
 import com.example.noteslist.presentation.viewmodel.NoteDetailsViewModel
 
 @Composable
@@ -38,12 +40,17 @@ fun NoteDetailsScreen(
     onClickBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val titleInput = viewModel.uiState.collectAsState().value.note.title
-    val descriptionInput = viewModel.uiState.collectAsState().value.note.description
-    val isNoteImportant = viewModel.uiState.collectAsState().value.note.isImportant
-    val isNoteRead = viewModel.uiState.collectAsState().value.note.isRead
-    val noteDate = viewModel.uiState.collectAsState().value.note.date
+    val currentNote = viewModel.uiState.collectAsState().value.note
+    val currentError = viewModel.uiState.collectAsState().value.error
     val isNewNote = viewModel.isNewNote.collectAsState().value
+
+    LaunchedEffect(Unit) {
+        viewModel.navigationEvent.collect { event ->
+            when(event) {
+                NavigationEvent.NavigateBack -> onClickBack()
+            }
+        }
+    }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -53,21 +60,33 @@ fun NoteDetailsScreen(
             .fillMaxSize()
     ) {
         TextField(
-            value = titleInput,
+            value = currentNote.title,
             onValueChange = { viewModel.updateNoteTitle(it) },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             maxLines = 1,
             label = { Text(stringResource(R.string.text_field_title_label)) },
+            isError = currentError is DetailsScreenError.TitleEmpty,
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 focusedLabelColor = colorResource(R.color.text_field_label_color),
-                cursorColor = colorResource(R.color.text_field_cursor_color)
+                cursorColor = colorResource(R.color.text_field_cursor_color),
+                errorTextColor = colorResource(R.color.error_color),
+                errorContainerColor = colorResource(R.color.error_light_color),
             )
         )
+        if(currentError is DetailsScreenError.TitleEmpty) {
+            Text(
+                text = currentError.message,
+                fontSize = with(LocalDensity.current) { dimensionResource(R.dimen.title_error_text_size).toSp() },
+                color = colorResource(R.color.error_color),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+        }
         TextField(
-            value = descriptionInput,
+            value = currentNote.description,
             onValueChange = { viewModel.updateNoteDescription(it) },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
@@ -90,7 +109,7 @@ fun NoteDetailsScreen(
                     .align(Alignment.CenterVertically)
             )
             Switch(
-                checked = isNoteImportant,
+                checked = currentNote.isImportant,
                 onCheckedChange = { viewModel.updateIsNoteImportant(it) },
                 colors = SwitchDefaults.colors(
                     checkedBorderColor = colorResource(R.color.active_button_color),
@@ -110,7 +129,7 @@ fun NoteDetailsScreen(
                         .align(Alignment.CenterVertically)
                 )
                 Switch(
-                    checked = isNoteRead,
+                    checked = currentNote.isRead,
                     onCheckedChange = { viewModel.updateIsNoteRead(it) },
                     colors = SwitchDefaults.colors(
                         checkedBorderColor = colorResource(R.color.active_button_color),
@@ -119,9 +138,18 @@ fun NoteDetailsScreen(
                 )
             }
             Text(
-                text = stringResource(R.string.creation_date_prefix_text) + noteDate,
-                fontSize = with(LocalDensity.current) { dimensionResource(R.dimen.switch_title_text_size).toSp() },
+                text = stringResource(R.string.creation_date_prefix_text) + currentNote.date,
+                fontSize = with(LocalDensity.current) { dimensionResource(R.dimen.date_title_text_size).toSp() },
                 color = colorResource(R.color.note_date),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
+        if(currentError is DetailsScreenError.Other) {
+            Text(
+                text = currentError.message,
+                fontSize = with(LocalDensity.current) { dimensionResource(R.dimen.error_title_text_size).toSp() },
+                color = colorResource(R.color.error_color),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(8.dp)
             )
@@ -130,7 +158,7 @@ fun NoteDetailsScreen(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             OutlinedButton(
-                onClick = { onClickBack()},
+                onClick = { viewModel.cancel() },
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
                     .weight(1f)
@@ -143,10 +171,7 @@ fun NoteDetailsScreen(
                 )
             }
             Button(
-                onClick = {
-                    if(isNewNote) viewModel.createNote()
-                        else viewModel.updateNote()
-                    onClickBack() },
+                onClick = { viewModel.submitNote() },
                 colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.active_button_color)),
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier

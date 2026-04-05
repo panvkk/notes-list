@@ -18,4 +18,7 @@
     <color name="switch_color">#1387d7</color>
     <color name="text_field_cursor_color">#1387d7</color>
     <color name="text_field_label_color">#1387d7</color>
+
+    <color name="error_color">#f1544b</color>
+    <color name="error_light_color">#fcdfde</color>
 </resources>

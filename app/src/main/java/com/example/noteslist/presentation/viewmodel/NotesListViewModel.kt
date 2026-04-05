@@ -1,5 +1,6 @@
 package com.example.noteslist.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -19,7 +20,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 class NotesListViewModel(
-    private val savedStateHandle: SavedStateHandle,
     private val notesUseCase: NotesUseCase,
     private val findNoteUseCase: FindNoteUseCase,
     private val updateNoteUseCase: UpdateNoteUseCase
@@ -36,9 +36,14 @@ class NotesListViewModel(
             initialValue = emptyList()
         )
     fun onNoteLongClick(noteId: Long) {
-        val note = findNoteUseCase.invoke(noteId)?.toUiModel() ?: return
-        val isNoteRead = note.isRead
+        var note: ViewTypedModel.Note? = null
+        findNoteUseCase.invoke(noteId).onSuccess {
+            note = it.toUiModel()
+        }.onFailure { Log.e(TAG, it.message ?: "Unknown Error.") }
+
+        val isNoteRead = note?.isRead ?: return
         updateNoteUseCase.invoke(note.copy(isRead = !isNoteRead).toDomain())
+        // TODO Потом добавлю обработку результата инвоука
     }
     private fun getViewTypedData(notes: List<ViewTypedModel.Note>) : List<ViewTypedModel> {
         val viewTypedData = mutableListOf<ViewTypedModel>()
@@ -86,11 +91,11 @@ class NotesListViewModel(
         return viewTypedData
     }
     companion object {
+        private const val TAG = "NotesListViewModel"
         val factory = viewModelFactory {
             initializer {
                 val application = this[APPLICATION_KEY] as NotesListApplication
                 NotesListViewModel(
-                    createSavedStateHandle(),
                     application.notesUseCase,
                     application.findNoteUseCase,
                     application.updateNoteUseCase)

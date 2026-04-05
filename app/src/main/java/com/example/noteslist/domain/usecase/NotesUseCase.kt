@@ -5,39 +5,21 @@ import com.example.noteslist.domain.model.NoteModel
 import com.example.noteslist.domain.repository.NotesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.time.LocalDate
+import java.util.Comparator.nullsLast
+import kotlin.comparisons.nullsLast
 
 class NotesUseCase(
     private val repository: NotesRepository
 ) {
-    companion object {
-        private const val TAG = "NotesUseCase"
-    }
-
     operator fun invoke() : Flow<List<NoteModel>> {
-        return repository.getNotes().map { notes ->
-            try {
-                sortByDate(notes)
-            } catch (e: Throwable) {
-                Log.e(TAG, e.message ?: "Unknown Error")
-                emptyList()
-            }
-        }
+        return repository.getNotes().map { notes -> sortByDate(notes) }
     }
 
     private fun sortByDate(notes: List<NoteModel>) : List<NoteModel> {
-        var sortedNotes: List<NoteModel> = emptyList()
-        try {
-            sortedNotes = notes.sortedWith { note1, note2 ->
-                val date1 = note1.date
-                val date2 = note2.date
-                if (date1 == null || date2 == null)
-                    throw IllegalArgumentException("Error while parse: Date can not be null")
-
-                date1.compareTo(date2)
-            }
-        } catch (e: Throwable) {
-            Log.e(TAG, e.message ?: "Unknown Error.")
-        }
+        // Заметки, дата которых == null будут в конце списка
+        val comparator = compareBy<NoteModel, LocalDate?>(nullsLast()) { it.date }
+        val sortedNotes = notes.sortedWith(comparator)
         return sortedNotes
     }
 }

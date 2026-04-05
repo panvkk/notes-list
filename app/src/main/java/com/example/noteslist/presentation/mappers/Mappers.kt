@@ -1,7 +1,7 @@
 package com.example.noteslist.presentation.mappers
 
-import com.example.noteslist.core.presentation.toLocalDate
-import com.example.noteslist.core.presentation.toStringWithPattern
+import com.example.noteslist.core.toLocalDate
+import com.example.noteslist.core.toStringWithPattern
 import com.example.noteslist.domain.model.NoteModel
 import com.example.noteslist.presentation.model.ViewTypedModel
 

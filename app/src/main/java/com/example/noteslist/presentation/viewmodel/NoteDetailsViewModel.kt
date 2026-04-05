@@ -1,24 +1,31 @@
 package com.example.noteslist.presentation.viewmodel
 
 import android.os.Bundle
+import android.util.Log
 import androidx.core.os.BundleCompat
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.noteslist.NotesListApplication
+import com.example.noteslist.core.domain.error.NoteValidationException
 import com.example.noteslist.domain.usecase.CreateNoteUseCase
 import com.example.noteslist.domain.usecase.FindNoteUseCase
 import com.example.noteslist.domain.usecase.UpdateNoteUseCase
 import com.example.noteslist.presentation.mappers.toDomain
 import com.example.noteslist.presentation.mappers.toUiModel
+import com.example.noteslist.presentation.model.DetailsScreenError
 import com.example.noteslist.presentation.model.DetailsUiState
 import com.example.noteslist.presentation.model.ViewTypedModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class NoteDetailsViewModel(
     private val savedStateHandle: SavedStateHandle,
@@ -41,8 +48,15 @@ class NoteDetailsViewModel(
     private val _isNewNote = MutableStateFlow(true)
     val isNewNote = _isNewNote.asStateFlow()
 
+    private val _navigationEvent = Channel<NavigationEvent>()
+    val navigationEvent = _navigationEvent.receiveAsFlow()
+
     fun updateNoteTitle(value: String) {
-        _uiState.update { it.copy(note = it.note.copy(title = value)) }
+        _uiState.apply {
+            update { it.copy(note = it.note.copy(title = value)) }
+            if(this.value.error is DetailsScreenError.TitleEmpty)
+                update { it.copy(error = null) }
+        }
     }
     fun updateNoteDescription(value: String) {
         _uiState.update { it.copy(note = it.note.copy(description = value)) }
@@ -71,23 +85,47 @@ class NoteDetailsViewModel(
             updateNoteDescription("")
             updateIsNoteImportant(false)
         } else {
-            updateIsNewNote(false)
-            val newNote = findNoteUseCase.invoke(newNoteId)?.toUiModel() ?: return
-            setNoteId(newNote.id)
+            var newNote: ViewTypedModel.Note? = null
+            findNoteUseCase.invoke(newNoteId)
+                .onSuccess { newNote = it.toUiModel() }
+                .onFailure {
+                    val msg = it.message ?: "Unknown error."
+                    _uiState.update { it.copy(error = DetailsScreenError.Other(msg)) }
+                    Log.e(TAG, msg)
+                }
+            setNoteId(newNote?.id ?: return)
             setNote(newNote)
+            updateIsNewNote(false)
         }
     }
 
-    fun createNote() {
+    fun submitNote() {
         _uiState.value.note.apply {
-            createNoteUseCase.invoke(title, description, isImportant)
+            val result = if (_isNewNote.value) {
+                createNoteUseCase.invoke(title, description, isImportant)
+            } else {
+                updateNoteUseCase.invoke(_uiState.value.note.toDomain())
+            }
+            result.onSuccess { cancel() }
+                .onFailure { exception ->
+                val msg = exception.message ?: "Unknown error."
+                when (exception) {
+                    NoteValidationException.TitleEmpty -> {
+                        _uiState.update { it.copy(error = DetailsScreenError.TitleEmpty(msg)) }
+                    }
+                    else -> {
+                        _uiState.update { it.copy(error = DetailsScreenError.Other(msg)) }
+                        Log.e(TAG, msg)
+                    }
+                }
+            }
         }
     }
 
-    fun updateNote() {
-        if(_uiState.value.noteId == null) throw IllegalStateException("Note with null id cannot be saved.")
-
-        updateNoteUseCase.invoke(_uiState.value.note.toDomain())
+    fun cancel() {
+        viewModelScope.launch {
+            _navigationEvent.send(NavigationEvent.NavigateBack)
+        }
     }
 
     private fun generateInitialState() : DetailsUiState {
@@ -117,4 +155,8 @@ class NoteDetailsViewModel(
             }
         }
     }
+}
+
+sealed interface NavigationEvent {
+    data object NavigateBack : NavigationEvent
 }

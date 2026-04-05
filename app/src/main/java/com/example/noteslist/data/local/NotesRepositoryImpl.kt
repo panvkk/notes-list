@@ -1,7 +1,7 @@
 package com.example.noteslist.data.local
 
-import com.example.noteslist.core.presentation.toLocalDate
-import com.example.noteslist.core.presentation.toStringWithPattern
+import com.example.noteslist.core.toLocalDate
+import com.example.noteslist.core.toStringWithPattern
 import com.example.noteslist.data.dto.NoteDto
 import com.example.noteslist.domain.model.NoteModel
 import com.example.noteslist.domain.repository.NotesRepository
@@ -77,22 +77,22 @@ class NotesRepositoryImpl : NotesRepository {
         updateNotesFlow()
     }
 
-    override fun updateNote(note: NoteModel): Boolean {
+    override fun updateNote(note: NoteModel): Result<Unit> {
         val newValue = note.toDto()
         val index = currentNotes.indexOfFirst { it.id == newValue.id }
         if(index != -1) {
             currentNotes[index] = newValue
             updateNotesFlow()
-            return true
+            return Result.success(Unit)
         }
-        return false
+        return Result.failure(IllegalAccessException("No note found for this position: ${note.id}"))
     }
 
-    override fun findNoteById(id: Long): NoteModel {
+    override fun findNoteById(id: Long): Result<NoteModel> {
         currentNotes.forEach {
-            if(it.id == id) return it.toDomain()
+            if(it.id == id) return Result.success(it.toDomain())
         }
-        throw IllegalAccessException("Note by id = $id is not found in list.")
+        return Result.failure(IllegalAccessException("No note found for this position: $id"))
     }
 
     private fun updateNotesFlow() {
