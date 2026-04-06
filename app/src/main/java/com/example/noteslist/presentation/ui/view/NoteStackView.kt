@@ -15,7 +15,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import com.example.noteslist.R
-import com.example.noteslist.core.presentation.toLocalDate
+import com.example.noteslist.core.toLocalDate
 import kotlin.math.min
 
 class NoteStackView @JvmOverloads constructor(

@@ -1,4 +1,4 @@
-package com.example.noteslist.core.presentation
+package com.example.noteslist.core
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -13,7 +13,7 @@ fun String.toLocalDate() : LocalDate? {
 }
 
 fun LocalDate.toStringWithPattern() : String {
-    var result = ""
+    var result: String
     val pattern = "dd.MM.yyyy"
     val formatter = DateTimeFormatter.ofPattern(pattern)
 

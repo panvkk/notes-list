@@ -20,6 +20,7 @@ import android.text.StaticLayout
 import android.text.TextPaint
 import android.text.TextUtils
 import android.util.AttributeSet
+import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewOutlineProvider
@@ -448,17 +449,6 @@ class NoteView @JvmOverloads constructor(
     }
     private fun drawDescriptionFadeRect(canvas: Canvas) {
         canvas.drawRect(descriptionFadeRect, descriptionFadePaint)
-    }
-
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        when(event?.action) {
-            MotionEvent.ACTION_DOWN -> return true
-            MotionEvent.ACTION_UP -> {
-                isRead = !isRead
-                return true
-            }
-        }
-        return super.onTouchEvent(event)
     }
 
     // Сохранение состояния

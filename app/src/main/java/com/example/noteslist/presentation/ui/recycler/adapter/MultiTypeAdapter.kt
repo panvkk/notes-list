@@ -1,15 +1,21 @@
-package com.example.noteslist.presentation.ui.recycler.adapters
+package com.example.noteslist.presentation.ui.recycler.adapter
 
 import android.view.ViewGroup
+import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.RecyclerView
-import com.example.noteslist.presentation.model.ViewTyped
-import com.example.noteslist.presentation.ui.recycler.adapters.delegates.AdapterDelegate
+import com.example.noteslist.presentation.model.ViewTypedModel
+import com.example.noteslist.presentation.ui.recycler.adapter.delegates.AdapterDelegate
 import com.example.noteslist.presentation.ui.recycler.holders.NoteStackViewHolder
+import com.example.noteslist.presentation.ui.recycler.util.ViewTypedDiffUtilCallback
 
 class MultiTypeAdapter(
-    private val delegates: List<AdapterDelegate<ViewTyped>>
+    private val delegates: List<AdapterDelegate<ViewTypedModel>>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    private var items: List<ViewTyped> = emptyList()
+
+    private val differ = AsyncListDiffer(this, ViewTypedDiffUtilCallback())
+
+    private val items: List<ViewTypedModel>
+        get() = differ.currentList
 
     override fun getItemViewType(position: Int): Int {
         for((index, delegate) in delegates.withIndex()) {
@@ -20,7 +26,7 @@ class MultiTypeAdapter(
         throw IllegalAccessException("No delegate found for position $position")
     }
 
-    private fun getDelegateForPosition(position: Int) : AdapterDelegate<ViewTyped> {
+    private fun getDelegateForPosition(position: Int) : AdapterDelegate<ViewTypedModel> {
         val viewTyped = getItemViewType(position)
         return delegates[viewTyped]
     }
@@ -42,8 +48,7 @@ class MultiTypeAdapter(
 
     override fun getItemCount() = items.size
 
-    fun setNewData(newItems: List<ViewTyped>) {
-        items = newItems
-        notifyDataSetChanged()
+    fun setNewData(newItems: List<ViewTypedModel>) {
+        differ.submitList(newItems)
     }
 }

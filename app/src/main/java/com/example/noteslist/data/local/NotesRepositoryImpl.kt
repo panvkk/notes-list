@@ -1,12 +1,20 @@
 package com.example.noteslist.data.local
 
-import com.example.noteslist.core.presentation.toLocalDate
+import com.example.noteslist.core.toLocalDate
+import com.example.noteslist.core.toStringWithPattern
 import com.example.noteslist.data.dto.NoteDto
 import com.example.noteslist.domain.model.NoteModel
 import com.example.noteslist.domain.repository.NotesRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
+import java.time.LocalDate
 
 class NotesRepositoryImpl : NotesRepository {
-    private fun fetchNotes() = listOf(
+
+    var noteNextId = 38L
+    private val currentNotes = mutableListOf(
         NoteDto(1, "универ", "завтра надо приехать к 4 паре (хотя бы приехать)", false, "15.03.2026"),
         NoteDto(2, "поесть", "пельменей можно", true, "15.03.2026"),
         NoteDto(3, "Зал", "Легкое кардио, чисто размяться перед неделей", true, "15.03.2026"),
@@ -53,13 +61,60 @@ class NotesRepositoryImpl : NotesRepository {
         NoteDto(37, "Отдых", "Чисто залипнуть в ютуб под вечер", false, "22.03.2026")
     )
 
-    override fun getNotes() = fetchNotes().map { noteDto -> noteDto.toDomain() }
+    private val _notesFlow = MutableStateFlow(currentNotes.toList())
+
+    override fun getNotes() = _notesFlow.asStateFlow().map { entities -> entities.map { it.toDomain() } }
+
+    override fun addNote(title: String, description: String, date: LocalDate, isImportant: Boolean) {
+        val noteDto = NoteDto(
+            id = noteNextId++,
+            title = title,
+            description = description,
+            isImportant = isImportant,
+            date = date.toStringWithPattern()
+        )
+        currentNotes.add(noteDto)
+        updateNotesFlow()
+    }
+
+    override fun updateNote(note: NoteModel): Result<Unit> {
+        val newValue = note.toDto()
+        val index = currentNotes.indexOfFirst { it.id == newValue.id }
+        if(index != -1) {
+            currentNotes[index] = newValue
+            updateNotesFlow()
+            return Result.success(Unit)
+        }
+        return Result.failure(IllegalAccessException("No note found for this position: ${note.id}"))
+    }
+
+    override fun findNoteById(id: Long): Result<NoteModel> {
+        currentNotes.forEach {
+            if(it.id == id) return Result.success(it.toDomain())
+        }
+        return Result.failure(IllegalAccessException("No note found for this position: $id"))
+    }
+
+    private fun updateNotesFlow() {
+        _notesFlow.update { currentNotes.toList() }
+    }
 
     fun NoteDto.toDomain() = NoteModel(
+        id = id,
         title = title,
         description = description,
         isImportant  = isImportant,
         date = date.toLocalDate(),
+        isRead = isRead
+    )
+
+    fun NoteModel.toDto() = NoteDto(
+        id = id,
+        title = title,
+        description = description,
+        isImportant = isImportant,
+        date = date?.toStringWithPattern()
+            ?: throw IllegalArgumentException("LocalDate is null."),
         isRead = isRead
     )
 }

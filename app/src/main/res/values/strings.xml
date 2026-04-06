@@ -2,4 +2,13 @@
     <string name="app_name">NotesList</string>
     <string name="note_stack_collapse_button_title"> &lt;&lt;&lt; Свернуть</string>
     <string name="data_title_default_text">01.01.2026</string>
+    <string name="add_note_icon_description">Add Note</string>
+    <string name="importance_switch_title_text">Важно</string>
+    <string name="cancel_button_text">Отмена</string>
+    <string name="create_button_text">Создать</string>
+    <string name="text_field_title_label">Заголовок</string>
+    <string name="text_field_description_label">Текст заметки</string>
+    <string name="is_read_switch_title_text">Прочитано</string>
+    <string name="update_button_text">Сохранить</string>
+    <string name="creation_date_prefix_text">"Дата создания: "</string>
 </resources>
