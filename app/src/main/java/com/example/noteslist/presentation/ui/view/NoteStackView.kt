@@ -64,8 +64,7 @@ class NoteStackView @JvmOverloads constructor(
     fun setOnClickExpandListener(l: () -> Unit) { onClickExpand = l }
     fun setOnClickCollapseListener(l: () -> Unit) { onClickCollapse = l }
 
-    // Геометрия и анимации
-    private var animationInterpolatorPath = Path()
+    // Анимации
     private var collapseButtonAnimator: ValueAnimator? = null
 
     // Кнопка сворачивания
@@ -86,8 +85,6 @@ class NoteStackView @JvmOverloads constructor(
         initAttrs(attrs, defStyleAttr, defStyleRes)
         initCollapseButton()
         setWillNotDraw(false)
-
-        animationInterpolatorPath.cubicTo(0.4f, 0.1f, 0.2f, 1f, 1f, 1f)
 
         clipToPadding = false // чтобы не обрезалась тень
     }
@@ -291,7 +288,7 @@ class NoteStackView @JvmOverloads constructor(
     }
 
     private fun performExpandAnimation() {
-        val pathInterpolator = PathInterpolator(animationInterpolatorPath)
+        val pathInterpolator = PathInterpolator(0.4f, 0.1f, 0.2f, 1f)
         val transitionSet = TransitionSet().setInterpolator(pathInterpolator)
 
         val maxDuration = 800L
@@ -300,9 +297,13 @@ class NoteStackView @JvmOverloads constructor(
         val baseDuration = 200L
         val translationZFactor = 10f
 
+
         val indexes = childIndexes?.toList() ?: return
 
-        var childCounter = 1
+        val transitionDuration =
+            min(maxDuration, baseDuration + indexes.size * durationFactor)
+
+        var childCounter = 0
         for(i in indexes) {
             val view = getChildAt(i)
             if(i in invisibleChildren) {
@@ -310,13 +311,10 @@ class NoteStackView @JvmOverloads constructor(
                 view.visibility = VISIBLE
             }
 
-            val transitionDuration =
-                min(maxDuration, baseDuration + childCounter * durationFactor)
-
             val viewTransition = ChangeBounds().apply {
                 addTarget(view)
                 duration = transitionDuration
-                startDelay = delayFactor * (childCounter++ - 1)
+                startDelay = delayFactor * (childCounter++)
             }
             transitionSet.addTransition(viewTransition)
         }
