@@ -1,6 +1,7 @@
 package com.example.noteslist.presentation.ui.recycler.adapter.delegates
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.presentation.model.ViewTypedModel
@@ -10,7 +11,10 @@ import com.example.noteslist.presentation.ui.recycler.holders.NoteStackViewHolde
 
 class NoteStackDelegate(
     private val onNoteClick: (Long) -> Unit,
-    private val onNoteLongClick: (Long) -> Unit
+    private val onNoteLongClick: (Long) -> Unit,
+    private val onStackExpandClick: (Int) -> Unit,
+    private val onStackCollapseClick: (Int) -> Unit,
+    private val isStackExpanded: (Int) -> Boolean
 ) : AdapterDelegate<ViewTypedModel> {
 
     private val stackViewPool = NoteViewPool(onNoteClick, onNoteLongClick)
@@ -26,7 +30,13 @@ class NoteStackDelegate(
     override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val binding = ItemNoteStackViewBinding.inflate(inflater)
-        return NoteStackViewHolder(binding, stackViewPool)
+        return NoteStackViewHolder(
+            binding,
+            stackViewPool,
+            onStackCollapseClick,
+            onStackExpandClick,
+            isStackExpanded
+        )
     }
 
     override fun onBindViewHolder(

@@ -1,10 +1,8 @@
 package com.example.noteslist.presentation.viewmodel
 
 import android.util.Log
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -16,7 +14,13 @@ import com.example.noteslist.domain.usecase.UpdateNoteUseCase
 import com.example.noteslist.presentation.mappers.toDomain
 import com.example.noteslist.presentation.mappers.toUiModel
 import com.example.noteslist.presentation.model.ViewTypedModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -25,16 +29,18 @@ class NotesListViewModel(
     private val updateNoteReadUseCase: UpdateNoteReadUseCase
 ) : ViewModel() {
 
-    val viewTypedNotes = notesUseCase.invoke()
+    private val _expandedStackIds = MutableStateFlow<Set<Int>>(emptySet())
+
+    val uiState = notesUseCase.invoke()
         .map { noteModels ->
             val notes = noteModels.map { it.toUiModel() }
             getViewTypedData(notes)
-        }
-        .stateIn(
+        }.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000L),
             initialValue = emptyList()
         )
+
     fun onNoteLongClick(noteId: Long) {
         updateNoteReadUseCase.invoke(noteId)
             .onFailure { Log.e(TAG, it.message ?: "Unknown Error.")  }
@@ -51,7 +57,8 @@ class NotesListViewModel(
             if(currentDate != note.date) {
                 if(notImportantNotes.size > 1) {                          // Если осталось больше 1
                     val noteStackChildren = notImportantNotes.toList()
-                    val noteStack = ViewTypedModel.NoteStack(nextStackId++, noteStackChildren)
+                    val noteStack = ViewTypedModel.NoteStack(
+                        nextStackId, noteStackChildren, isStackExpanded(nextStackId++))
                     viewTypedData.add(noteStack)
                 } else if (notImportantNotes.isNotEmpty())                 // Если остался 1
                     viewTypedData.add(notImportantNotes.first())
@@ -64,7 +71,8 @@ class NotesListViewModel(
             if(note.isImportant) {
                 if(notImportantNotes.size > 1) {
                     val noteStackChildren = notImportantNotes.toList()
-                    val noteStack = ViewTypedModel.NoteStack(nextStackId++, noteStackChildren)
+                    val noteStack = ViewTypedModel.NoteStack(
+                        nextStackId, noteStackChildren, isStackExpanded(nextStackId++))
                     viewTypedData.add(noteStack)
                 } else if(notImportantNotes.isNotEmpty()) {
                     viewTypedData.add(notImportantNotes.first())
@@ -77,13 +85,24 @@ class NotesListViewModel(
         }
         if(notImportantNotes.size > 1) {                          // Если осталось больше 1
             val noteStackChildren = notImportantNotes.toList()
-            val noteStack = ViewTypedModel.NoteStack(nextStackId++, noteStackChildren)
+            val noteStack = ViewTypedModel.NoteStack(
+                nextStackId, noteStackChildren, isStackExpanded(nextStackId)
+            )
             viewTypedData.add(noteStack)
         } else if (notImportantNotes.isNotEmpty())                 // Если остался 1
             viewTypedData.add(notImportantNotes.first())
 
         return viewTypedData
     }
+
+    fun expandStack(stackId: Int) {
+        _expandedStackIds.value += stackId
+    }
+    fun collapseStack(stackId: Int) {
+        _expandedStackIds.value -= stackId
+    }
+    fun isStackExpanded(stackId: Int) = _expandedStackIds.value.contains(stackId)
+
     companion object {
         private const val TAG = "NotesListViewModel"
         val factory = viewModelFactory {

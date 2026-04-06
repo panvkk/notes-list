@@ -1,19 +1,33 @@
 package com.example.noteslist.presentation.ui.recycler.holders
 
-import androidx.core.view.isNotEmpty
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.R
 import com.example.noteslist.databinding.ItemNoteStackViewBinding
 import com.example.noteslist.databinding.ItemNoteViewBinding
 import com.example.noteslist.presentation.model.ViewTypedModel
 import com.example.noteslist.presentation.ui.recycler.adapter.delegates.pool.NoteViewPool
+import com.example.noteslist.presentation.ui.view.NoteView
 
 class NoteStackViewHolder(
     private val binding: ItemNoteStackViewBinding,
-    private val viewPool: NoteViewPool
+    private val viewPool: NoteViewPool,
+    private val onCollapseClickListener: (Int) -> Unit,
+    private val onExpandClickListener: (Int) -> Unit,
+    private val isStackExpanded: (Int) -> Boolean
 ) : RecyclerView.ViewHolder(binding.root) {
 
+    private var currentStackId = -1
+
+    init {
+        binding.noteStackView.apply {
+            setOnClickExpandListener { if(currentStackId != -1) onExpandClickListener(currentStackId) }
+            setOnClickCollapseListener { if(currentStackId != -1) onCollapseClickListener(currentStackId) }
+        }
+    }
+
     fun bind(noteStack: ViewTypedModel.NoteStack) {
+        currentStackId = noteStack.stackId
+        binding.noteStackView.isExpanded = isStackExpanded(noteStack.stackId)
         noteStack.notes.forEach { note ->
             val child = viewPool.getView(binding.noteStackView)
 
@@ -33,16 +47,14 @@ class NoteStackViewHolder(
 
     fun recycleChildren() {
         binding.noteStackView.apply {
-            isExpanded = false
-            while(this.isNotEmpty()) {
-                val child = this.getChildAt(0)
+            val childrenToRemove = (0 until childCount)
+                .map { getChildAt(it) }
+                .filterIsInstance<NoteView>()
 
-                this.removeView(child)
+            childrenToRemove.forEach { child ->
+                removeView(child)
                 val binding = child.getTag(R.id.noteBindingTag) as? ItemNoteViewBinding
-                if(binding != null) {
-                    binding.noteView.translationZ = 0f
-                    viewPool.putView(binding)
-                }
+                binding?.let { viewPool.putView(it) }
             }
         }
     }

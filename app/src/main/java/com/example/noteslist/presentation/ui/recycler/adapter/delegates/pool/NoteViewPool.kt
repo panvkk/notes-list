@@ -43,6 +43,7 @@ class NoteViewPool(
             translationZ = 0f
             alpha = 1f
             isRead = false
+            visibility = View.VISIBLE
         }
         pool.add(binding)
     }

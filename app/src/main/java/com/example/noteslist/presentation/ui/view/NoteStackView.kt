@@ -22,10 +22,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.PathInterpolator
-import androidx.core.graphics.withTranslation
-import androidx.core.view.isEmpty
 import androidx.core.view.isGone
-import androidx.core.view.isInvisible
 import com.example.noteslist.R
 import com.example.noteslist.core.toLocalDate
 import kotlin.math.min
@@ -57,13 +54,15 @@ class NoteStackView @JvmOverloads constructor(
         set(value) {
             if(field == value) return
             field = value
-            updateCollapseButtonBeforeAnimation()
             requestLayout()
             invalidate()
         }
 
-    // TODO
-    private var isTransitionRunning = false
+    // Клики на стэк
+    private var onClickExpand: () -> Unit = { }
+    private var onClickCollapse: () -> Unit = { }
+    fun setOnClickExpandListener(l: () -> Unit) { onClickExpand = l }
+    fun setOnClickCollapseListener(l: () -> Unit) { onClickCollapse = l }
 
     // Геометрия и анимации
     private var animationInterpolatorPath = Path()
@@ -97,7 +96,8 @@ class NoteStackView @JvmOverloads constructor(
         collapseButton.apply {
             layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
             alpha = 0f
-            setOnCollapseClickListener {
+            setOnButtonClickListener {
+                onClickCollapse()
                 performCollapseAnimation()
                 isExpanded = false
             }
@@ -128,6 +128,7 @@ class NoteStackView @JvmOverloads constructor(
     override fun shouldDelayChildPressedState(): Boolean = false
 
     override fun onFinishInflate() {
+        addView(collapseButton)
         updateChildIndexes()
         super.onFinishInflate()
     }
@@ -147,7 +148,7 @@ class NoteStackView @JvmOverloads constructor(
 
         childIndexes?.let {
             if(!isExpanded) {
-                for(i in childIndexes) {
+                for(i in it) {
                     val child = getChildAt(i)
                     measureChildWithMargins(
                         child,
@@ -155,11 +156,11 @@ class NoteStackView @JvmOverloads constructor(
                         heightMeasureSpec, 0
                     )
                 }
-                if(childCount != 0) totalHeight += getChildAt(0).measuredHeight
+                if(it.isNotEmpty()) totalHeight += getChildAt(1).measuredHeight
                 val visibleChildrenCount = min(stackMaxVisible, childCount)
                 totalHeight += (stackSpacing * (visibleChildrenCount - 1)).toInt()
             } else {
-                for(i in childIndexes) {
+                for(i in it) {
                     val child = getChildAt(i)
                     measureChildWithMargins(
                         child,
@@ -188,7 +189,7 @@ class NoteStackView @JvmOverloads constructor(
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        if(isEmpty()) return
+        if(childIndexes?.size == 0) return
 
         var childLeft = paddingLeft
         var childTop = paddingTop
@@ -264,43 +265,6 @@ class NoteStackView @JvmOverloads constructor(
         }
     }
 
-    override fun dispatchDraw(canvas: Canvas) {
-        super.dispatchDraw(canvas)
-
-        if (isExpanded || collapseButton.alpha > 0f) {
-            canvas.withTranslation(collapseButton.left.toFloat(), collapseButton.top.toFloat()) {
-
-                val pivotX = collapseButton.width / 2f
-                val pivotY = collapseButton.height / 2f
-                scale(collapseButton.scaleX, collapseButton.scaleY, pivotX, pivotY)
-
-                val saveCount = if (collapseButton.alpha < 1f) {
-                    saveLayerAlpha(
-                        0f,
-                        0f,
-                        collapseButton.width.toFloat(),
-                        collapseButton.height.toFloat(),
-                        (collapseButton.alpha * 255).toInt()
-                    )
-                } else -1
-
-                collapseButton.draw(this)
-
-                if (saveCount != -1) restoreToCount(saveCount)
-            }
-        }
-//        if(isExpanded) {
-//            Log.d("DRAW_TRACE", "Drawing ghost with alpha: ${collapseButton.alpha}") // ЛОГ СЮДА!
-//            canvas.withTranslation(
-//                collapseButton.left.toFloat(), collapseButton.top.toFloat()
-//            ) { collapseButton.draw(canvas) }
-//        }
-    }
-
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        super.onSizeChanged(w, h, oldw, oldh)
-    }
-
     private fun animateCollapseButtonAppearance(
         pathInterpolator: PathInterpolator,
         animDuration: Long,
@@ -357,6 +321,7 @@ class NoteStackView @JvmOverloads constructor(
             transitionSet.addTransition(viewTransition)
         }
 
+        updateCollapseButtonBeforeAnimation()
         transitionSet.addListener(object: TransitionListenerAdapter() {
             override fun onTransitionEnd(transition: Transition?) {
                 animateCollapseButtonAppearance(
@@ -396,29 +361,16 @@ class NoteStackView @JvmOverloads constructor(
         when(event.action) {
             MotionEvent.ACTION_DOWN -> return true
             MotionEvent.ACTION_UP -> {
-                performExpandAnimation()
-                isExpanded = true
+                if(!isExpanded) {
+                    onClickExpand()
+                    performExpandAnimation()
+                    isExpanded = true
+                }
                 return true
             }
         }
         return super.onTouchEvent(event)
     }
-
-    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        if (ev.x >= collapseButton.left && ev.x <= collapseButton.right &&
-            ev.y >= collapseButton.top && ev.y <= collapseButton.bottom) {
-
-            val offsetEv = MotionEvent.obtain(ev)
-            offsetEv.offsetLocation(-collapseButton.left.toFloat(), -collapseButton.top.toFloat())
-
-            if (collapseButton.dispatchTouchEvent(offsetEv)) {
-                offsetEv.recycle()
-                return true
-            }
-        }
-        return super.dispatchTouchEvent(ev)
-    }
-
     private fun sortIndexes() {
         try {
             childIndexes?.sortWith(Comparator { i1, i2 ->
@@ -439,7 +391,8 @@ class NoteStackView @JvmOverloads constructor(
     }
 
     private fun updateChildIndexes() {
-        childIndexes = MutableList(childCount) { index -> index }
+        childIndexes = (0 until childCount)
+                .filter { getChildAt(it) is NoteView }.toMutableList()
         sortIndexes()
         childIndexes?.let {
             if(stackMaxVisible < childCount) {
@@ -504,7 +457,7 @@ class NoteStackView @JvmOverloads constructor(
 
         private var onCollapseClick: () -> Unit = { }
 
-        fun setOnCollapseClickListener(onClick: () -> Unit) {
+        fun setOnButtonClickListener(onClick: () -> Unit) {
             onCollapseClick = onClick
         }
 

@@ -20,7 +20,8 @@ sealed interface ViewTypedModel : Parcelable , ViewTyped {
 
     data class NoteStack(
         val stackId: Int,
-        val notes: List<Note>
+        val notes: List<Note>,
+        val isExpanded: Boolean
     ) : ViewTypedModel {
         @IgnoredOnParcel
         override val uid = "note_${stackId}"

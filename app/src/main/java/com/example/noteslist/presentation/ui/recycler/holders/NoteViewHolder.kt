@@ -11,6 +11,7 @@ class NoteViewHolder(
     private val onLongClick: (noteId: Long) -> Unit
 ) : RecyclerView.ViewHolder(binding.root) {
 
+    // TODO Почему я пложу сущности???
     private val onLongClickListener = View.OnLongClickListener { view ->
         val noteId = view.tag as Long
         onLongClick(noteId)

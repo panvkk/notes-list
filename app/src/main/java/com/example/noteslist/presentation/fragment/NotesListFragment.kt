@@ -61,7 +61,7 @@ class NotesListFragment : Fragment() {
         }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.viewTypedNotes.collect { newNotes ->
+                viewModel.uiState.collect { newNotes ->
                     notesAdapter.setNewData(newNotes)
                 }
             }
@@ -99,13 +99,21 @@ class NotesListFragment : Fragment() {
 
     private fun setupAdapter() : MultiTypeAdapter {
         val navController = findNavController()
+
         val onNoteClick = { noteId: Long ->
             navController.navigate(NotesListFragmentDirections.openDetails(noteId)) }
         val onNoteLongClick = { noteId: Long -> viewModel.onNoteLongClick(noteId) }
+        val onStackExpandClick = { stackId: Int -> viewModel.expandStack(stackId) }
+        val onStackCollapseClick = { stackId: Int -> viewModel.collapseStack(stackId) }
+        val isStackExpanded = { stackId: Int -> viewModel.isStackExpanded(stackId)}
 
         val delegates = listOf(
             NoteDelegate(onNoteClick, onNoteLongClick),
-            NoteStackDelegate(onNoteClick, onNoteLongClick),
+            NoteStackDelegate(
+                onNoteClick, onNoteLongClick,
+                onStackExpandClick, onStackCollapseClick,
+                isStackExpanded
+            ),
             DateTitleDelegate()
         )
         val adapter = MultiTypeAdapter(delegates)
