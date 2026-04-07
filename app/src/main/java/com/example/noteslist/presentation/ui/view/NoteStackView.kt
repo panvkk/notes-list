@@ -6,7 +6,6 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Path
 import android.graphics.Point
 import android.graphics.Rect
 import android.os.Bundle
@@ -92,11 +91,9 @@ class NoteStackView @JvmOverloads constructor(
     private fun initCollapseButton() {
         collapseButton.apply {
             layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
-            alpha = 0f
             setOnButtonClickListener {
                 onClickCollapse()
-                performCollapseAnimation()
-                isExpanded = false
+                collapseStack()
             }
         }
     }
@@ -287,7 +284,7 @@ class NoteStackView @JvmOverloads constructor(
             }
     }
 
-    private fun performExpandAnimation() {
+    private fun expandStack() {
         val pathInterpolator = PathInterpolator(0.4f, 0.1f, 0.2f, 1f)
         val transitionSet = TransitionSet().setInterpolator(pathInterpolator)
 
@@ -337,9 +334,11 @@ class NoteStackView @JvmOverloads constructor(
             }
         })
         TransitionManager.beginDelayedTransition(this, transitionSet)
+
+        isExpanded = true
     }
 
-    private fun performCollapseAnimation() {
+    private fun collapseStack() {
         val indexes = childIndexes?.toList() ?: return
         for(i in indexes) {
             val view = getChildAt(i)
@@ -347,6 +346,7 @@ class NoteStackView @JvmOverloads constructor(
         }
         TransitionManager.beginDelayedTransition(this)
 
+        isExpanded = false
     }
 
     // Перехват нажатия, если стэк свёрнут
@@ -361,8 +361,7 @@ class NoteStackView @JvmOverloads constructor(
             MotionEvent.ACTION_UP -> {
                 if(!isExpanded) {
                     onClickExpand()
-                    performExpandAnimation()
-                    isExpanded = true
+                    expandStack()
                 }
                 return true
             }

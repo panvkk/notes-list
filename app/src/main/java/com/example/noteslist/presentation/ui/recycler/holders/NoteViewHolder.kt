@@ -7,22 +7,9 @@ import com.example.noteslist.databinding.ItemNoteViewBinding
 
 class NoteViewHolder(
     private val binding: ItemNoteViewBinding,
-    private val onClick: (noteId: Long) -> Unit,
-    private val onLongClick: (noteId: Long) -> Unit
+    private val onClickListener: View.OnClickListener,
+    private val onLongClickListener: View.OnLongClickListener
 ) : RecyclerView.ViewHolder(binding.root) {
-
-    // TODO Почему я пложу сущности???
-    private val onLongClickListener = View.OnLongClickListener { view ->
-        val noteId = view.tag as Long
-        onLongClick(noteId)
-        true
-    }
-
-    private val onClickListener = View.OnClickListener { view ->
-        val noteId = view.tag as Long
-        onClick(noteId)
-    }
-
     init {
         binding.noteView.apply {
             setOnClickListener(onClickListener)
