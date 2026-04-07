@@ -20,13 +20,9 @@
         android:name="com.example.noteslist.presentation.fragment.NoteDetailsFragment">
 
         <argument
-            android:name="note_id"
+            android:name="noteId"
             app:argType="long"
             android:defaultValue="-1L"/>
-
-        <action
-            android:id="@+id/return_to_list"
-            app:destination="@id/notes_list"/>
     </fragment>
 
 </navigation>

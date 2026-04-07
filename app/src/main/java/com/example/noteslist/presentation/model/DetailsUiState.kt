@@ -6,7 +6,8 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class DetailsUiState(
     val noteId: Long?,
-    val note: ViewTypedModel.Note,
+    val currentNote: ViewTypedModel.Note,
+    val originalNote: ViewTypedModel.Note,
     val error: DetailsScreenError? = null
 ) : Parcelable
 
