@@ -5,11 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.R
@@ -19,8 +19,10 @@ import com.example.noteslist.presentation.ui.recycler.adapter.delegates.DateTitl
 import com.example.noteslist.presentation.ui.recycler.adapter.delegates.NoteDelegate
 import com.example.noteslist.presentation.ui.recycler.adapter.delegates.NoteStackDelegate
 import com.example.noteslist.presentation.ui.recycler.decoration.NoteItemDecoration
+import com.example.noteslist.presentation.viewmodel.GlobalViewModel
 import com.example.noteslist.presentation.viewmodel.NotesListViewModel
 import kotlinx.coroutines.launch
+import kotlin.getValue
 
 class NotesListFragment : Fragment() {
 
@@ -28,6 +30,7 @@ class NotesListFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel by viewModels<NotesListViewModel> { NotesListViewModel.factory }
+    private val globalViewModel: GlobalViewModel by activityViewModels()
 
     private val notesAdapter by lazy { setupAdapter() }
 
@@ -72,9 +75,7 @@ class NotesListFragment : Fragment() {
     private fun setupListeners() {
         binding.addNoteButton.setOnClickListener {
             if(it.alpha > 0f) {
-                findNavController().navigate(
-                    NotesListFragmentDirections.openDetails(-1L)
-                )
+                globalViewModel.openCreateNote()
             }
         }
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -98,10 +99,7 @@ class NotesListFragment : Fragment() {
     }
 
     private fun setupAdapter() : MultiTypeAdapter {
-        val navController = findNavController()
-
-        val onNoteClick = { noteId: Long ->
-            navController.navigate(NotesListFragmentDirections.openDetails(noteId)) }
+        val onNoteClick = { noteId: Long -> globalViewModel.openEditNote(noteId) }
         val onNoteLongClick = { noteId: Long -> viewModel.onNoteLongClick(noteId) }
         val onStackExpandClick = { stackId: Int -> viewModel.expandStack(stackId) }
         val onStackCollapseClick = { stackId: Int -> viewModel.collapseStack(stackId) }

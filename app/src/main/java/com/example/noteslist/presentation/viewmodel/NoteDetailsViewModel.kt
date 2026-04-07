@@ -77,7 +77,8 @@ class NoteDetailsViewModel(
         _isNewNote.value = value
     }
 
-    fun setCurrentNote(newNoteId: Long?) {
+    fun setNote(newNoteId: Long?) {
+        _uiState.update { it.copy(error = null) }
         if(newNoteId == null) {
             updateIsNewNote(true)
             setNoteId(null)

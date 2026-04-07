@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.slidingpanelayout.widget.SlidingPaneLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/sliding_pane_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/notes_list_pane"
+        android:name="com.example.noteslist.presentation.fragment.NotesListFragment"
+        android:layout_width="300dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/note_details_pane"
+        android:name="com.example.noteslist.presentation.fragment.NoteDetailsFragment"
+        android:layout_width="300dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+
+</androidx.slidingpanelayout.widget.SlidingPaneLayout>

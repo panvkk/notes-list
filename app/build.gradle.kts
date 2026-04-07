@@ -62,5 +62,7 @@ dependencies {
     implementation(libs.androidx.navigation.ui)
     implementation(libs.androidx.navigation.fragment)
 
+    // SlidingPaneLayout - для оптимизации под ландшафтный режим
+    implementation(libs.androidx.slidingpanelayout)
 
 }

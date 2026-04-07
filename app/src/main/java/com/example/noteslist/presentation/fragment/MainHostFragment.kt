@@ -4,25 +4,21 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.noteslist.databinding.FragmentMainHostBinding
 import com.example.noteslist.presentation.model.GlobalUiState
-import com.example.noteslist.presentation.ui.screen.NoteDetailsScreen
-import com.example.noteslist.presentation.ui.theme.NotesListTheme
 import com.example.noteslist.presentation.viewmodel.GlobalViewModel
-import com.example.noteslist.presentation.viewmodel.NoteDetailsViewModel
 import kotlinx.coroutines.launch
 import kotlin.getValue
 
-class NoteDetailsFragment : Fragment() {
+class MainHostFragment : Fragment() {
+    private var _binding: FragmentMainHostBinding? = null
+    private val binding get() = _binding!!
 
-    private val viewModel by viewModels<NoteDetailsViewModel> { NoteDetailsViewModel.factory }
     private val globalViewModel: GlobalViewModel by activityViewModels()
 
     override fun onCreateView(
@@ -30,30 +26,29 @@ class NoteDetailsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                NotesListTheme {NoteDetailsScreen(
-                    viewModel = viewModel,
-                    onClickBack = { globalViewModel.closeDetails() }
-                )}
-            }
-        }
+        _binding = FragmentMainHostBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val slidingPane = binding.slidingPaneLayout
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 globalViewModel.uiState.collect { state ->
                     when(state) {
-                        is GlobalUiState.CreateNote -> viewModel.setNote(null)
-                        is GlobalUiState.EditNote ->  viewModel.setNote(state.noteId)
-                        else -> {  }
+                        is GlobalUiState.CreateNote -> slidingPane.openPane()
+                        is GlobalUiState.EditNote -> slidingPane.openPane()
+                        is GlobalUiState.Idle -> slidingPane.closePane()
                     }
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
