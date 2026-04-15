@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.update
 class GlobalViewModel : ViewModel() {
     private val _uiState = MutableStateFlow<GlobalUiState>(GlobalUiState.Idle)
     val uiState = _uiState.asStateFlow()
+    var hasUnsavedChanges: Boolean = false
 
     fun openEditNote(noteId: Long) {
         _uiState.update { GlobalUiState.EditNote(noteId) }

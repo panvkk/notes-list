@@ -35,7 +35,8 @@ class NoteDetailsFragment : Fragment() {
             setContent {
                 NotesListTheme {NoteDetailsScreen(
                     viewModel = viewModel,
-                    onClickBack = { globalViewModel.closeDetails() }
+                    onClickSave = { globalViewModel.closeDetails() } ,
+                    onClickCancel = { requireActivity().onBackPressedDispatcher.onBackPressed() }
                 )}
             }
         }
@@ -52,6 +53,13 @@ class NoteDetailsFragment : Fragment() {
                         is GlobalUiState.EditNote ->  viewModel.setNote(state.noteId)
                         else -> {  }
                     }
+                }
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.hasUnsavedChanges.collect { state ->
+                    globalViewModel.hasUnsavedChanges = state
                 }
             }
         }

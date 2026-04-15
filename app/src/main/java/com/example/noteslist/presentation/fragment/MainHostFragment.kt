@@ -10,12 +10,13 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.slidingpanelayout.widget.SlidingPaneLayout
+import com.example.noteslist.core.presentation.showOnExitAlert
+import com.example.noteslist.core.presentation.showUnsavedChangesAlert
 import com.example.noteslist.databinding.FragmentMainHostBinding
 import com.example.noteslist.presentation.model.GlobalUiState
 import com.example.noteslist.presentation.viewmodel.GlobalViewModel
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
-import kotlin.getValue
 
 class MainHostFragment : Fragment() {
     private var _binding: FragmentMainHostBinding? = null
@@ -38,6 +39,8 @@ class MainHostFragment : Fragment() {
         requireActivity().onBackPressedDispatcher.addCallback(backPressedCallback)
 
         val slidingPane = binding.slidingPaneLayout
+        slidingPane.lockMode = SlidingPaneLayout.LOCK_MODE_LOCKED // TODO узнать в чём же проблема редких зависаний
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 globalViewModel.uiState.collect { state ->
@@ -55,36 +58,24 @@ class MainHostFragment : Fragment() {
         override fun handleOnBackPressed() {
             val slidingPane = binding.slidingPaneLayout
 
-            if(slidingPane.isSlideable && slidingPane.isOpen) {
-                showUnsavedChangesAlert(onConfirm = { slidingPane.closePane() })
-            } else if(slidingPane.isOpen) {
-                showUnsavedChangesAlert(onConfirm = { slidingPane.closePane() })
-                slidingPane.closePane()
+            // Открыта заметка и это портретный режим - 1 случай
+            // Открыта заметка и ландшафтный режим - 2 случай (открываем экран создания заметки или выходим)
+            if((slidingPane.isSlideable && slidingPane.isOpen)) {
+                if(globalViewModel.hasUnsavedChanges)
+                    showUnsavedChangesAlert(requireContext()) { globalViewModel.closeDetails() }
+                else globalViewModel.closeDetails()
+            } else if(!slidingPane.isSlideable) {
+                if(globalViewModel.uiState.value is GlobalUiState.EditNote) {
+                    if(globalViewModel.hasUnsavedChanges)
+                        showUnsavedChangesAlert(requireContext()) { globalViewModel.openCreateNote()}
+                    else globalViewModel.openCreateNote()
+                } else {
+                    showOnExitAlert(requireContext()) { requireActivity().finish() }
+                }
             } else {
-                showOnExitAlert()
+                showOnExitAlert(requireContext()) { requireActivity().finish() }
             }
         }
-    }
-
-    private fun showOnExitAlert() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Выйти?")
-            .setMessage("Вы уверены, что хотите выйти из приложения?")
-            .setPositiveButton("Да", { _, _ -> requireActivity().finish() })
-            .setNegativeButton("Нет", null)
-            .show()
-    }
-
-    private fun showUnsavedChangesAlert(onConfirm: () -> Unit) {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Назад?")
-            .setMessage("Несохранённые данные будут потеряны.")
-            .setPositiveButton("Да", { _, _ ->
-                requireActivity().finish()
-                onConfirm()
-            })
-            .setNegativeButton("Нет",  null)
-            .show()
     }
 
     override fun onDestroyView() {

@@ -39,17 +39,19 @@ import com.example.noteslist.presentation.viewmodel.NoteDetailsViewModel
 @Composable
 fun NoteDetailsScreen(
     viewModel: NoteDetailsViewModel,
-    onClickBack: () -> Unit,
+    onClickSave: () -> Unit,
+    onClickCancel: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val currentNote = viewModel.uiState.collectAsState().value.note
+    val currentNote = viewModel.uiState.collectAsState().value.currentNote
     val currentError = viewModel.uiState.collectAsState().value.error
     val isNewNote = viewModel.isNewNote.collectAsState().value
 
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->
             when(event) {
-                NavigationEvent.NavigateBack -> onClickBack()
+                NavigationEvent.OnCancel -> onClickCancel()
+                NavigationEvent.OnSave -> onClickSave()
             }
         }
     }

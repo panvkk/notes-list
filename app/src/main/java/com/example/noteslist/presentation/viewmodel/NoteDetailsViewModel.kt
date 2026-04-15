@@ -22,8 +22,11 @@ import com.example.noteslist.presentation.model.DetailsUiState
 import com.example.noteslist.presentation.model.ViewTypedModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -51,24 +54,28 @@ class NoteDetailsViewModel(
     private val _navigationEvent = Channel<NavigationEvent>()
     val navigationEvent = _navigationEvent.receiveAsFlow()
 
+    val hasUnsavedChanges = _uiState.map { state ->
+        state.originalNote != state.currentNote
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), false)
+
     fun updateNoteTitle(value: String) {
         _uiState.apply {
-            update { it.copy(note = it.note.copy(title = value)) }
+            update { it.copy(currentNote = it.currentNote.copy(title = value)) }
             if(this.value.error is DetailsScreenError.TitleEmpty)
                 update { it.copy(error = null) }
         }
     }
     fun updateNoteDescription(value: String) {
-        _uiState.update { it.copy(note = it.note.copy(description = value)) }
+        _uiState.update { it.copy(currentNote = it.currentNote.copy(description = value)) }
     }
     fun updateIsNoteImportant(value: Boolean) {
-        _uiState.update { it.copy(note = it.note.copy(isImportant = value)) }
+        _uiState.update { it.copy(currentNote = it.currentNote.copy(isImportant = value)) }
     }
     fun updateIsNoteRead(value: Boolean) {
-        _uiState.update { it.copy(note = it.note.copy(isRead = value)) }
+        _uiState.update { it.copy(currentNote = it.currentNote.copy(isRead = value)) }
     }
-    private fun setNote(value: ViewTypedModel.Note) {
-        _uiState.update { it.copy(note = value) }
+    private fun setCurrentAndOriginalNotes(value: ViewTypedModel.Note) {
+        _uiState.update { it.copy(currentNote = value, originalNote = value) }
     }
     private fun setNoteId(value: Long?) {
         _uiState.update { it.copy(noteId = value) }
@@ -82,9 +89,7 @@ class NoteDetailsViewModel(
         if(newNoteId == null) {
             updateIsNewNote(true)
             setNoteId(null)
-            updateNoteTitle("")
-            updateNoteDescription("")
-            updateIsNoteImportant(false)
+            setCurrentAndOriginalNotes(ViewTypedModel.Note(-1, "", "", false, "", false))
         } else {
             var newNote: ViewTypedModel.Note? = null
             findNoteUseCase.invoke(newNoteId)
@@ -95,41 +100,43 @@ class NoteDetailsViewModel(
                     Log.e(TAG, msg)
                 }
             setNoteId(newNote?.id ?: return)
-            setNote(newNote)
+            setCurrentAndOriginalNotes(newNote)
             updateIsNewNote(false)
         }
     }
 
     fun submitNote() {
-        _uiState.value.note.apply {
+        _uiState.value.currentNote.apply {
             val result = if (_isNewNote.value) {
                 createNoteUseCase.invoke(title, description, isImportant)
             } else {
-                updateNoteUseCase.invoke(_uiState.value.note.toDomain())
+                updateNoteUseCase.invoke(_uiState.value.currentNote.toDomain())
             }
             result
-                .onSuccess { cancel() }
-                .onFailure { exception ->
-                val msg = exception.message ?: "Unknown error."
-                when (exception) {
-                    NoteValidationException.TitleEmpty() -> {
-                        _uiState.update { it.copy(error = DetailsScreenError.TitleEmpty()) }
-                    }
-                    else -> {
-                        _uiState.update { it.copy(error = DetailsScreenError.Other(msg)) }
-                        Log.e(TAG, msg)
+                .onSuccess {
+                viewModelScope.launch {
+                    _navigationEvent.send(NavigationEvent.OnSave)
+                }
+            }.onFailure { exception ->
+                    val msg = exception.message ?: "Unknown error."
+                    when (exception) {
+                        is NoteValidationException.TitleEmpty -> {
+                            _uiState.update { it.copy(error = DetailsScreenError.TitleEmpty()) }
+                        }
+                        else -> {
+                            _uiState.update { it.copy(error = DetailsScreenError.Other(msg)) }
+                            Log.e(TAG, msg)
+                        }
                     }
                 }
-            }
         }
     }
 
     fun cancel() {
         viewModelScope.launch {
-            _navigationEvent.send(NavigationEvent.NavigateBack)
+            _navigationEvent.send(NavigationEvent.OnCancel)
         }
     }
-
     private fun generateInitialState() : DetailsUiState {
         val savedState = savedStateHandle.get<Bundle>(STATE_BUNDLE_KEY)?.let {
             BundleCompat.getParcelable(it, STATE_KEY, DetailsUiState::class.java)
@@ -137,6 +144,7 @@ class NoteDetailsViewModel(
 
         return savedState ?: DetailsUiState(
             noteId = null,
+            ViewTypedModel.Note(-1, "", "", false, "", false),
             ViewTypedModel.Note(-1, "", "", false, "", false)
         )
     }
@@ -160,5 +168,6 @@ class NoteDetailsViewModel(
 }
 
 sealed interface NavigationEvent {
-    data object NavigateBack : NavigationEvent
+    data object OnCancel : NavigationEvent
+    data object OnSave : NavigationEvent
 }
