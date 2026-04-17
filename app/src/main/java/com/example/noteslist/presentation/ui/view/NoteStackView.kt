@@ -285,6 +285,7 @@ class NoteStackView @JvmOverloads constructor(
     }
 
     private fun expandStack() {
+        val parentViewGroup = parent as ViewGroup
         val pathInterpolator = PathInterpolator(0.4f, 0.1f, 0.2f, 1f)
         val transitionSet = TransitionSet().setInterpolator(pathInterpolator)
 
@@ -299,6 +300,10 @@ class NoteStackView @JvmOverloads constructor(
 
         val transitionDuration =
             min(maxDuration, baseDuration + indexes.size * durationFactor)
+        // Анимация изменения размеров всего стэка, нет таргета, чтобы пинался ресайклер(или любой другой парент вью групп)
+        transitionSet.addTransition(ChangeBounds().apply{
+            setDuration(transitionDuration)
+        })
 
         var childCounter = 0
         for(i in indexes) {
@@ -333,18 +338,25 @@ class NoteStackView @JvmOverloads constructor(
                 }
             }
         })
-        TransitionManager.beginDelayedTransition(this, transitionSet)
+        TransitionManager.beginDelayedTransition(parentViewGroup, transitionSet)
 
         isExpanded = true
     }
 
     private fun collapseStack() {
+        val parentViewGroup = parent as ViewGroup
+        val pathInterpolator = PathInterpolator(0.4f, 0.1f, 0.2f, 1f)
+
         val indexes = childIndexes?.toList() ?: return
         for(i in indexes) {
             val view = getChildAt(i)
             if(i in invisibleChildren) view.visibility = INVISIBLE
         }
-        TransitionManager.beginDelayedTransition(this)
+        val collapseAnimation = ChangeBounds().apply {
+            setDuration(400L)
+            setInterpolator(pathInterpolator)
+        }
+        TransitionManager.beginDelayedTransition(parentViewGroup, collapseAnimation)
 
         isExpanded = false
     }
