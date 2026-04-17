@@ -11,6 +11,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.noteslist.NotesListApplication
 import com.example.noteslist.domain.usecase.FindNoteUseCase
 import com.example.noteslist.domain.usecase.NotesUseCase
+import com.example.noteslist.domain.usecase.UpdateNoteReadUseCase
 import com.example.noteslist.domain.usecase.UpdateNoteUseCase
 import com.example.noteslist.presentation.mappers.toDomain
 import com.example.noteslist.presentation.mappers.toUiModel
@@ -21,8 +22,7 @@ import kotlinx.coroutines.flow.stateIn
 
 class NotesListViewModel(
     private val notesUseCase: NotesUseCase,
-    private val findNoteUseCase: FindNoteUseCase,
-    private val updateNoteUseCase: UpdateNoteUseCase
+    private val updateNoteReadUseCase: UpdateNoteReadUseCase
 ) : ViewModel() {
 
     val viewTypedNotes = notesUseCase.invoke()
@@ -36,14 +36,8 @@ class NotesListViewModel(
             initialValue = emptyList()
         )
     fun onNoteLongClick(noteId: Long) {
-        var note: ViewTypedModel.Note? = null
-        findNoteUseCase.invoke(noteId).onSuccess {
-            note = it.toUiModel()
-        }.onFailure { Log.e(TAG, it.message ?: "Unknown Error.") }
-
-        val isNoteRead = note?.isRead ?: return
-        updateNoteUseCase.invoke(note.copy(isRead = !isNoteRead).toDomain())
-        // TODO Потом добавлю обработку результата инвоука
+        updateNoteReadUseCase.invoke(noteId)
+            .onFailure { Log.e(TAG, it.message ?: "Unknown Error.")  }
     }
     private fun getViewTypedData(notes: List<ViewTypedModel.Note>) : List<ViewTypedModel> {
         val viewTypedData = mutableListOf<ViewTypedModel>()
@@ -97,8 +91,7 @@ class NotesListViewModel(
                 val application = this[APPLICATION_KEY] as NotesListApplication
                 NotesListViewModel(
                     application.notesUseCase,
-                    application.findNoteUseCase,
-                    application.updateNoteUseCase)
+                    application.updateNoteReadUseCase)
             }
         }
     }

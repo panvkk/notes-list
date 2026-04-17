@@ -1,13 +1,10 @@
 package com.example.noteslist.domain.usecase
 
-import android.util.Log
 import com.example.noteslist.domain.model.NoteModel
 import com.example.noteslist.domain.repository.NotesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
-import java.util.Comparator.nullsLast
-import kotlin.comparisons.nullsLast
 
 class NotesUseCase(
     private val repository: NotesRepository

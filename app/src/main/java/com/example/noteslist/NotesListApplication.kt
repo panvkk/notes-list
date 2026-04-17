@@ -5,6 +5,7 @@ import com.example.noteslist.data.local.NotesRepositoryImpl
 import com.example.noteslist.domain.usecase.CreateNoteUseCase
 import com.example.noteslist.domain.usecase.FindNoteUseCase
 import com.example.noteslist.domain.usecase.NotesUseCase
+import com.example.noteslist.domain.usecase.UpdateNoteReadUseCase
 import com.example.noteslist.domain.usecase.UpdateNoteUseCase
 
 class NotesListApplication : Application() {
@@ -12,6 +13,7 @@ class NotesListApplication : Application() {
     val createNoteUseCase by lazy { CreateNoteUseCase(notesRepository) }
     val findNoteUseCase by lazy { FindNoteUseCase(notesRepository) }
     val updateNoteUseCase by lazy { UpdateNoteUseCase(notesRepository) }
+    val updateNoteReadUseCase by lazy { UpdateNoteReadUseCase(findNoteUseCase, updateNoteUseCase) }
     val notesUseCase by lazy { NotesUseCase(notesRepository) }
 
 }
