@@ -11,6 +11,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.noteslist.presentation.ui.screen.NoteDetailsScreen
+import com.example.noteslist.presentation.ui.theme.NotesListTheme
 import com.example.noteslist.presentation.viewmodel.NoteDetailsViewModel
 
 class NoteDetailsFragment : Fragment() {
@@ -33,13 +34,15 @@ class NoteDetailsFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                NoteDetailsScreen(
-                    viewModel = viewModel,
-                    onClickBack = {
-                        findNavController()
-                            .navigate(NoteDetailsFragmentDirections.returnToList())
-                    }
-                )
+                NotesListTheme {
+                    NoteDetailsScreen(
+                        viewModel = viewModel,
+                        onClickBack = {
+                            findNavController()
+                                .navigate(NoteDetailsFragmentDirections.returnToList())
+                        }
+                    )
+                }
             }
         }
     }

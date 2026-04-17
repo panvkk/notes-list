@@ -106,12 +106,13 @@ class NoteDetailsViewModel(
             } else {
                 updateNoteUseCase.invoke(_uiState.value.note.toDomain())
             }
-            result.onSuccess { cancel() }
+            result
+                .onSuccess { cancel() }
                 .onFailure { exception ->
                 val msg = exception.message ?: "Unknown error."
                 when (exception) {
-                    NoteValidationException.TitleEmpty -> {
-                        _uiState.update { it.copy(error = DetailsScreenError.TitleEmpty(msg)) }
+                    NoteValidationException.TitleEmpty() -> {
+                        _uiState.update { it.copy(error = DetailsScreenError.TitleEmpty()) }
                     }
                     else -> {
                         _uiState.update { it.copy(error = DetailsScreenError.Other(msg)) }

@@ -11,7 +11,7 @@ class UpdateNoteUseCase(
         return if(note == null || note.id == -1L)
             Result.failure(IllegalArgumentException("Note with null id cannot be saved."))
         else if(note.title.isEmpty())
-            Result.failure(NoteValidationException.TitleEmpty)
+            Result.failure(NoteValidationException.TitleEmpty())
         else repository.updateNote(note)
     }
 }

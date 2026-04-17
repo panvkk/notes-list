@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -22,15 +22,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.noteslist.R
 import com.example.noteslist.presentation.model.DetailsScreenError
+import com.example.noteslist.presentation.ui.component.CustomTextField
 import com.example.noteslist.presentation.viewmodel.NavigationEvent
 import com.example.noteslist.presentation.viewmodel.NoteDetailsViewModel
 
@@ -59,50 +58,33 @@ fun NoteDetailsScreen(
             .padding(16.dp)
             .fillMaxSize()
     ) {
-        TextField(
+        CustomTextField(
             value = currentNote.title,
             onValueChange = { viewModel.updateNoteTitle(it) },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
             maxLines = 1,
             label = { Text(stringResource(R.string.text_field_title_label)) },
-            isError = currentError is DetailsScreenError.TitleEmpty,
-            colors = TextFieldDefaults.colors(
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedLabelColor = colorResource(R.color.text_field_label_color),
-                cursorColor = colorResource(R.color.text_field_cursor_color),
-                errorTextColor = colorResource(R.color.error_color),
-                errorContainerColor = colorResource(R.color.error_light_color),
-            )
+            isError = currentError is DetailsScreenError.TitleEmpty
         )
         if(currentError is DetailsScreenError.TitleEmpty) {
             Text(
-                text = currentError.message,
-                fontSize = with(LocalDensity.current) { dimensionResource(R.dimen.title_error_text_size).toSp() },
+                text = stringResource(R.string.empty_title_error),
+                style = MaterialTheme.typography.titleSmall,
                 color = colorResource(R.color.error_color),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(start = 4.dp)
             )
         }
-        TextField(
+        CustomTextField(
             value = currentNote.description,
             onValueChange = { viewModel.updateNoteDescription(it) },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            label = { Text(stringResource(R.string.text_field_description_label)) },
-            colors = TextFieldDefaults.colors(
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedLabelColor = colorResource(R.color.text_field_label_color),
-                cursorColor = colorResource(R.color.text_field_cursor_color)
-            )
+            label = { Text(stringResource(R.string.text_field_description_label)) }
         )
         Row {
             Text(
                 text = stringResource(R.string.importance_switch_title_text),
-                fontSize = with(LocalDensity.current) { dimensionResource(R.dimen.switch_title_text_size).toSp() },
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
@@ -112,8 +94,8 @@ fun NoteDetailsScreen(
                 checked = currentNote.isImportant,
                 onCheckedChange = { viewModel.updateIsNoteImportant(it) },
                 colors = SwitchDefaults.colors(
-                    checkedBorderColor = colorResource(R.color.active_button_color),
-                    checkedTrackColor =  colorResource(R.color.active_button_color)
+                    checkedBorderColor = MaterialTheme.colorScheme.primary,
+                    checkedTrackColor =  MaterialTheme.colorScheme.primary
                 )
             )
         }
@@ -121,8 +103,7 @@ fun NoteDetailsScreen(
             Row {
                 Text(
                     text = stringResource(R.string.is_read_switch_title_text),
-                    fontSize = with(LocalDensity.current) { dimensionResource(R.dimen.switch_title_text_size).toSp() },
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(horizontal = 8.dp)
@@ -132,24 +113,24 @@ fun NoteDetailsScreen(
                     checked = currentNote.isRead,
                     onCheckedChange = { viewModel.updateIsNoteRead(it) },
                     colors = SwitchDefaults.colors(
-                        checkedBorderColor = colorResource(R.color.active_button_color),
-                        checkedTrackColor =  colorResource(R.color.active_button_color)
+                        checkedBorderColor = MaterialTheme.colorScheme.primary,
+                        checkedTrackColor =  MaterialTheme.colorScheme.primary
                     )
                 )
             }
             Text(
                 text = stringResource(R.string.creation_date_prefix_text) + currentNote.date,
-                fontSize = with(LocalDensity.current) { dimensionResource(R.dimen.date_title_text_size).toSp() },
-                color = colorResource(R.color.note_date),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSecondary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(8.dp)
             )
         }
         if(currentError is DetailsScreenError.Other) {
             Text(
-                text = currentError.message,
-                fontSize = with(LocalDensity.current) { dimensionResource(R.dimen.error_title_text_size).toSp() },
-                color = colorResource(R.color.error_color),
+                text = currentError.message ?: stringResource(R.string.unknown_error),
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.error,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(8.dp)
             )
@@ -159,21 +140,20 @@ fun NoteDetailsScreen(
         ) {
             OutlinedButton(
                 onClick = { viewModel.cancel() },
-                shape = RoundedCornerShape(16.dp),
+                shape = MaterialTheme.shapes.large,
                 modifier = Modifier
                     .weight(1f)
                     .height(dimensionResource(R.dimen.button_height))
             ) {
                 Text(
                     text = stringResource(R.string.cancel_button_text),
-                    fontSize = with(LocalDensity.current) { dimensionResource(R.dimen.button_text_size).toSp() },
-                    fontWeight = FontWeight.Bold
+                    style = MaterialTheme.typography.titleMedium
                 )
             }
             Button(
                 onClick = { viewModel.submitNote() },
-                colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.active_button_color)),
-                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                shape = MaterialTheme.shapes.large,
                 modifier = Modifier
                     .weight(1f)
                     .height(dimensionResource(R.dimen.button_height))
@@ -181,8 +161,7 @@ fun NoteDetailsScreen(
                 Text(
                     text = if(isNewNote) stringResource(R.string.create_button_text)
                         else stringResource(R.string.update_button_text),
-                    fontSize = with(LocalDensity.current) { dimensionResource(R.dimen.button_text_size).toSp() },
-                    fontWeight = FontWeight.ExtraBold
+                    style = MaterialTheme.typography.titleLarge
                 )
             }
         }
