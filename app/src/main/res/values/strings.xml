@@ -15,4 +15,10 @@
     <!-- Errors -->
     <string name="empty_title_error">Необходимо заполнить</string>
     <string name="unknown_error">Неизвестная ошибка.</string>
+    <string name="settings_title">Настройки</string>
+    <string name="stack_spacing_parameter">Расстояние между элементами стэка</string>
+    <string name="decrease_icon_description">Уменьшить число</string>
+    <string name="increase_icon_description">Увеличить число</string>
+    <string name="settings_button_description">Параметры</string>
+    <string name="stack_max_visible_parameter">Число видимых заметок стэка</string>
 </resources>

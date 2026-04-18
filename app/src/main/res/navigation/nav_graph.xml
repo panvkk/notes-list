@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/list_and_details">
+
+    <fragment
+        android:id="@+id/list_and_details"
+        android:name="com.example.noteslist.presentation.fragment.MainHostFragment"
+        tools:layout="@layout/fragment_main_host">
+        <action
+            android:id="@+id/open_settings"
+            app:destination="@id/settings"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/settings"
+        android:name="com.example.noteslist.presentation.fragment.SettingsFragment">
+        <action
+            android:id="@+id/open_list"
+            app:destination="@id/list_and_details"/>
+    </fragment>
+
+</navigation>

@@ -33,11 +33,13 @@ class NoteDetailsFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                NotesListTheme {NoteDetailsScreen(
-                    viewModel = viewModel,
-                    onClickSave = { globalViewModel.closeDetails() } ,
-                    onClickCancel = { requireActivity().onBackPressedDispatcher.onBackPressed() }
-                )}
+                NotesListTheme {
+                    NoteDetailsScreen(
+                        viewModel = viewModel,
+                        onClickSave = { globalViewModel.closeDetails() } ,
+                        onClickCancel = { requireActivity().onBackPressedDispatcher.onBackPressed() }
+                    )
+                }
             }
         }
     }

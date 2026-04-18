@@ -10,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.R
@@ -51,7 +52,7 @@ class NotesListFragment : Fragment() {
 
         with(binding.recyclerView) {
             adapter = notesAdapter
-            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+            layoutManager = setupLayoutManager()
             clipChildren = false
             clipToPadding = false
 
@@ -78,6 +79,9 @@ class NotesListFragment : Fragment() {
                 globalViewModel.openCreateNote()
             }
         }
+        binding.settingsButton.setOnClickListener {
+            findNavController().navigate(MainHostFragmentDirections.openSettings())
+        }
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             val animDuration = 200L
 
@@ -94,10 +98,30 @@ class NotesListFragment : Fragment() {
                         }
                     }
                 }
+                binding.settingsButton.apply {
+                    clearAnimation()
+                    when(newState) {
+                        RecyclerView.SCROLL_STATE_IDLE -> {
+                            animate().alpha(1f).setDuration(animDuration)
+                        }
+                        RecyclerView.SCROLL_STATE_DRAGGING -> {
+                            animate().alpha(0f).setDuration(animDuration)
+                        }
+                    }
+                }
             }
         })
     }
 
+    private fun setupLayoutManager() : RecyclerView.LayoutManager {
+        return object : LinearLayoutManager(context) {
+            override fun calculateExtraLayoutSpace(state: RecyclerView.State, extraLayoutSpace: IntArray) {
+                // Добавляем по 1500 пикселей сверху и снизу для лучшей работы анимаций в ресайклере
+                extraLayoutSpace[0] = 1500
+                extraLayoutSpace[1] = 1500
+            }
+        }
+    }
     private fun setupAdapter() : MultiTypeAdapter {
         val onNoteClick = { noteId: Long -> globalViewModel.openEditNote(noteId) }
         val onNoteLongClick = { noteId: Long -> viewModel.onNoteLongClick(noteId) }

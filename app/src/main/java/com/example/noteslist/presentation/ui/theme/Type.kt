@@ -6,6 +6,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 val NotesTypography = Typography(
+    headlineMedium = TextStyle(
+        fontSize = 24.sp,
+        fontWeight = FontWeight.ExtraBold
+    ),
     headlineSmall = TextStyle(
         fontSize = 20.sp
     ),

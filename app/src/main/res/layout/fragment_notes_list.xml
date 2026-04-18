@@ -27,4 +27,16 @@
         android:backgroundTint="@color/details_button_background_tint"
         app:tint="@color/details_button_foreground_tint" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/settingsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/settings_button_description"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_margin="16dp"
+        android:src="@drawable/settings_icon"
+        android:backgroundTint="@color/details_button_background_tint"
+        app:tint="@color/details_button_foreground_tint" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
