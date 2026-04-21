@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -23,7 +24,6 @@ import com.example.noteslist.presentation.ui.recycler.decoration.NoteItemDecorat
 import com.example.noteslist.presentation.viewmodel.GlobalViewModel
 import com.example.noteslist.presentation.viewmodel.NotesListViewModel
 import kotlinx.coroutines.launch
-import kotlin.getValue
 
 class NotesListFragment : Fragment() {
 
@@ -71,6 +71,14 @@ class NotesListFragment : Fragment() {
             }
         }
         setupListeners()
+        setupSearchEditText()
+        setupOnScrollAnimations()
+    }
+
+    private fun setupSearchEditText() {
+        binding.searchQueryField.doAfterTextChanged { text ->
+            viewModel.updateSearchQuery(text.toString())
+        }
     }
 
     private fun setupListeners() {
@@ -82,29 +90,40 @@ class NotesListFragment : Fragment() {
         binding.settingsButton.setOnClickListener {
             findNavController().navigate(MainHostFragmentDirections.openSettings())
         }
+    }
+
+    private fun setupOnScrollAnimations() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             val animDuration = 200L
 
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
-                binding.addNoteButton.apply {
-                    clearAnimation()
-                    when(newState) {
-                        RecyclerView.SCROLL_STATE_IDLE -> {
+                when(newState) {
+                    RecyclerView.SCROLL_STATE_IDLE -> {
+                        binding.addNoteButton.apply {
+                            clearAnimation()
                             animate().alpha(1f).setDuration(animDuration)
                         }
-                        RecyclerView.SCROLL_STATE_DRAGGING -> {
-                            animate().alpha(0f).setDuration(animDuration)
+                        binding.settingsButton.apply {
+                            clearAnimation()
+                            animate().alpha(1f).setDuration(animDuration)
+                        }
+                        binding.searchQueryFieldContainer.apply {
+                            clearAnimation()
+                            animate().alpha(1f).setDuration(animDuration)
                         }
                     }
-                }
-                binding.settingsButton.apply {
-                    clearAnimation()
-                    when(newState) {
-                        RecyclerView.SCROLL_STATE_IDLE -> {
-                            animate().alpha(1f).setDuration(animDuration)
+                    RecyclerView.SCROLL_STATE_DRAGGING -> {
+                        binding.addNoteButton.apply {
+                            clearAnimation()
+                            animate().alpha(0f).setDuration(animDuration)
                         }
-                        RecyclerView.SCROLL_STATE_DRAGGING -> {
+                        binding.settingsButton.apply {
+                            clearAnimation()
+                            animate().alpha(0f).setDuration(animDuration)
+                        }
+                        binding.searchQueryFieldContainer.apply {
+                            clearAnimation()
                             animate().alpha(0f).setDuration(animDuration)
                         }
                     }

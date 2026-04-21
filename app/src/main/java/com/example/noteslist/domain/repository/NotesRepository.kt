@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
 interface NotesRepository {
-    fun getNotes() : Flow<List<NoteModel>>
+    fun getNotes(query: String) : Flow<List<NoteModel>>
 
     fun addNote(title: String, description: String, date: LocalDate, isImportant: Boolean)
 

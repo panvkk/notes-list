@@ -59,11 +59,9 @@ class NoteDetailsViewModel(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), false)
 
     fun updateNoteTitle(value: String) {
-        _uiState.apply {
-            update { it.copy(currentNote = it.currentNote.copy(title = value)) }
-            if(this.value.error is DetailsScreenError.TitleEmpty)
-                update { it.copy(error = null) }
-        }
+        _uiState.update { it.copy(currentNote = it.currentNote.copy(title = value)) }
+        if(_uiState.value.error is DetailsScreenError.TitleEmpty)
+            _uiState.update { it.copy(error = null) }
     }
     fun updateNoteDescription(value: String) {
         _uiState.update { it.copy(currentNote = it.currentNote.copy(description = value)) }

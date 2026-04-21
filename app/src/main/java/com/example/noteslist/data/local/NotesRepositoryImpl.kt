@@ -63,7 +63,12 @@ class NotesRepositoryImpl : NotesRepository {
 
     private val _notesFlow = MutableStateFlow(currentNotes.toList())
 
-    override fun getNotes() = _notesFlow.asStateFlow().map { entities -> entities.map { it.toDomain() } }
+    override fun getNotes(query: String) = _notesFlow.asStateFlow()
+        .map { entities ->
+            entities
+                .filter { it.title.contains(query) }
+                .map { it.toDomain() }
+        }
 
     override fun addNote(title: String, description: String, date: LocalDate, isImportant: Boolean) {
         val noteDto = NoteDto(

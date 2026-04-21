@@ -13,16 +13,22 @@ import com.example.noteslist.domain.usecase.UpdateNoteReadUseCase
 import com.example.noteslist.domain.usecase.UpdateNoteUseCase
 import com.example.noteslist.presentation.mappers.toDomain
 import com.example.noteslist.presentation.mappers.toUiModel
+import com.example.noteslist.presentation.model.ViewTyped
 import com.example.noteslist.presentation.model.ViewTypedModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 
 class NotesListViewModel(
     private val notesUseCase: NotesUseCase,
@@ -30,16 +36,19 @@ class NotesListViewModel(
 ) : ViewModel() {
 
     private val _expandedStackIds = MutableStateFlow<Set<Int>>(emptySet())
+    private val _searchQuery = MutableStateFlow("")
 
-    val uiState = notesUseCase.invoke()
-        .map { noteModels ->
-            val notes = noteModels.map { it.toUiModel() }
-            getViewTypedData(notes)
-        }.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000L),
-            initialValue = emptyList()
-        )
+    val uiState = _searchQuery
+        .debounce(500L)
+        .distinctUntilChanged()
+        .flatMapLatest { query ->
+            notesUseCase.invoke(query).map { noteModels ->
+                val notes = noteModels.map { it.toUiModel() }
+
+                if(notes.isEmpty()) emptyList()
+                else getViewTypedData(notes)
+            }
+        }
 
     fun onNoteLongClick(noteId: Long) {
         updateNoteReadUseCase.invoke(noteId)
@@ -100,6 +109,9 @@ class NotesListViewModel(
     }
     fun collapseStack(stackId: Int) {
         _expandedStackIds.value -= stackId
+    }
+    fun updateSearchQuery(value: String) {
+        _searchQuery.update { value }
     }
     fun isStackExpanded(stackId: Int) = _expandedStackIds.value.contains(stackId)
 

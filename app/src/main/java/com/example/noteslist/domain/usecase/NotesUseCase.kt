@@ -9,8 +9,8 @@ import java.time.LocalDate
 class NotesUseCase(
     private val repository: NotesRepository
 ) {
-    operator fun invoke() : Flow<List<NoteModel>> {
-        return repository.getNotes().map { notes -> sortByDate(notes) }
+    operator fun invoke(query: String) : Flow<List<NoteModel>> {
+        return repository.getNotes(query).map { notes -> sortByDate(notes) }
     }
 
     private fun sortByDate(notes: List<NoteModel>) : List<NoteModel> {

@@ -11,6 +11,10 @@
     <color name="note_read_point_color">#32b333</color>
     <color name="note_stack_collapse_button_color">#ff9e999e</color>
 
+    <color name="primary">#1387d7</color>
+    <color name="secondary">#daeefc</color>
+    <color name="onSecondary">#3f3b3c</color>
+
     <color name="details_button_background_tint">#daeefc</color>
     <color name="details_button_foreground_tint">#0e67a4</color>
 

@@ -39,4 +39,26 @@
         android:backgroundTint="@color/details_button_background_tint"
         app:tint="@color/details_button_foreground_tint" />
 
+    <LinearLayout
+        android:id="@+id/search_query_field_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:background="@drawable/search_field_shape"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" >
+
+        <EditText
+            android:id="@+id/search_query_field"
+            android:layout_width="match_parent"
+            android:layout_marginHorizontal="12dp"
+            android:layout_height="48dp"
+            android:inputType="text"
+            android:textColor="@color/onSecondary"
+            android:textColorHint="@color/onSecondary"
+            android:hint="@string/search_query_field_hint"
+            android:background="@null"/>
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

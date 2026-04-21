@@ -21,4 +21,6 @@
     <string name="increase_icon_description">Увеличить число</string>
     <string name="settings_button_description">Параметры</string>
     <string name="stack_max_visible_parameter">Число видимых заметок стэка</string>
+    <string name="search_query_field_description">Поисковой запрос</string>
+    <string name="search_query_field_hint">Найти заметку</string>
 </resources>
