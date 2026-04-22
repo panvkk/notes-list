@@ -4,6 +4,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.R
 import com.example.noteslist.databinding.ItemNoteStackViewBinding
 import com.example.noteslist.databinding.ItemNoteViewBinding
+import com.example.noteslist.presentation.model.SettingsUiState
 import com.example.noteslist.presentation.model.ViewTypedModel
 import com.example.noteslist.presentation.ui.recycler.adapter.delegates.pool.NoteViewPool
 import com.example.noteslist.presentation.ui.view.NoteView
@@ -13,7 +14,8 @@ class NoteStackViewHolder(
     private val viewPool: NoteViewPool,
     private val onCollapseClickListener: (Int) -> Unit,
     private val onExpandClickListener: (Int) -> Unit,
-    private val isStackExpanded: (Int) -> Boolean
+    private val isStackExpanded: (Int) -> Boolean,
+    private val settings: SettingsUiState
 ) : RecyclerView.ViewHolder(binding.root) {
 
     private var currentStackId = -1
@@ -22,6 +24,8 @@ class NoteStackViewHolder(
         binding.noteStackView.apply {
             setOnClickExpandListener { if(currentStackId != -1) onExpandClickListener(currentStackId) }
             setOnClickCollapseListener { if(currentStackId != -1) onCollapseClickListener(currentStackId) }
+            stackSpacing = settings.stackSpacing
+            stackMaxVisible = settings.stackMaxVisible
         }
     }
 

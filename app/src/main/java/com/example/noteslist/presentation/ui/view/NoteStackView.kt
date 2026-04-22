@@ -46,7 +46,17 @@ class NoteStackView @JvmOverloads constructor(
     private var defaultMaxChildElevation = 20f
 
     var stackSpacing = 20f
+        set(value) {
+            field = value
+            requestLayout()
+            invalidate()
+        }
     var stackMaxVisible = 3
+        set(value) {
+            field = value
+            requestLayout()
+            invalidate()
+        }
     var maxChildElevation = 20f
     private var verticalPadding = defaultVerticalPadding
     var isExpanded: Boolean = false

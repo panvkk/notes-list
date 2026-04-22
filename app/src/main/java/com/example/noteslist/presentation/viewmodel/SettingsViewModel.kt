@@ -7,16 +7,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 class SettingsViewModel : ViewModel() {
-    private val _uiState = MutableStateFlow(SettingsUiState(1, 1))
+    private val _uiState = MutableStateFlow(SettingsUiState(20f, 2))
     val uiState = _uiState.asStateFlow()
 
-    fun increaseStackSpacing() {
-        _uiState.update { it.copy(stackSpacing = _uiState.value.stackSpacing + 1) }
+    fun updateStackSpacing(value: Float) {
+        _uiState.update { it.copy(stackSpacing = value) }
     }
-    fun decreaseStackSpacing() {
-        _uiState.update { it.copy(stackSpacing = _uiState.value.stackSpacing - 1) }
-    }
-
     fun increaseStackMaxVisible() {
         _uiState.update { it.copy(stackMaxVisible = _uiState.value.stackMaxVisible + 1) }
     }

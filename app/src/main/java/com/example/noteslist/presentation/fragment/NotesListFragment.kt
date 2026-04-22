@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.R
 import com.example.noteslist.databinding.FragmentNotesListBinding
+import com.example.noteslist.presentation.model.SettingsUiState
 import com.example.noteslist.presentation.ui.recycler.adapter.MultiTypeAdapter
 import com.example.noteslist.presentation.ui.recycler.adapter.delegates.DateTitleDelegate
 import com.example.noteslist.presentation.ui.recycler.adapter.delegates.NoteDelegate
@@ -147,18 +148,24 @@ class NotesListFragment : Fragment() {
         val onStackExpandClick = { stackId: Int -> viewModel.expandStack(stackId) }
         val onStackCollapseClick = { stackId: Int -> viewModel.collapseStack(stackId) }
         val isStackExpanded = { stackId: Int -> viewModel.isStackExpanded(stackId)}
+        val settings = fetchSettings()
 
         val delegates = listOf(
             NoteDelegate(onNoteClick, onNoteLongClick),
             NoteStackDelegate(
                 onNoteClick, onNoteLongClick,
                 onStackExpandClick, onStackCollapseClick,
-                isStackExpanded
+                isStackExpanded,
+                settings
             ),
             DateTitleDelegate()
         )
         val adapter = MultiTypeAdapter(delegates)
         return adapter
+    }
+
+    private fun fetchSettings() : SettingsUiState {
+        return SettingsUiState(50f, 4)
     }
 
     override fun onDestroyView() {

@@ -14,6 +14,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -66,10 +67,10 @@ fun SettingsScreen(
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.weight(1f)
                 )
-                SettingValueCard(
+                Slider(
                     value = state.stackSpacing,
-                    onDecreaseValue = { viewModel.decreaseStackSpacing() },
-                    onIncreaseValue = { viewModel.increaseStackSpacing() },
+                    onValueChange = { viewModel.updateStackSpacing(it) },
+                    valueRange = 1f..100f,
                     modifier = Modifier.weight(1f)
                 )
             }
