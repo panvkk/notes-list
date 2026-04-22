@@ -15,6 +15,9 @@ data class DetailsUiState(
 sealed class DetailsScreenError(
     val message: String? = null
 ) : Parcelable {
-    class TitleEmpty : DetailsScreenError()
+    sealed interface Title {
+        class Empty : DetailsScreenError(), Title
+        class Large : DetailsScreenError(), Title
+    }
     data class Other(val msg: String) : DetailsScreenError(msg)
 }

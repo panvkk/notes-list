@@ -23,4 +23,5 @@
     <string name="stack_max_visible_parameter">Число видимых заметок стэка</string>
     <string name="search_query_field_description">Поисковой запрос</string>
     <string name="search_query_field_hint">Найти заметку</string>
+    <string name="title_large_error">Название слишком длинное</string>
 </resources>

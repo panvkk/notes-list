@@ -70,11 +70,12 @@ fun NoteDetailsScreen(
             modifier = Modifier.fillMaxWidth(),
             maxLines = 1,
             label = { Text(stringResource(R.string.text_field_title_label)) },
-            isError = currentError is DetailsScreenError.TitleEmpty
+            isError = currentError is DetailsScreenError.Title
         )
-        if(currentError is DetailsScreenError.TitleEmpty) {
+        if(currentError is DetailsScreenError.Title) {
             Text(
-                text = stringResource(R.string.empty_title_error),
+                text = if(currentError is DetailsScreenError.Title.Empty) stringResource(R.string.empty_title_error)
+                    else stringResource(R.string.title_large_error),
                 style = MaterialTheme.typography.titleSmall,
                 color = colorResource(R.color.error_color),
                 textAlign = TextAlign.Center,

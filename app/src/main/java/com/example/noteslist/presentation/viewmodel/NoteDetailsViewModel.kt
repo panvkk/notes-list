@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.noteslist.NotesListApplication
+import com.example.noteslist.core.MAX_TITLE_LENGTH
 import com.example.noteslist.core.domain.error.NoteValidationException
 import com.example.noteslist.domain.usecase.CreateNoteUseCase
 import com.example.noteslist.domain.usecase.FindNoteUseCase
@@ -20,11 +21,16 @@ import com.example.noteslist.presentation.mappers.toUiModel
 import com.example.noteslist.presentation.model.DetailsScreenError
 import com.example.noteslist.presentation.model.DetailsUiState
 import com.example.noteslist.presentation.model.ViewTypedModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -36,14 +42,6 @@ class NoteDetailsViewModel(
     private val updateNoteUseCase: UpdateNoteUseCase,
     private val findNoteUseCase: FindNoteUseCase
 ) : ViewModel() {
-
-    init {
-        savedStateHandle.setSavedStateProvider(STATE_BUNDLE_KEY) {
-            Bundle().apply {
-                putParcelable(STATE_KEY, _uiState.value)
-            }
-        }
-    }
 
     private val _uiState = MutableStateFlow(generateInitialState())
     val uiState = _uiState.asStateFlow()
@@ -58,9 +56,29 @@ class NoteDetailsViewModel(
         state.originalNote != state.currentNote
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), false)
 
+
+    init {
+        savedStateHandle.setSavedStateProvider(STATE_BUNDLE_KEY) {
+            Bundle().apply {
+                putParcelable(STATE_KEY, _uiState.value)
+            }
+        }
+        // Сделал одну подписку на стейт, чтобы не создавать каждый раз новую корутину в updateNoteTitle()
+        // вдруг пользователь печатает слишком быстро
+        viewModelScope.launch(Dispatchers.Default) {
+            _uiState.map { it.currentNote.title }
+                .distinctUntilChanged()
+                .collect { title ->
+                    if (title.length > MAX_TITLE_LENGTH)
+                        updateError(DetailsScreenError.Title.Large())
+                    else if(uiState.value.error is DetailsScreenError.Title.Large)
+                        updateError(null)
+                }
+        }
+    }
     fun updateNoteTitle(value: String) {
         _uiState.update { it.copy(currentNote = it.currentNote.copy(title = value)) }
-        if(_uiState.value.error is DetailsScreenError.TitleEmpty)
+        if(_uiState.value.error is DetailsScreenError.Title.Empty)
             _uiState.update { it.copy(error = null) }
     }
     fun updateNoteDescription(value: String) {
@@ -81,6 +99,9 @@ class NoteDetailsViewModel(
     private fun updateIsNewNote(value: Boolean) {
         _isNewNote.value = value
     }
+    private fun updateError(error: DetailsScreenError?) {
+        _uiState.update { it.copy(error = error) }
+    }
 
     fun setNote(newNoteId: Long?) {
         _uiState.update { it.copy(error = null) }
@@ -94,7 +115,7 @@ class NoteDetailsViewModel(
                 .onSuccess { newNote = it.toUiModel() }
                 .onFailure {
                     val msg = it.message ?: "Unknown error."
-                    _uiState.update { it.copy(error = DetailsScreenError.Other(msg)) }
+                    updateError(DetailsScreenError.Other(msg))
                     Log.e(TAG, msg)
                 }
             setNoteId(newNote?.id ?: return)
@@ -105,6 +126,8 @@ class NoteDetailsViewModel(
 
     fun submitNote() {
         _uiState.value.currentNote.apply {
+            if(_uiState.value.error is DetailsScreenError.Title) return
+
             val result = if (_isNewNote.value) {
                 createNoteUseCase.invoke(title, description, isImportant)
             } else {
@@ -119,7 +142,7 @@ class NoteDetailsViewModel(
                     val msg = exception.message ?: "Unknown error."
                     when (exception) {
                         is NoteValidationException.TitleEmpty -> {
-                            _uiState.update { it.copy(error = DetailsScreenError.TitleEmpty()) }
+                            _uiState.update { it.copy(error = DetailsScreenError.Title.Empty()) }
                         }
                         else -> {
                             _uiState.update { it.copy(error = DetailsScreenError.Other(msg)) }
