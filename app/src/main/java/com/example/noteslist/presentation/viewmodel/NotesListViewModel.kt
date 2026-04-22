@@ -48,7 +48,11 @@ class NotesListViewModel(
                 if(notes.isEmpty()) emptyList()
                 else getViewTypedData(notes)
             }
-        }
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000L),
+            emptyList()
+        )
 
     fun onNoteLongClick(noteId: Long) {
         updateNoteReadUseCase.invoke(noteId)
