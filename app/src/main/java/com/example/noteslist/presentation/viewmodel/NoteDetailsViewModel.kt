@@ -69,17 +69,17 @@ class NoteDetailsViewModel(
             _uiState.map { it.currentNote.title }
                 .distinctUntilChanged()
                 .collect { title ->
-                    if (title.length > MAX_TITLE_LENGTH)
-                        updateError(DetailsScreenError.Title.Large())
-                    else if(uiState.value.error is DetailsScreenError.Title.Large)
-                        updateError(null)
+                    val error = if(title.length > MAX_TITLE_LENGTH)
+                        DetailsScreenError.Title.Large()
+                    else null // сброс всех ошибок title при вводе символа
+
+                    if(_uiState.value.error != error)
+                        updateError(error)
                 }
         }
     }
     fun updateNoteTitle(value: String) {
         _uiState.update { it.copy(currentNote = it.currentNote.copy(title = value)) }
-        if(_uiState.value.error is DetailsScreenError.Title.Empty)
-            _uiState.update { it.copy(error = null) }
     }
     fun updateNoteDescription(value: String) {
         _uiState.update { it.copy(currentNote = it.currentNote.copy(description = value)) }
