@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.noteslist.NotesListApplication
+import com.example.noteslist.domain.model.SettingsModel
+import com.example.noteslist.domain.usecase.GetSettingsUseCase
 import com.example.noteslist.domain.usecase.NotesUseCase
 import com.example.noteslist.domain.usecase.UpdateNoteReadUseCase
 import com.example.noteslist.presentation.mappers.toUiModel
@@ -25,7 +27,8 @@ import kotlinx.coroutines.launch
 
 class NotesListViewModel(
     private val notesUseCase: NotesUseCase,
-    private val updateNoteReadUseCase: UpdateNoteReadUseCase
+    private val updateNoteReadUseCase: UpdateNoteReadUseCase,
+    private val getSettingsUseCase: GetSettingsUseCase
 ) : ViewModel() {
 
     private val _expandedStackIds = MutableStateFlow<Set<Int>>(emptySet())
@@ -54,6 +57,9 @@ class NotesListViewModel(
                 .onFailure { Log.e(TAG, it.message ?: "Unknown Error.")  }
         }
     }
+
+    suspend fun fetchSettings() : SettingsModel = getSettingsUseCase.invoke()
+
     private fun getViewTypedData(notes: List<ViewTypedModel.Note>) : List<ViewTypedModel> {
         if(notes.isEmpty()) return emptyList()
 
@@ -124,7 +130,9 @@ class NotesListViewModel(
                 val application = this[APPLICATION_KEY] as NotesListApplication
                 NotesListViewModel(
                     application.notesUseCase,
-                    application.updateNoteReadUseCase)
+                    application.updateNoteReadUseCase,
+                    application.getSettingsUseCase
+                )
             }
         }
     }

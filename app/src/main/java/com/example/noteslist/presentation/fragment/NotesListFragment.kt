@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.R
 import com.example.noteslist.databinding.FragmentNotesListBinding
-import com.example.noteslist.presentation.model.SettingsUiState
+import com.example.noteslist.domain.model.SettingsModel
 import com.example.noteslist.presentation.ui.recycler.adapter.MultiTypeAdapter
 import com.example.noteslist.presentation.ui.recycler.adapter.delegates.DateTitleDelegate
 import com.example.noteslist.presentation.ui.recycler.adapter.delegates.NoteDelegate
@@ -149,7 +149,7 @@ internal class NotesListFragment : Fragment() {
         val onStackExpandClick = { stackId: Int -> viewModel.expandStack(stackId) }
         val onStackCollapseClick = { stackId: Int -> viewModel.collapseStack(stackId) }
         val isStackExpanded = { stackId: Int -> viewModel.isStackExpanded(stackId)}
-        val settings = fetchSettings()
+        val defaultSettings = getDefaultSettings()
 
         val delegates = listOf(
             NoteDelegate(onNoteClick, onNoteLongClick),
@@ -157,7 +157,7 @@ internal class NotesListFragment : Fragment() {
                 onNoteClick, onNoteLongClick,
                 onStackExpandClick, onStackCollapseClick,
                 isStackExpanded,
-                settings
+                defaultSettings
             ),
             DateTitleDelegate()
         )
@@ -165,9 +165,7 @@ internal class NotesListFragment : Fragment() {
         return adapter
     }
 
-    private fun fetchSettings() : SettingsUiState {
-        return SettingsUiState(50f, 4)
-    }
+    private fun getDefaultSettings() = SettingsModel(50f, 3)
 
     override fun onDestroyView() {
         super.onDestroyView()

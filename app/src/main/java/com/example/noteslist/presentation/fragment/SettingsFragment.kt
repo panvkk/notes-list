@@ -8,18 +8,15 @@ import androidx.activity.OnBackPressedCallback
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.example.noteslist.core.presentation.showOnExitAlert
-import com.example.noteslist.core.presentation.showUnsavedChangesAlert
-import com.example.noteslist.presentation.model.GlobalUiState
-import com.example.noteslist.presentation.ui.screen.NoteDetailsScreen
 import com.example.noteslist.presentation.ui.screen.SettingsScreen
 import com.example.noteslist.presentation.ui.theme.NotesListTheme
 import com.example.noteslist.presentation.viewmodel.SettingsViewModel
 
 internal class SettingsFragment : Fragment() {
 
-    private val viewModel: SettingsViewModel = SettingsViewModel()
+    private val viewModel by viewModels<SettingsViewModel> { SettingsViewModel.factory }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,6 +31,7 @@ internal class SettingsFragment : Fragment() {
                         viewModel = viewModel,
                         onClickCancel = { findNavController().popBackStack() },
                         onClickSave = {
+                            viewModel.saveSettings()
                             findNavController().navigate(SettingsFragmentDirections.openList())
                         }
                     )
