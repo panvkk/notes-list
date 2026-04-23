@@ -10,7 +10,11 @@ class NotesUseCase(
     private val repository: NotesRepository
 ) {
     operator fun invoke(query: String) : Flow<List<NoteModel>> {
-        return repository.getNotes(query).map { notes -> sortByDate(notes) }
+        return if(query.isBlank()) {
+            repository.getNotes().map { notes -> sortByDate(notes) }
+        } else {
+            repository.getNotesByQuery(query).map { notes -> sortByDate(notes) }
+        }
     }
 
     private fun sortByDate(notes: List<NoteModel>) : List<NoteModel> {

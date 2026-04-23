@@ -13,3 +13,4 @@ capture/
 *.log
 deps.txt
 local.properties
+app/schemas/

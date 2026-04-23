@@ -4,7 +4,7 @@ class UpdateNoteReadUseCase(
     private val findNoteUseCase: FindNoteUseCase,
     private val updateNoteUseCase: UpdateNoteUseCase
 ) {
-    operator fun invoke(noteId: Long) : Result<Unit> {
+    suspend operator fun invoke(noteId: Long) : Result<Unit> {
         findNoteUseCase.invoke(noteId).onSuccess {
             val isNoteRead = it.isRead
             updateNoteUseCase.invoke(it.copy(isRead = !isNoteRead))

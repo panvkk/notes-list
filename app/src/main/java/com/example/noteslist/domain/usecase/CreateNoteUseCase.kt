@@ -7,10 +7,10 @@ import java.time.LocalDate
 class CreateNoteUseCase(
     private val repository: NotesRepository
 ) {
-    operator fun invoke(title: String, description: String, isImportant: Boolean) : Result<Unit> {
+    suspend operator fun invoke(title: String, description: String, isImportant: Boolean) : Result<Unit> {
         val date = LocalDate.now()
         return if(title.isEmpty())
             Result.failure(NoteValidationException.TitleEmpty())
-        else Result.success(repository.addNote(title, description, date, isImportant))
+        else Result.success(repository.createNote(title, description, date, isImportant))
     }
 }

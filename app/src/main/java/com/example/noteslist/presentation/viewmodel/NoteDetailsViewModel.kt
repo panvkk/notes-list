@@ -106,52 +106,57 @@ class NoteDetailsViewModel(
     }
 
     fun setNote(newNoteId: Long?) {
-        updateError(null)
-        if(newNoteId == null) {
-            updateIsNewNote(true)
-            setNoteId(null)
-            setCurrentAndOriginalNotes(ViewTypedModel.Note(-1, "", "", false, "", false))
-        } else {
-            var newNote: ViewTypedModel.Note? = null
-            findNoteUseCase.invoke(newNoteId)
-                .onSuccess { newNote = it.toUiModel() }
-                .onFailure {
-                    val msg = it.message ?: "Unknown error."
-                    updateError(DetailsScreenError.Other(msg))
-                    Log.e(TAG, msg)
-                }
-            setNoteId(newNote?.id ?: return)
-            setCurrentAndOriginalNotes(newNote)
-            updateIsNewNote(false)
+        viewModelScope.launch {
+            updateError(null)
+            if (newNoteId == null) {
+                updateIsNewNote(true)
+                setNoteId(null)
+                setCurrentAndOriginalNotes(ViewTypedModel.Note(-1, "", "", false, "", false))
+            } else {
+                var newNote: ViewTypedModel.Note? = null
+                findNoteUseCase.invoke(newNoteId)
+                    .onSuccess { newNote = it.toUiModel() }
+                    .onFailure {
+                        val msg = it.message ?: "Unknown error."
+                        updateError(DetailsScreenError.Other(msg))
+                        Log.e(TAG, msg)
+                    }
+                setNoteId(newNote?.id ?: return@launch)
+                setCurrentAndOriginalNotes(newNote)
+                updateIsNewNote(false)
+            }
         }
     }
 
     fun submitNote() {
-        uiState.value.currentNote.apply {
-            if(uiState.value.error is DetailsScreenError.HasTitle) return
+        viewModelScope.launch {
+            uiState.value.currentNote.apply {
+                if (uiState.value.error is DetailsScreenError.HasTitle) return@launch
 
-            val result = if (_isNewNote.value) {
-                createNoteUseCase.invoke(title, description, isImportant)
-            } else {
-                updateNoteUseCase.invoke(uiState.value.currentNote.toDomain())
-            }
-            result
-                .onSuccess {
-                viewModelScope.launch {
-                    _navigationEvent.send(NavigationEvent.OnSave)
+                val result = if (_isNewNote.value) {
+                    createNoteUseCase.invoke(title, description, isImportant)
+                } else {
+                    updateNoteUseCase.invoke(uiState.value.currentNote.toDomain())
                 }
-            }.onFailure { exception ->
-                    val msg = exception.message ?: "Unknown error."
-                    when (exception) {
-                        is NoteValidationException.TitleEmpty -> {
-                            updateError(DetailsScreenError.HasTitle.Empty())
+                result
+                    .onSuccess {
+                        viewModelScope.launch {
+                            _navigationEvent.send(NavigationEvent.OnSave)
                         }
-                        else -> {
-                            updateError(DetailsScreenError.Other(msg))
-                            Log.e(TAG, msg)
+                    }.onFailure { exception ->
+                        val msg = exception.message ?: "Unknown error."
+                        when (exception) {
+                            is NoteValidationException.TitleEmpty -> {
+                                updateError(DetailsScreenError.HasTitle.Empty())
+                            }
+
+                            else -> {
+                                updateError(DetailsScreenError.Other(msg))
+                                Log.e(TAG, msg)
+                            }
                         }
                     }
-                }
+            }
         }
     }
 
