@@ -12,7 +12,7 @@ interface NotesDao {
     @Query("SELECT * FROM notes_table")
     fun getNotes() : Flow<List<NoteEntity>>
 
-    @Query("SELECT * FROM notes_table WHERE title LIKE :query")
+    @Query("SELECT * FROM notes_table WHERE title LIKE '%' || :query || '%' ")
     fun getNotesByQuery(query: String) : Flow<List<NoteEntity>>
 
     @Query("SELECT * FROM notes_table WHERE id = :id")
