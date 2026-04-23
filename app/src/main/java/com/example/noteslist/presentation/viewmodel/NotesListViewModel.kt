@@ -39,7 +39,7 @@ class NotesListViewModel(
     private val _searchQuery = MutableStateFlow("")
 
     val uiState = _searchQuery
-        .debounce(500L)
+        .debounce { if(it.isEmpty()) 0L else 500L }
         .distinctUntilChanged()
         .flatMapLatest { query ->
             notesUseCase.invoke(query).map { noteModels ->
