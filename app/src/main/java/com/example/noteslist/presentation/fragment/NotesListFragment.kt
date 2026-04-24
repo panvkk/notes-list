@@ -3,9 +3,8 @@ package com.example.noteslist.presentation.fragment
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -18,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.R
 import com.example.noteslist.databinding.FragmentNotesListBinding
+import com.example.noteslist.presentation.model.NotesListUiState
 import com.example.noteslist.presentation.ui.recycler.adapter.MultiTypeAdapter
 import com.example.noteslist.presentation.ui.recycler.adapter.delegates.DateTitleDelegate
 import com.example.noteslist.presentation.ui.recycler.adapter.delegates.NoteDelegate
@@ -25,7 +25,6 @@ import com.example.noteslist.presentation.ui.recycler.adapter.delegates.NoteStac
 import com.example.noteslist.presentation.ui.recycler.decoration.NoteItemDecoration
 import com.example.noteslist.presentation.viewmodel.GlobalViewModel
 import com.example.noteslist.presentation.viewmodel.NotesListViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 internal class NotesListFragment : Fragment() {
@@ -50,34 +49,6 @@ internal class NotesListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.appConfig.collect { appConfig ->
-                    appConfig?.let {
-                        val isFirstEntry = appConfig.isFirstEntry
-                        if(isFirstEntry) {
-                            binding.shimmerContainer.startShimmer()
-
-                            delay(500L)
-                            viewModel.uiState.collect { state ->
-                                if(state.isNotEmpty()) {
-                                    binding.shimmerContainer.stopShimmer()
-                                    binding.shimmerContainer.visibility = GONE
-                                    binding.recyclerView.visibility = VISIBLE
-
-                                    viewModel.updateIsFirstEntry(false)
-                                }
-                            }
-                        } else {
-                            binding.shimmerContainer.visibility = GONE
-                            binding.recyclerView.visibility = VISIBLE
-                            return@collect
-                        }
-                    }
-                }
-            }
-        }
-
         val recyclerItemsHorizontalMargin = resources.getDimensionPixelSize(R.dimen.recycler_item_horizontal_margin)
         val recyclerItemsVerticalMargin = resources.getDimensionPixelSize(R.dimen.recycler_item_vertical_margin)
 
@@ -96,7 +67,22 @@ internal class NotesListFragment : Fragment() {
         }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { newNotes ->
+                viewModel.uiState.collect { state ->
+                    val newNotes = when(state) {
+                        is NotesListUiState.Loading -> {
+                            binding.recyclerView.isVisible = false
+                            binding.shimmerContainer.isVisible = true
+                            binding.shimmerContainer.startShimmer()
+                            emptyList()
+                        }
+                        is NotesListUiState.Content ->  {
+                            binding.shimmerContainer.stopShimmer()
+                            binding.shimmerContainer.isVisible = false
+                            binding.recyclerView.isVisible = true
+                            state.notesViewTypedModel
+                        }
+                    }
+
                     notesAdapter.setNewData(newNotes)
                 }
             }

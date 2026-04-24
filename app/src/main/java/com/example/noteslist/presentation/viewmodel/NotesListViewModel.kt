@@ -15,15 +15,20 @@ import com.example.noteslist.domain.usecase.NotesUseCase
 import com.example.noteslist.domain.usecase.UpdateAppConfigUseCase
 import com.example.noteslist.domain.usecase.UpdateNoteReadUseCase
 import com.example.noteslist.presentation.mappers.toUiModel
+import com.example.noteslist.presentation.model.NotesListUiState
 import com.example.noteslist.presentation.model.ViewTypedModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -39,27 +44,41 @@ class NotesListViewModel(
     private val _expandedStackIds = MutableStateFlow<Set<Int>>(emptySet())
     private val _searchQuery = MutableStateFlow("")
 
-    val currentSettings = getSettingsUseCase.invokeFlow()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), getDefaultSettings())
-    val appConfig = getAppConfigUseCase.invoke()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), null)
-
-    val uiState = _searchQuery
+    private val debouncedSearchQuery = _searchQuery
         .debounce { if(it.isEmpty()) 0L else 500L }
         .distinctUntilChanged()
-        .flatMapLatest { query ->
-            notesUseCase.invoke(query).map { noteModels ->
-                val notes = noteModels.map { it.toUiModel() }
 
-                getViewTypedData(notes)
-            }
+    val currentSettings = getSettingsUseCase.invokeFlow()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), getDefaultSettings())
+
+    val uiState: StateFlow<NotesListUiState> = combine(
+        debouncedSearchQuery,
+        getAppConfigUseCase.invokeFlow().map { it.isFirstEntry }
+    ) { searchQuery, isFirstEntry ->
+        object {
+            val query = searchQuery
+            val isFirstEntry = isFirstEntry
         }
-        .flowOn(Dispatchers.Default) // Так как выше сложный маппинг ViewTypedModel
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000L),
-            emptyList()
-        )
+    }.flatMapLatest { params ->
+        if(params.isFirstEntry) {
+            combine(
+                loadNotes(params.query),
+                flow {
+                    delay(500L)
+                    emit(Unit)
+                }
+            ) { viewTyped, _ ->
+                updateIsFirstEntry(false)
+                NotesListUiState.Content(viewTyped) as NotesListUiState
+            }.onStart { emit(NotesListUiState.Loading) }
+        } else {
+            loadNotes(params.query).map { NotesListUiState.Content(it) }
+        }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000L),
+        NotesListUiState.Content(emptyList())
+    )
 
     fun onNoteLongClick(noteId: Long) {
         viewModelScope.launch {
@@ -131,10 +150,15 @@ class NotesListViewModel(
     fun updateSearchQuery(value: String) {
         _searchQuery.update { value }
     }
-    private fun updateIsFirstEntry(value: Boolean) {
-        viewModelScope.launch {
-            updateAppConfigUseCase.invoke(AppConfig(value))
+    private fun loadNotes(query: String) : Flow<List<ViewTypedModel>> {
+        return notesUseCase.invoke(query).map { noteModels ->
+            val notes = noteModels.map { it.toUiModel() }
+
+            getViewTypedData(notes)
         }
+    }
+    private suspend fun updateIsFirstEntry(value: Boolean) {
+        updateAppConfigUseCase.invoke(AppConfig(value))
     }
     fun isStackExpanded(stackId: Int) = _expandedStackIds.value.contains(stackId)
 
