@@ -3,19 +3,26 @@ package com.example.noteslist.presentation.ui.recycler.adapter
 import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.RecyclerView
+import com.example.noteslist.domain.model.SettingsModel
 import com.example.noteslist.presentation.model.ViewTypedModel
 import com.example.noteslist.presentation.ui.recycler.adapter.delegates.AdapterDelegate
 import com.example.noteslist.presentation.ui.recycler.holders.NoteStackViewHolder
 import com.example.noteslist.presentation.ui.recycler.util.ViewTypedDiffUtilCallback
 
 class MultiTypeAdapter(
-    private val delegates: List<AdapterDelegate<ViewTypedModel>>
+    private var delegates: List<AdapterDelegate<ViewTypedModel>>,
+    private var settings: SettingsModel
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val differ = AsyncListDiffer(this, ViewTypedDiffUtilCallback())
 
     private val items: List<ViewTypedModel>
         get() = differ.currentList
+
+    fun setSettings(newSettings: SettingsModel) {
+        settings = newSettings
+        notifyItemRangeChanged(0, itemCount)
+    }
 
     override fun getItemViewType(position: Int): Int {
         for((index, delegate) in delegates.withIndex()) {
@@ -36,9 +43,8 @@ class MultiTypeAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        getDelegateForPosition(position).onBindViewHolder(items, position, holder)
+        getDelegateForPosition(position).onBindViewHolder(items, position, holder, settings)
     }
-
     override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
         if(holder is NoteStackViewHolder) {
             holder.recycleChildren()

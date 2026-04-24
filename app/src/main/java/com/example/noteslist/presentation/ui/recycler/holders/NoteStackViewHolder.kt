@@ -15,7 +15,6 @@ class NoteStackViewHolder(
     private val onCollapseClickListener: (Int) -> Unit,
     private val onExpandClickListener: (Int) -> Unit,
     private val isStackExpanded: (Int) -> Boolean,
-    private val settings: SettingsModel
 ) : RecyclerView.ViewHolder(binding.root) {
 
     private var currentStackId = -1
@@ -24,12 +23,19 @@ class NoteStackViewHolder(
         binding.noteStackView.apply {
             setOnClickExpandListener { if(currentStackId != -1) onExpandClickListener(currentStackId) }
             setOnClickCollapseListener { if(currentStackId != -1) onCollapseClickListener(currentStackId) }
+        }
+    }
+
+    fun bindSettings(settings: SettingsModel) {
+        binding.noteStackView.apply {
             stackSpacing = settings.stackSpacing
             stackMaxVisible = settings.stackMaxVisible
         }
     }
 
     fun bind(noteStack: ViewTypedModel.NoteStack) {
+        if(binding.noteStackView.childCount > 1)
+            recycleChildren()
         currentStackId = noteStack.stackId
         binding.noteStackView.isExpanded = isStackExpanded(noteStack.stackId)
         noteStack.notes.forEach { note ->

@@ -4,8 +4,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.noteslist.presentation.model.ViewTypedModel
 import com.example.noteslist.databinding.ItemNoteViewBinding
+import com.example.noteslist.domain.model.SettingsModel
+import com.example.noteslist.presentation.model.ViewTypedModel
 import com.example.noteslist.presentation.ui.recycler.holders.NoteViewHolder
 
 class NoteDelegate(
@@ -43,6 +44,7 @@ class NoteDelegate(
         items: List<ViewTypedModel>,
         position: Int,
         holder: RecyclerView.ViewHolder,
+        settings: SettingsModel
     ) {
         val note = items[position]
         (holder as? NoteViewHolder)?.bind(note as ViewTypedModel.Note)

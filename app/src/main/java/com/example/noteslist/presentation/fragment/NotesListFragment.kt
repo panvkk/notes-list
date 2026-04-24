@@ -1,6 +1,9 @@
 package com.example.noteslist.presentation.fragment
 
 import android.os.Bundle
+import android.transition.AutoTransition
+import android.transition.TransitionManager
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +15,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.R
@@ -24,6 +28,8 @@ import com.example.noteslist.presentation.ui.recycler.adapter.delegates.NoteStac
 import com.example.noteslist.presentation.ui.recycler.decoration.NoteItemDecoration
 import com.example.noteslist.presentation.viewmodel.GlobalViewModel
 import com.example.noteslist.presentation.viewmodel.NotesListViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 internal class NotesListFragment : Fragment() {
@@ -68,6 +74,14 @@ internal class NotesListFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { newNotes ->
                     notesAdapter.setNewData(newNotes)
+                }
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.currentSettings.collect { newSettings ->
+//                    TransitionManager.beginDelayedTransition(binding.recyclerView, AutoTransition())
+                    notesAdapter.setSettings(newSettings)
                 }
             }
         }
@@ -149,23 +163,20 @@ internal class NotesListFragment : Fragment() {
         val onStackExpandClick = { stackId: Int -> viewModel.expandStack(stackId) }
         val onStackCollapseClick = { stackId: Int -> viewModel.collapseStack(stackId) }
         val isStackExpanded = { stackId: Int -> viewModel.isStackExpanded(stackId)}
-        val defaultSettings = getDefaultSettings()
+        val defaultSettings = viewModel.currentSettings.value
 
         val delegates = listOf(
             NoteDelegate(onNoteClick, onNoteLongClick),
             NoteStackDelegate(
                 onNoteClick, onNoteLongClick,
                 onStackExpandClick, onStackCollapseClick,
-                isStackExpanded,
-                defaultSettings
+                isStackExpanded
             ),
             DateTitleDelegate()
         )
-        val adapter = MultiTypeAdapter(delegates)
+        val adapter = MultiTypeAdapter(delegates, defaultSettings)
         return adapter
     }
-
-    private fun getDefaultSettings() = SettingsModel(50f, 3)
 
     override fun onDestroyView() {
         super.onDestroyView()

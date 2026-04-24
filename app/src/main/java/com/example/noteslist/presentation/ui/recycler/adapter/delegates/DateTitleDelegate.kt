@@ -3,8 +3,9 @@ package com.example.noteslist.presentation.ui.recycler.adapter.delegates
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.noteslist.presentation.model.ViewTypedModel
 import com.example.noteslist.databinding.ItemDateTitleBinding
+import com.example.noteslist.domain.model.SettingsModel
+import com.example.noteslist.presentation.model.ViewTypedModel
 import com.example.noteslist.presentation.ui.recycler.holders.DateTitleViewHolder
 
 class DateTitleDelegate : AdapterDelegate<ViewTypedModel> {
@@ -29,7 +30,8 @@ class DateTitleDelegate : AdapterDelegate<ViewTypedModel> {
     override fun onBindViewHolder(
         items: List<ViewTypedModel>,
         position: Int,
-        holder: RecyclerView.ViewHolder
+        holder: RecyclerView.ViewHolder,
+        settings: SettingsModel
     ) {
         val item = items[position]
         (holder as? DateTitleViewHolder)?.bind(item as ViewTypedModel.DateTitle)

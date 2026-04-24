@@ -41,7 +41,7 @@ class SettingsViewModel(
 
     private fun fetchSettings() {
         viewModelScope.launch {
-            val settings = getSettingsUseCase.invoke()
+            val settings = getSettingsUseCase.invokeFirst()
             _uiState.update { settings }
         }
     }

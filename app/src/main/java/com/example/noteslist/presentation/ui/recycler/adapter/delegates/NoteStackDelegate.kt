@@ -15,7 +15,6 @@ class NoteStackDelegate(
     private val onStackExpandClick: (Int) -> Unit,
     private val onStackCollapseClick: (Int) -> Unit,
     private val isStackExpanded: (Int) -> Boolean,
-    private val settings: SettingsModel
 ) : AdapterDelegate<ViewTypedModel> {
 
     private val stackViewPool = NoteViewPool(onNoteClick, onNoteLongClick)
@@ -37,18 +36,18 @@ class NoteStackDelegate(
             onStackCollapseClick,
             onStackExpandClick,
             isStackExpanded,
-            settings
         )
     }
 
     override fun onBindViewHolder(
         items: List<ViewTypedModel>,
         position: Int,
-        holder: RecyclerView.ViewHolder
+        holder: RecyclerView.ViewHolder,
+        settings: SettingsModel
     ) {
         val noteStack = items[position]
-        (holder as? NoteStackViewHolder)?.bind(
-            noteStack as ViewTypedModel.NoteStack
-        )
+        val holder = (holder as? NoteStackViewHolder)
+        holder?.bindSettings(settings)
+        holder?.bind(noteStack as ViewTypedModel.NoteStack)
     }
 }

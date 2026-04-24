@@ -34,6 +34,9 @@ class NotesListViewModel(
     private val _expandedStackIds = MutableStateFlow<Set<Int>>(emptySet())
     private val _searchQuery = MutableStateFlow("")
 
+    val currentSettings = getSettingsUseCase.invokeFlow()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), getDefaultSettings())
+
     val uiState = _searchQuery
         .debounce { if(it.isEmpty()) 0L else 500L }
         .distinctUntilChanged()
@@ -58,7 +61,7 @@ class NotesListViewModel(
         }
     }
 
-    suspend fun fetchSettings() : SettingsModel = getSettingsUseCase.invoke()
+    private fun getDefaultSettings() = SettingsModel(50f, 3)
 
     private fun getViewTypedData(notes: List<ViewTypedModel.Note>) : List<ViewTypedModel> {
         if(notes.isEmpty()) return emptyList()

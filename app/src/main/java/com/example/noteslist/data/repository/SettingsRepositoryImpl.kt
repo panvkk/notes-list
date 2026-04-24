@@ -14,11 +14,11 @@ class SettingsRepositoryImpl(
     private val dataStore: DataStore<Preferences>
 ) : SettingsRepository {
 
-    override suspend fun getStackMaxVisible(): Int {
-        return dataStore.data.first()[STACK_MAX_VISIBLE_KEY] ?: DEFAULT_STACK_MAX_VISIBLE
+    override val stackMaxVisible: Flow<Int> = dataStore.data.map { preferences ->
+        preferences[STACK_MAX_VISIBLE_KEY] ?: DEFAULT_STACK_MAX_VISIBLE
     }
-    override suspend fun getStackSpacing(): Float {
-        return dataStore.data.first()[STACK_SPACING_KEY] ?: DEFAULT_STACK_SPACING
+    override val stackSpacing: Flow<Float> = dataStore.data.map { preferences ->
+        preferences[STACK_SPACING_KEY] ?: DEFAULT_STACK_SPACING
     }
 
     override suspend fun setStackMaxVisible(newValue: Int) {

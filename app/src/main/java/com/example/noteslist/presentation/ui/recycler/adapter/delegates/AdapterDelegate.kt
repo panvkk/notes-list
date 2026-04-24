@@ -2,6 +2,7 @@ package com.example.noteslist.presentation.ui.recycler.adapter.delegates
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.noteslist.domain.model.SettingsModel
 
 interface AdapterDelegate<T> {
     fun isForViewType(items: List<T>, position: Int) : Boolean
@@ -13,5 +14,6 @@ interface AdapterDelegate<T> {
         items: List<T>,
         position: Int,
         holder: RecyclerView.ViewHolder,
+        settings: SettingsModel
     )
 }

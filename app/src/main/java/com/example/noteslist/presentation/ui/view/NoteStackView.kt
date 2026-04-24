@@ -47,12 +47,14 @@ class NoteStackView @JvmOverloads constructor(
 
     var stackSpacing = 20f
         set(value) {
+            if(field == value) return
             field = value
             requestLayout()
             invalidate()
         }
     var stackMaxVisible = 3
         set(value) {
+            if(field == value) return
             field = value
             requestLayout()
             invalidate()
