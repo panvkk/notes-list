@@ -1,13 +1,13 @@
 package com.example.noteslist.domain.usecase
 
 import com.example.noteslist.domain.model.SettingsModel
-import com.example.noteslist.domain.repository.SettingsRepository
+import com.example.noteslist.domain.repository.ParametersRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 
 class GetSettingsUseCase(
-    private val repository: SettingsRepository
+    private val repository: ParametersRepository
 ) {
     suspend fun invokeFirst() : SettingsModel {
         return SettingsModel(
@@ -16,7 +16,10 @@ class GetSettingsUseCase(
         )
     }
     fun invokeFlow() : Flow<SettingsModel> {
-        return combine(repository.stackSpacing, repository.stackMaxVisible) { stackSpacing, stackMaxVisible ->
+        return combine(
+            repository.stackSpacing,
+            repository.stackMaxVisible,
+        ) { stackSpacing, stackMaxVisible ->
             SettingsModel(stackSpacing, stackMaxVisible)
         }
     }

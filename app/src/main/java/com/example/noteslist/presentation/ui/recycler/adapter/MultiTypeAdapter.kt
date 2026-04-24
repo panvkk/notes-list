@@ -19,8 +19,8 @@ class MultiTypeAdapter(
     private val items: List<ViewTypedModel>
         get() = differ.currentList
 
-    fun setSettings(newSettings: SettingsModel) {
-        settings = newSettings
+    fun setSettings(newParameters: SettingsModel) {
+        settings = newParameters
         notifyItemRangeChanged(0, itemCount)
     }
 

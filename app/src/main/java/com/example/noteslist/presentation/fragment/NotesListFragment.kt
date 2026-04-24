@@ -1,11 +1,10 @@
 package com.example.noteslist.presentation.fragment
 
 import android.os.Bundle
-import android.transition.AutoTransition
-import android.transition.TransitionManager
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
@@ -15,12 +14,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.R
 import com.example.noteslist.databinding.FragmentNotesListBinding
-import com.example.noteslist.domain.model.SettingsModel
 import com.example.noteslist.presentation.ui.recycler.adapter.MultiTypeAdapter
 import com.example.noteslist.presentation.ui.recycler.adapter.delegates.DateTitleDelegate
 import com.example.noteslist.presentation.ui.recycler.adapter.delegates.NoteDelegate
@@ -28,8 +25,7 @@ import com.example.noteslist.presentation.ui.recycler.adapter.delegates.NoteStac
 import com.example.noteslist.presentation.ui.recycler.decoration.NoteItemDecoration
 import com.example.noteslist.presentation.viewmodel.GlobalViewModel
 import com.example.noteslist.presentation.viewmodel.NotesListViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 internal class NotesListFragment : Fragment() {
@@ -53,6 +49,34 @@ internal class NotesListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.appConfig.collect { appConfig ->
+                    appConfig?.let {
+                        val isFirstEntry = appConfig.isFirstEntry
+                        if(isFirstEntry) {
+                            binding.shimmerContainer.startShimmer()
+
+                            delay(500L)
+                            viewModel.uiState.collect { state ->
+                                if(state.isNotEmpty()) {
+                                    binding.shimmerContainer.stopShimmer()
+                                    binding.shimmerContainer.visibility = GONE
+                                    binding.recyclerView.visibility = VISIBLE
+
+                                    viewModel.updateIsFirstEntry(false)
+                                }
+                            }
+                        } else {
+                            binding.shimmerContainer.visibility = GONE
+                            binding.recyclerView.visibility = VISIBLE
+                            return@collect
+                        }
+                    }
+                }
+            }
+        }
 
         val recyclerItemsHorizontalMargin = resources.getDimensionPixelSize(R.dimen.recycler_item_horizontal_margin)
         val recyclerItemsVerticalMargin = resources.getDimensionPixelSize(R.dimen.recycler_item_vertical_margin)

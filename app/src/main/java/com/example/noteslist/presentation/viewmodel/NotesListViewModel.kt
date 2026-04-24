@@ -7,9 +7,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.noteslist.NotesListApplication
+import com.example.noteslist.domain.model.AppConfig
 import com.example.noteslist.domain.model.SettingsModel
+import com.example.noteslist.domain.usecase.GetAppConfigUseCase
 import com.example.noteslist.domain.usecase.GetSettingsUseCase
 import com.example.noteslist.domain.usecase.NotesUseCase
+import com.example.noteslist.domain.usecase.UpdateAppConfigUseCase
 import com.example.noteslist.domain.usecase.UpdateNoteReadUseCase
 import com.example.noteslist.presentation.mappers.toUiModel
 import com.example.noteslist.presentation.model.ViewTypedModel
@@ -28,7 +31,9 @@ import kotlinx.coroutines.launch
 class NotesListViewModel(
     private val notesUseCase: NotesUseCase,
     private val updateNoteReadUseCase: UpdateNoteReadUseCase,
-    private val getSettingsUseCase: GetSettingsUseCase
+    private val getSettingsUseCase: GetSettingsUseCase,
+    private val getAppConfigUseCase: GetAppConfigUseCase,
+    private val updateAppConfigUseCase: UpdateAppConfigUseCase
 ) : ViewModel() {
 
     private val _expandedStackIds = MutableStateFlow<Set<Int>>(emptySet())
@@ -36,6 +41,8 @@ class NotesListViewModel(
 
     val currentSettings = getSettingsUseCase.invokeFlow()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), getDefaultSettings())
+    val appConfig = getAppConfigUseCase.invoke()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), null)
 
     val uiState = _searchQuery
         .debounce { if(it.isEmpty()) 0L else 500L }
@@ -124,6 +131,11 @@ class NotesListViewModel(
     fun updateSearchQuery(value: String) {
         _searchQuery.update { value }
     }
+    private fun updateIsFirstEntry(value: Boolean) {
+        viewModelScope.launch {
+            updateAppConfigUseCase.invoke(AppConfig(value))
+        }
+    }
     fun isStackExpanded(stackId: Int) = _expandedStackIds.value.contains(stackId)
 
     companion object {
@@ -134,7 +146,9 @@ class NotesListViewModel(
                 NotesListViewModel(
                     application.notesUseCase,
                     application.updateNoteReadUseCase,
-                    application.getSettingsUseCase
+                    application.getSettingsUseCase,
+                    application.getAppConfigUseCase,
+                    application.updateAppConfigUseCase
                 )
             }
         }

@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation("com.facebook.shimmer:shimmer:0.5.0")
 
     // Compose
     implementation(libs.androidx.activity.compose)
