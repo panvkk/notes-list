@@ -18,30 +18,25 @@ abstract class NotesListDatabase : RoomDatabase() {
     companion object {
         private var INSTANCE: NotesListDatabase? = null
 
-        fun getDatabase(context: Context, scope: CoroutineScope) : NotesListDatabase {
+        fun getDatabase(context: Context) : NotesListDatabase {
             return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
+                var instance: NotesListDatabase? = null
+                instance = Room.databaseBuilder(
                     context.applicationContext,
                     NotesListDatabase::class.java, "noteslist-db.db"
                 ).addCallback(object : RoomDatabase.Callback() {
                     override fun onCreate(db: SupportSQLiteDatabase) {
                         super.onCreate(db)
-                        scope.launch(Dispatchers.IO) {
-                            val dao = getDatabase(context, scope).notesDao()
 
-                            val testNotes = listOf(
-                                NoteEntity(1, "универ", "завтра надо приехать к 4 паре (хотя бы приехать)", false, "15.03.2026"),
-                                NoteEntity(2, "поесть", "пельменей можно", true, "15.03.2026"),
-                                NoteEntity(5, "универ", "завтра надо приехать к 4 паре (хотя бы приехать)", false, "15.03.2026"),
-                                NoteEntity(6, "Hilt", "Поправить циклическую зависимость в модуле Data", false, "15.03.2026"),
-                                NoteEntity(7, "Зал", "Тяжелая тренировка: спина и бицепс", false, "15.03.2026"),
-                                NoteEntity(8, "БГУ", "Забрать справку в деканате (если не забуду)", false, "16.03.2026"),
-                                NoteEntity(9, "Android", "Custom View: разобраться с onMeasure и StaticLayout", false, "16.03.2026"),
-                                NoteEntity(3, "Зал", "Легкое кардио, чисто размяться перед неделей", true, "15.03.2026"),
-                                NoteEntity(4, "Планы", "Распихать все лабы по дедлайнам нахуй", false, "15.03.2026")
-                            )
-                            testNotes.forEach { dao.putNote(it) }
-                        }
+                        db.execSQL("INSERT INTO notes_table (id, title, description, is_important, date, is_read) VALUES (1, 'универ', 'завтра надо приехать к 4 паре (хотя бы приехать)', 0, '15.03.2026', 0)")
+                        db.execSQL("INSERT INTO notes_table (id, title, description, is_important, date, is_read) VALUES (2, 'поесть', 'пельменей можно', 1, '15.03.2026', 0)")
+                        db.execSQL("INSERT INTO notes_table (id, title, description, is_important, date, is_read) VALUES (5, 'универ', 'завтра надо приехать к 4 паре (хотя бы приехать)', 0, '15.03.2026', 0)")
+                        db.execSQL("INSERT INTO notes_table (id, title, description, is_important, date, is_read) VALUES (6, 'Hilt', 'Поправить циклическую зависимость в модуле Data', 0, '15.03.2026', 0)")
+                        db.execSQL("INSERT INTO notes_table (id, title, description, is_important, date, is_read) VALUES (7, 'Зал', 'Тяжелая тренировка: спина и бицепс', 0, '15.03.2026', 0)")
+                        db.execSQL("INSERT INTO notes_table (id, title, description, is_important, date, is_read) VALUES (8, 'БГУ', 'Забрать справку в деканате (если не забуду)', 0, '16.03.2026', 0)")
+                        db.execSQL("INSERT INTO notes_table (id, title, description, is_important, date, is_read) VALUES (9, 'Android', 'Custom View: разобраться с onMeasure и StaticLayout', 0, '16.03.2026', 0)")
+                        db.execSQL("INSERT INTO notes_table (id, title, description, is_important, date, is_read) VALUES (3, 'Зал', 'Легкое кардио, чисто размяться перед неделей', 1, '15.03.2026', 0)")
+                        db.execSQL("INSERT INTO notes_table (id, title, description, is_important, date, is_read) VALUES (4, 'Планы', 'Распихать все лабы по дедлайнам', 0, '15.03.2026', 0)")
                     }
                 }).build()
                 INSTANCE = instance

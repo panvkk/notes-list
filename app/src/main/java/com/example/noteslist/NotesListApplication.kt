@@ -22,12 +22,7 @@ import kotlinx.coroutines.SupervisorJob
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("settings")
 class NotesListApplication : Application() {
 
-    val database by lazy {
-        NotesListDatabase.getDatabase(
-            this,
-            CoroutineScope(SupervisorJob() + Dispatchers.Main)
-        )
-    }
+    val database by lazy { NotesListDatabase.getDatabase(this) }
 
     private val notesRepository by lazy { NotesRepositoryImpl(database.notesDao()) }
     private val settingsRepository by lazy { SettingsRepositoryImpl(dataStore) }
