@@ -14,9 +14,12 @@ class DataComponent(
     private val dependencies: Dependencies
 ) {
     private val context: Context by lazy { dependencies.getContext() }
-    private val database by lazy { NotesListDatabase.getDatabase(context) }
 
-    val notesRepository by lazy { NotesRepositoryImpl(database.notesDao()) }
+    val notesRepository by lazy {
+        NotesRepositoryImpl(
+            NotesListDatabase.getDatabase(context).notesDao()
+        )
+    }
     val paramsRepository by lazy { ParametersRepositoryImpl(context.dataStore) }
 
     interface Dependencies {
