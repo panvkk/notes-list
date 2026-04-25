@@ -45,16 +45,4 @@ class SettingsViewModel(
             _uiState.update { settings }
         }
     }
-
-    companion object {
-        val factory = viewModelFactory {
-            initializer {
-                val application = this[APPLICATION_KEY] as NotesListApplication
-                SettingsViewModel(
-                    application.getSettingsUseCase,
-                    application.updateSettingsUseCase
-                )
-            }
-        }
-    }
 }

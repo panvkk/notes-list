@@ -10,13 +10,23 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.example.noteslist.presentation.di.PresentationComponentHolder
+import com.example.noteslist.presentation.di.subcomponent.SettingsSubComponent
 import com.example.noteslist.presentation.ui.screen.SettingsScreen
 import com.example.noteslist.presentation.ui.theme.NotesListTheme
 import com.example.noteslist.presentation.viewmodel.SettingsViewModel
 
 internal class SettingsFragment : Fragment() {
 
-    private val viewModel by viewModels<SettingsViewModel> { SettingsViewModel.factory }
+    private var subcomponent: SettingsSubComponent? = null
+    private val viewModel by viewModels<SettingsViewModel> {
+        subcomponent!!.createSettingsViewModelFactory()
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        subcomponent = PresentationComponentHolder.component.provideSettingsSubComponent()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -52,5 +62,10 @@ internal class SettingsFragment : Fragment() {
         override fun handleOnBackPressed() {
             findNavController().popBackStack()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        subcomponent = null
     }
 }

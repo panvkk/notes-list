@@ -17,6 +17,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.noteslist.R
 import com.example.noteslist.databinding.FragmentNotesListBinding
+import com.example.noteslist.presentation.di.PresentationComponentHolder
+import com.example.noteslist.presentation.di.subcomponent.NotesListSubComponent
 import com.example.noteslist.presentation.model.NotesListUiState
 import com.example.noteslist.presentation.ui.recycler.adapter.MultiTypeAdapter
 import com.example.noteslist.presentation.ui.recycler.adapter.delegates.DateTitleDelegate
@@ -31,11 +33,18 @@ internal class NotesListFragment : Fragment() {
 
     private var _binding: FragmentNotesListBinding? = null
     private val binding get() = _binding!!
+    private var subcomponent: NotesListSubComponent? = null
 
-    private val viewModel by viewModels<NotesListViewModel> { NotesListViewModel.factory }
+    private val viewModel by viewModels<NotesListViewModel> {
+        subcomponent!!.createNotesListViewModelFactory()
+    }
     private val globalViewModel: GlobalViewModel by activityViewModels()
-
     private val notesAdapter by lazy { setupAdapter() }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        subcomponent = PresentationComponentHolder.component.provideNotesListSubComponent()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -191,5 +200,6 @@ internal class NotesListFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        subcomponent = null
     }
 }

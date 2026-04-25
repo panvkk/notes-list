@@ -12,18 +12,27 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.noteslist.presentation.di.PresentationComponentHolder
+import com.example.noteslist.presentation.di.subcomponent.NoteDetailsSubComponent
 import com.example.noteslist.presentation.model.GlobalUiState
 import com.example.noteslist.presentation.ui.screen.NoteDetailsScreen
 import com.example.noteslist.presentation.ui.theme.NotesListTheme
 import com.example.noteslist.presentation.viewmodel.GlobalViewModel
 import com.example.noteslist.presentation.viewmodel.NoteDetailsViewModel
 import kotlinx.coroutines.launch
-import kotlin.getValue
 
 internal class NoteDetailsFragment : Fragment() {
 
-    private val viewModel by viewModels<NoteDetailsViewModel> { NoteDetailsViewModel.factory }
     private val globalViewModel: GlobalViewModel by activityViewModels()
+    private var subcomponent: NoteDetailsSubComponent? = null
+    private val viewModel by viewModels<NoteDetailsViewModel> {
+        subcomponent!!.createNoteDetailsViewModelFactory()
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        subcomponent = PresentationComponentHolder.component.provideNoteDetailsSubComponent()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -67,5 +76,10 @@ internal class NoteDetailsFragment : Fragment() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        subcomponent = null
     }
 }

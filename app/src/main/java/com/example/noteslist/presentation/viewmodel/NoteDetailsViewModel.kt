@@ -179,17 +179,6 @@ class NoteDetailsViewModel(
     companion object {
         private const val TAG = "NoteDetailsViewModel"
         private const val STATE_KEY = "details_state"
-        val factory = viewModelFactory {
-            initializer {
-                val application = this[APPLICATION_KEY] as NotesListApplication
-                NoteDetailsViewModel(
-                    createSavedStateHandle(),
-                    application.createNoteUseCase,
-                    application.updateNoteUseCase,
-                    application.findNoteUseCase
-                )
-            }
-        }
     }
 }
 

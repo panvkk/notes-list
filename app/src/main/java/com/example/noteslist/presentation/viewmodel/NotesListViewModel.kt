@@ -163,17 +163,5 @@ class NotesListViewModel(
 
     companion object {
         private const val TAG = "NotesListViewModel"
-        val factory = viewModelFactory {
-            initializer {
-                val application = this[APPLICATION_KEY] as NotesListApplication
-                NotesListViewModel(
-                    application.notesUseCase,
-                    application.updateNoteReadUseCase,
-                    application.getSettingsUseCase,
-                    application.getAppConfigUseCase,
-                    application.updateAppConfigUseCase
-                )
-            }
-        }
     }
 }
