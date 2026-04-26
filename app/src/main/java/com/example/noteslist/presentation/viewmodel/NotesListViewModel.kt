@@ -1,6 +1,5 @@
 package com.example.noteslist.presentation.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.noteslist.domain.model.AppConfig
@@ -29,7 +28,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 class NotesListViewModel(
     private val notesUseCase: NotesUseCase,

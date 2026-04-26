@@ -42,7 +42,7 @@ class MainHostFragment : Fragment() {
         )
 
         val slidingPane = binding.slidingPaneLayout
-        slidingPane.lockMode = SlidingPaneLayout.LOCK_MODE_LOCKED // TODO узнать в чём же проблема редких зависаний
+        slidingPane.lockMode = SlidingPaneLayout.LOCK_MODE_LOCKED
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {

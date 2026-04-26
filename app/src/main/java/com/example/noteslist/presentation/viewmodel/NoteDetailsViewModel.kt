@@ -104,22 +104,15 @@ class NoteDetailsViewModel(
     fun setNote(newNoteId: Long?) {
         if(uiState.value.noteId == newNoteId) return
 
-        viewModelScope.launch {
-            updateError(null)
-            if (newNoteId == null) {
-                updateIsNewNote(true)
-                setNoteId(null)
-                setCurrentAndOriginalNotes(ViewTypedModel.Note(-1, "", "", false, "", false))
-            } else {
-                val newNote: ViewTypedModel.Note? = findNoteUseCase.invoke(newNoteId).fold(
-                    onSuccess = { it.toUiModel() },
-                    onFailure = {
-                        val msg = it.message
-                        updateError(DetailsScreenError.Other(msg))
-                        Log.e(TAG, msg ?: "Unknown error")
-                        null
-                    }
-                )
+        updateError(null)
+        if (newNoteId == null) {
+            updateIsNewNote(true)
+            setNoteId(null)
+            setCurrentAndOriginalNotes(ViewTypedModel.Note(-1, "", "", false, "", false))
+        } else {
+            viewModelScope.launch {
+                val newNote = findNote(newNoteId)
+
                 newNote?.let {
                     setNoteId(newNote.id)
                     setCurrentAndOriginalNotes(newNote)
@@ -127,6 +120,17 @@ class NoteDetailsViewModel(
                 }
             }
         }
+    }
+
+    private suspend fun findNote(noteId: Long) : ViewTypedModel.Note? {
+        findNoteUseCase.invoke(noteId)
+            .onSuccess { return it.toUiModel() }
+            .onFailure {
+                val msg = it.message
+                updateError(DetailsScreenError.Other(msg))
+                Log.e(TAG, msg ?: "Unknown error")
+            }
+        return null
     }
 
     fun submitNote() {

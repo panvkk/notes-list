@@ -54,7 +54,10 @@ internal class NoteDetailsFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 globalViewModel.uiState.collect { state ->
                     when(state) {
-                        is GlobalUiState.CreateNote -> viewModel.setNote(null)
+                        is GlobalUiState.CreateNote -> {
+                            if(!viewModel.isNewNote.value)
+                                viewModel.setNote(null)
+                        }
                         is GlobalUiState.EditNote ->  viewModel.setNote(state.noteId)
                         else -> {  }
                     }
