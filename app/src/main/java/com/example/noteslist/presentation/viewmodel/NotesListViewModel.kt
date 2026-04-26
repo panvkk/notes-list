@@ -13,6 +13,7 @@ import com.example.noteslist.presentation.di.PresentationComponentHolder
 import com.example.noteslist.presentation.mappers.toUiModel
 import com.example.noteslist.presentation.model.NotesListUiState
 import com.example.noteslist.presentation.model.ViewTypedModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -143,7 +144,7 @@ class NotesListViewModel(
             val notes = noteModels.map { it.toUiModel() }
 
             getViewTypedData(notes)
-        }
+        }.flowOn(Dispatchers.Default) // Так как сложная сортировка списка
     }
     private suspend fun updateIsFirstEntry(value: Boolean) {
         updateAppConfigUseCase.invoke(AppConfig(value))

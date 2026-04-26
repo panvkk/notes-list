@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.noteslist.core.MAX_TITLE_LENGTH
 import com.example.noteslist.core.domain.error.DomainError
-import com.example.noteslist.core.domain.error.NoteValidationException
 import com.example.noteslist.domain.usecase.CreateNoteUseCase
 import com.example.noteslist.domain.usecase.FindNoteUseCase
 import com.example.noteslist.domain.usecase.UpdateNoteUseCase

@@ -1,7 +1,6 @@
 package com.example.noteslist.domain.usecase
 
 import com.example.noteslist.core.domain.error.DomainError
-import com.example.noteslist.core.domain.error.NoteValidationException
 import com.example.noteslist.domain.repository.NotesRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

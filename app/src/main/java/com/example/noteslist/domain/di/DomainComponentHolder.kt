@@ -25,7 +25,7 @@ object DomainComponentHolder {
         }
 
         override fun getApplicationScope(): CoroutineScope {
-            return CoroutineScope(SupervisorJob() + Dispatchers.Default)
+            return CoroutineScope(SupervisorJob() + Dispatchers.IO)
         }
     }
 }
