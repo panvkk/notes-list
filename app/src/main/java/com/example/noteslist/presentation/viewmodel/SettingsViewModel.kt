@@ -31,9 +31,7 @@ class SettingsViewModel(
     }
 
     fun saveSettings() {
-        viewModelScope.launch {
-            updateSettingsUseCase.invoke(_uiState.value)
-        }
+        updateSettingsUseCase.invoke(_uiState.value)
     }
 
     private fun fetchSettings() {

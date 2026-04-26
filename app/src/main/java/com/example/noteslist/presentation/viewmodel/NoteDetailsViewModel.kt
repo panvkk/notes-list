@@ -114,9 +114,9 @@ class NoteDetailsViewModel(
                 val newNote: ViewTypedModel.Note? = findNoteUseCase.invoke(newNoteId).fold(
                     onSuccess = { it.toUiModel() },
                     onFailure = {
-                        val msg = it.message ?: "Unknown error."
+                        val msg = it.message
                         updateError(DetailsScreenError.Other(msg))
-                        Log.e(TAG, msg)
+                        Log.e(TAG, msg ?: "Unknown error")
                         null
                     }
                 )
@@ -141,19 +141,16 @@ class NoteDetailsViewModel(
                 }
                 result
                     .onSuccess {
-                        viewModelScope.launch {
-                            _navigationEvent.send(NavigationEvent.OnSave)
-                        }
+                        _navigationEvent.send(NavigationEvent.OnSave)
                     }.onFailure { exception ->
-                        val msg = exception.message ?: "Unknown error."
+                        val msg = exception.message
                         when (exception) {
                             is NoteValidationException.TitleEmpty -> {
                                 updateError(DetailsScreenError.HasTitle.Empty())
                             }
-
                             else -> {
                                 updateError(DetailsScreenError.Other(msg))
-                                Log.e(TAG, msg)
+                                Log.e(TAG, msg ?: "Unknown error.")
                             }
                         }
                     }

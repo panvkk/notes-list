@@ -75,12 +75,7 @@ class NotesListViewModel(
         NotesListUiState.Content(emptyList())
     )
 
-    fun onNoteLongClick(noteId: Long) {
-        viewModelScope.launch {
-            updateNoteReadUseCase.invoke(noteId)
-                .onFailure { Log.e(TAG, it.message ?: "Unknown Error.")  }
-        }
-    }
+    fun onNoteLongClick(noteId: Long) { updateNoteReadUseCase.invoke(noteId) }
 
     private fun getDefaultSettings() = SettingsModel(50f, 3)
 

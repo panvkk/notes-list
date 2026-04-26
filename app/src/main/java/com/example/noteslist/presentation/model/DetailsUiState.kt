@@ -19,5 +19,5 @@ sealed class DetailsScreenError(
         @Parcelize class Empty : DetailsScreenError(), HasTitle
         @Parcelize class Large : DetailsScreenError(), HasTitle
     }
-    @Parcelize data class Other(val msg: String) : DetailsScreenError(msg)
+    @Parcelize data class Other(val msg: String?) : DetailsScreenError(msg)
 }
