@@ -1,23 +1,21 @@
 package com.example.noteslist.domain.usecase
 
-import com.example.noteslist.core.domain.error.NoteValidationException
+import com.example.noteslist.core.domain.error.DomainError
 import com.example.noteslist.domain.model.NoteModel
 import com.example.noteslist.domain.repository.NotesRepository
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class UpdateNoteUseCase(
     private val repository: NotesRepository,
     private val applicationScope: CoroutineScope
 ) {
-    operator fun invoke(note: NoteModel?) : Result<Unit> {
+    suspend operator fun invoke(note: NoteModel?) : Result<Unit> = withContext(applicationScope.coroutineContext) {
         if(note == null || note.id == -1L)
-            return Result.failure(IllegalArgumentException("Note with null id cannot be saved."))
+            return@withContext Result.failure(DomainError.InvalidArgument.Note())
         else if(note.title.isEmpty())
-            return Result.failure(NoteValidationException.TitleEmpty())
+            return@withContext Result.failure(DomainError.Validation.NoteTitleEmpty())
 
-        applicationScope.launch { repository.updateNote(note) }
-        return Result.success(Unit)
+        repository.updateNote(note)
     }
 }

@@ -1,5 +1,8 @@
 package com.example.noteslist.data.repository
 
+import android.database.sqlite.SQLiteException
+import android.database.sqlite.SQLiteFullException
+import com.example.noteslist.core.domain.error.DomainError
 import com.example.noteslist.core.toLocalDate
 import com.example.noteslist.core.toStringWithPattern
 import com.example.noteslist.data.dto.NoteEntity
@@ -25,20 +28,39 @@ class NotesRepositoryImpl(
             entities.map { it.toDomain() }
         }
     }
-    override suspend fun createNote(title: String, description: String, date: LocalDate, isImportant: Boolean) {
-        val noteEntity = NoteEntity(
-            title = title,
-            description = description,
-            isImportant = isImportant,
-            date = date.toStringWithPattern()
-        )
-        notesDao.putNote(noteEntity)
+    override suspend fun createNote(
+        title: String,
+        description: String,
+        date: LocalDate,
+        isImportant: Boolean
+    ): Result<Unit> {
+        return try {
+            val noteEntity = NoteEntity(
+                title = title,
+                description = description,
+                isImportant = isImportant,
+                date = date.toStringWithPattern()
+            )
+            notesDao.putNote(noteEntity)
+            Result.success(Unit)
+        } catch (e: SQLiteFullException) {
+            Result.failure(DomainError.Data.NoDiskSpace())
+        } catch (e: SQLiteException) {
+            Result.failure(DomainError.Data.Other(e.message))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+
     }
     override suspend fun updateNote(note: NoteModel) : Result<Unit> {
         val noteEntity = note.toDto()
         return try {
             notesDao.updateNote(noteEntity)
             Result.success(Unit)
+        } catch (e: SQLiteFullException) {
+            Result.failure(DomainError.Data.NoDiskSpace())
+        } catch (e: SQLiteException) {
+            Result.failure(DomainError.Data.Other(e.message))
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -48,6 +70,8 @@ class NotesRepositoryImpl(
         return try {
             val noteEntity = notesDao.findNote(id)
             Result.success(noteEntity.toDomain())
+        } catch (e: SQLiteException) {
+            Result.failure(DomainError.Data.Other(e.message))
         } catch (e: Exception) {
             Result.failure(e)
         }

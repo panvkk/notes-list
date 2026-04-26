@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.noteslist.core.MAX_TITLE_LENGTH
+import com.example.noteslist.core.domain.error.DomainError
 import com.example.noteslist.core.domain.error.NoteValidationException
 import com.example.noteslist.domain.usecase.CreateNoteUseCase
 import com.example.noteslist.domain.usecase.FindNoteUseCase
@@ -125,10 +126,12 @@ class NoteDetailsViewModel(
     private suspend fun findNote(noteId: Long) : ViewTypedModel.Note? {
         findNoteUseCase.invoke(noteId)
             .onSuccess { return it.toUiModel() }
-            .onFailure {
-                val msg = it.message
-                updateError(DetailsScreenError.Other(msg))
-                Log.e(TAG, msg ?: "Unknown error")
+            .onFailure { exception ->
+                val msg = exception.message
+                when(exception) {
+                    is DomainError.InvalidArgument.Note -> { Log.e(TAG, "Invalid note state") }
+                    else -> Log.e(TAG, msg ?: "Unknown error.")
+                }
             }
         return null
     }
@@ -143,19 +146,15 @@ class NoteDetailsViewModel(
                 } else {
                     updateNoteUseCase.invoke(uiState.value.currentNote.toDomain())
                 }
-                result
-                    .onSuccess {
+                result.onSuccess {
                         _navigationEvent.send(NavigationEvent.OnSave)
                     }.onFailure { exception ->
                         val msg = exception.message
                         when (exception) {
-                            is NoteValidationException.TitleEmpty -> {
-                                updateError(DetailsScreenError.HasTitle.Empty())
-                            }
-                            else -> {
-                                updateError(DetailsScreenError.Other(msg))
-                                Log.e(TAG, msg ?: "Unknown error.")
-                            }
+                            is DomainError.Validation.NoteTitleEmpty -> { updateError(DetailsScreenError.HasTitle.Empty()) }
+                            is DomainError.Data.NoDiskSpace -> { updateError(DetailsScreenError.NoDiscSpace()) }
+                            is DomainError.Data.Other -> { Log.e(TAG, "Database error: ${msg ?: "Unknown error."}") }
+                            else -> { Log.e(TAG, msg ?: "Unknown error.") }
                         }
                     }
             }

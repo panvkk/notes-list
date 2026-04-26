@@ -9,7 +9,7 @@ interface NotesRepository {
 
     fun getNotesByQuery(query: String) : Flow<List<NoteModel>>
 
-    suspend fun createNote(title: String, description: String, date: LocalDate, isImportant: Boolean)
+    suspend fun createNote(title: String, description: String, date: LocalDate, isImportant: Boolean): Result<Unit>
 
     suspend fun updateNote(note: NoteModel) : Result<Unit>
 

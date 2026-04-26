@@ -128,9 +128,9 @@ fun NoteDetailsScreen(
                 modifier = Modifier.padding(dimensionResource(R.dimen.small_padding))
             )
         }
-        if(currentError is DetailsScreenError.Other) {
+        if(currentError is DetailsScreenError.NoDiscSpace) {
             Text(
-                text = currentError.message ?: stringResource(R.string.unknown_error),
+                text = stringResource(R.string.no_disc_space_error),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.error,
                 textAlign = TextAlign.Center,

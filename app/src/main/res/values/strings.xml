@@ -24,4 +24,5 @@
     <string name="search_query_field_description">Поисковой запрос</string>
     <string name="search_query_field_hint">Найти заметку</string>
     <string name="title_large_error">Название слишком длинное</string>
+    <string name="no_disc_space_error">Нет места на диске.</string>
 </resources>
