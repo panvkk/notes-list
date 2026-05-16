@@ -113,26 +113,29 @@ class NoteDetailsViewModel(
                 setNoteId(null)
                 setCurrentAndOriginalNotes(ViewTypedModel.Note(-1, "", "", false, "", false))
             } else {
-                var newNote: ViewTypedModel.Note? = null
-                findNoteUseCase.invoke(newNoteId)
-                    .onSuccess { newNote = it.toUiModel() }
-                    .onFailure {
+                val newNote: ViewTypedModel.Note? = findNoteUseCase.invoke(newNoteId).fold(
+                    onSuccess = { it.toUiModel() },
+                    onFailure = {
                         val msg = it.message ?: "Unknown error."
                         updateError(DetailsScreenError.Other(msg))
                         Log.e(TAG, msg)
+                        null
                     }
-                setNoteId(newNote?.id ?: return@launch)
-                setCurrentAndOriginalNotes(newNote)
-                updateIsNewNote(false)
+                )
+                newNote?.let {
+                    setNoteId(newNote.id)
+                    setCurrentAndOriginalNotes(newNote)
+                    updateIsNewNote(false)
+                }
             }
         }
     }
 
     fun submitNote() {
+        if (uiState.value.error is DetailsScreenError.HasTitle) return
+
         viewModelScope.launch {
             uiState.value.currentNote.apply {
-                if (uiState.value.error is DetailsScreenError.HasTitle) return@launch
-
                 val result = if (_isNewNote.value) {
                     createNoteUseCase.invoke(title, description, isImportant)
                 } else {
