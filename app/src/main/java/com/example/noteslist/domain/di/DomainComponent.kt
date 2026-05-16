@@ -18,23 +18,15 @@ class DomainComponent(
 ) {
 
     fun createNoteUseCase(): CreateNoteUseCase =
-        CreateNoteUseCase(
-            dependencies.getNotesRepository(),
-            dependencies.getApplicationScope()
-        )
+        CreateNoteUseCase(dependencies.getNotesRepository())
     fun findNoteUseCase(): FindNoteUseCase =
         FindNoteUseCase(dependencies.getNotesRepository())
     fun updateNoteUseCase(): UpdateNoteUseCase =
-        UpdateNoteUseCase(
-            dependencies.getNotesRepository(),
-            applicationScope = dependencies.getApplicationScope()
-        )
+        UpdateNoteUseCase(dependencies.getNotesRepository())
     fun updateNoteReadUseCase(): UpdateNoteReadUseCase =
         UpdateNoteReadUseCase(
             findNoteUseCase = findNoteUseCase(),
-            updateNoteUseCase = updateNoteUseCase(),
-            applicationScope = dependencies.getApplicationScope()
-        )
+            updateNoteUseCase = updateNoteUseCase())
 
     fun notesUseCase(): NotesUseCase =
         NotesUseCase(dependencies.getNotesRepository())
@@ -42,10 +34,7 @@ class DomainComponent(
     fun getSettingsUseCase(): GetSettingsUseCase =
         GetSettingsUseCase(dependencies.getParametersRepository())
     fun updateSettingsUseCase(): UpdateSettingsUseCase =
-        UpdateSettingsUseCase(
-            dependencies.getParametersRepository(),
-            applicationScope = dependencies.getApplicationScope()
-        )
+        UpdateSettingsUseCase(dependencies.getParametersRepository())
 
     fun getAppConfigUseCase(): GetAppConfigUseCase =
         GetAppConfigUseCase(dependencies.getParametersRepository())
@@ -55,6 +44,5 @@ class DomainComponent(
     interface Dependencies {
         fun getNotesRepository() : NotesRepository
         fun getParametersRepository() : ParametersRepository
-        fun getApplicationScope() : CoroutineScope
     }
 }

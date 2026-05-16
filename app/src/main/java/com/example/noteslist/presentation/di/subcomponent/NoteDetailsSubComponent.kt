@@ -9,6 +9,7 @@ import com.example.noteslist.domain.usecase.CreateNoteUseCase
 import com.example.noteslist.domain.usecase.FindNoteUseCase
 import com.example.noteslist.domain.usecase.UpdateNoteUseCase
 import com.example.noteslist.presentation.viewmodel.NoteDetailsViewModel
+import kotlinx.coroutines.CoroutineScope
 
 class NoteDetailsSubComponent(
     private val dependencies: Dependencies
@@ -26,7 +27,8 @@ class NoteDetailsSubComponent(
             savedStateHandle,
             dependencies.getCreateNoteUseCase(),
             dependencies.getUpdateNoteUseCase(),
-            dependencies.getFindNoteUseCase()
+            dependencies.getFindNoteUseCase(),
+            dependencies.getApplicationScope()
         )
     }
 
@@ -34,5 +36,6 @@ class NoteDetailsSubComponent(
         fun getCreateNoteUseCase() : CreateNoteUseCase
         fun getUpdateNoteUseCase() : UpdateNoteUseCase
         fun getFindNoteUseCase() : FindNoteUseCase
+        fun getApplicationScope() : CoroutineScope
     }
 }

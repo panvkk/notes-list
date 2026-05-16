@@ -1,14 +1,15 @@
 package com.example.noteslist.core.domain.error
 
-sealed class DomainError(msg: String? = null) : Throwable(msg) {
-    sealed class InvalidArgument : DomainError() {
-        class Note : InvalidArgument()
+sealed interface DomainError {
+    sealed interface InvalidArgument : DomainError {
+        data object Note : InvalidArgument
     }
-    sealed class Validation : DomainError() {
-        class NoteTitleEmpty : Validation()
+    sealed interface ValidationError : DomainError {
+        data object NoteTitleEmpty : ValidationError
     }
-    sealed class Data(msg: String? = null) : DomainError(msg) {
-        class NoDiskSpace : Data()
-        class Other(msg: String?) : Data(msg)
+    sealed interface StorageError : DomainError {
+        data object NoDiskSpace : StorageError
+        data class Other(val msg: String?) : StorageError
     }
+    data class UnexpectedException(val e: Throwable) : DomainError
 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.noteslist.core.MAX_TITLE_LENGTH
+import com.example.noteslist.core.Resource
 import com.example.noteslist.core.domain.error.DomainError
 import com.example.noteslist.domain.usecase.CreateNoteUseCase
 import com.example.noteslist.domain.usecase.FindNoteUseCase
@@ -15,6 +16,7 @@ import com.example.noteslist.presentation.mappers.toUiModel
 import com.example.noteslist.presentation.model.DetailsScreenError
 import com.example.noteslist.presentation.model.DetailsUiState
 import com.example.noteslist.presentation.model.ViewTypedModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +32,8 @@ class NoteDetailsViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val createNoteUseCase: CreateNoteUseCase,
     private val updateNoteUseCase: UpdateNoteUseCase,
-    private val findNoteUseCase: FindNoteUseCase
+    private val findNoteUseCase: FindNoteUseCase,
+    private val applicationScope: CoroutineScope
 ) : ViewModel() {
 
     val uiState = savedStateHandle.getStateFlow(STATE_KEY, generateInitialState())
@@ -123,39 +126,44 @@ class NoteDetailsViewModel(
     }
 
     private suspend fun findNote(noteId: Long) : ViewTypedModel.Note? {
-        findNoteUseCase.invoke(noteId)
-            .onSuccess { return it.toUiModel() }
-            .onFailure { exception ->
-                val msg = exception.message
-                when(exception) {
+        when(val result = findNoteUseCase.invoke(noteId)) {
+            is Resource.Success -> { return result.data.toUiModel() }
+            is Resource.Error -> {
+                when(result.error) {
                     is DomainError.InvalidArgument.Note -> { Log.e(TAG, "Invalid note state") }
-                    else -> Log.e(TAG, msg ?: "Unknown error.")
+                    else -> Log.e(TAG, "Error occurred: $result")
                 }
             }
+        }
         return null
     }
 
     fun submitNote() {
         if (uiState.value.error is DetailsScreenError.HasTitle) return
 
-        viewModelScope.launch {
-            uiState.value.currentNote.apply {
+        uiState.value.currentNote.apply {
+            applicationScope.launch {
                 val result = if (_isNewNote.value) {
                     createNoteUseCase.invoke(title, description, isImportant)
                 } else {
                     updateNoteUseCase.invoke(uiState.value.currentNote.toDomain())
                 }
-                result.onSuccess {
-                        _navigationEvent.send(NavigationEvent.OnSave)
-                    }.onFailure { exception ->
-                        val msg = exception.message
-                        when (exception) {
-                            is DomainError.Validation.NoteTitleEmpty -> { updateError(DetailsScreenError.HasTitle.Empty()) }
-                            is DomainError.Data.NoDiskSpace -> { updateError(DetailsScreenError.NoDiscSpace()) }
-                            is DomainError.Data.Other -> { Log.e(TAG, "Database error: ${msg ?: "Unknown error."}") }
-                            else -> { Log.e(TAG, msg ?: "Unknown error.") }
+                viewModelScope.launch {  // а стейт уже меня на viewModelScope
+                    when(result) {
+                        is Resource.Success -> {
+                            _navigationEvent.send(NavigationEvent.OnSave)
+                        }
+                        is Resource.Error -> {
+                            when (result.error) {
+                                is DomainError.ValidationError.NoteTitleEmpty -> { updateError(DetailsScreenError.HasTitle.Empty()) }
+                                is DomainError.StorageError.NoDiskSpace -> { updateError(DetailsScreenError.NoDiscSpace()) }
+                                is DomainError.UnexpectedException -> { Log.e(TAG, result.error.e.message ?: "Unknown error.") }
+                                is DomainError.StorageError.Other -> { Log.e(TAG, "Database error: ${result.error.msg ?: "Unknown error."}") }
+                                else -> { Log.e(TAG, "Error occurred: $result") }
+                            }
                         }
                     }
+                }
             }
         }
     }

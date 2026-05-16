@@ -9,6 +9,7 @@ import com.example.noteslist.domain.usecase.NotesUseCase
 import com.example.noteslist.domain.usecase.UpdateAppConfigUseCase
 import com.example.noteslist.domain.usecase.UpdateNoteReadUseCase
 import com.example.noteslist.presentation.viewmodel.NotesListViewModel
+import kotlinx.coroutines.CoroutineScope
 
 class NotesListSubComponent(
     private val dependencies: Dependencies
@@ -23,7 +24,8 @@ class NotesListSubComponent(
             dependencies.getUpdateNoteReadUseCase(),
             dependencies.getGetSettingsUseCase(),
             dependencies.getGetAppConfigUseCase(),
-            dependencies.getUpdateAppConfigUseCase()
+            dependencies.getUpdateAppConfigUseCase(),
+            dependencies.getApplicationScope()
         )
     }
 
@@ -33,5 +35,6 @@ class NotesListSubComponent(
         fun getGetSettingsUseCase() : GetSettingsUseCase
         fun getGetAppConfigUseCase() : GetAppConfigUseCase
         fun getUpdateAppConfigUseCase() : UpdateAppConfigUseCase
+        fun getApplicationScope() : CoroutineScope
     }
 }

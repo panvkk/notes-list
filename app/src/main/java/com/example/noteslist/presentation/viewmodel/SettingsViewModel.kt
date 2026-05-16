@@ -6,6 +6,7 @@ import com.example.noteslist.domain.model.SettingsModel
 import com.example.noteslist.domain.usecase.GetSettingsUseCase
 import com.example.noteslist.domain.usecase.UpdateSettingsUseCase
 import com.example.noteslist.presentation.di.PresentationComponentHolder
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -13,7 +14,8 @@ import kotlinx.coroutines.launch
 
 class SettingsViewModel(
     private val getSettingsUseCase: GetSettingsUseCase,
-    private val updateSettingsUseCase: UpdateSettingsUseCase
+    private val updateSettingsUseCase: UpdateSettingsUseCase,
+    private val applicationScope: CoroutineScope
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SettingsModel(40f, 2))
     val uiState = _uiState.asStateFlow()
@@ -31,7 +33,7 @@ class SettingsViewModel(
     }
 
     fun saveSettings() {
-        updateSettingsUseCase.invoke(_uiState.value)
+        applicationScope.launch { updateSettingsUseCase.invoke(_uiState.value) }
     }
 
     private fun fetchSettings() {

@@ -2,6 +2,7 @@ package com.example.noteslist.data.repository
 
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteFullException
+import com.example.noteslist.core.Resource
 import com.example.noteslist.core.domain.error.DomainError
 import com.example.noteslist.core.toLocalDate
 import com.example.noteslist.core.toStringWithPattern
@@ -9,6 +10,7 @@ import com.example.noteslist.data.dto.NoteEntity
 import com.example.noteslist.data.local.dao.NotesDao
 import com.example.noteslist.domain.model.NoteModel
 import com.example.noteslist.domain.repository.NotesRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
@@ -33,7 +35,7 @@ class NotesRepositoryImpl(
         description: String,
         date: LocalDate,
         isImportant: Boolean
-    ): Result<Unit> {
+    ) : Resource<Unit> {
         return try {
             val noteEntity = NoteEntity(
                 title = title,
@@ -42,38 +44,44 @@ class NotesRepositoryImpl(
                 date = date.toStringWithPattern()
             )
             notesDao.putNote(noteEntity)
-            Result.success(Unit)
+            Resource.Success(Unit)
         } catch (e: SQLiteFullException) {
-            Result.failure(DomainError.Data.NoDiskSpace())
+            Resource.Error(DomainError.StorageError.NoDiskSpace)
         } catch (e: SQLiteException) {
-            Result.failure(DomainError.Data.Other(e.message))
+            Resource.Error(DomainError.StorageError.Other(e.message))
         } catch (e: Exception) {
-            Result.failure(e)
+            if(e is CancellationException) throw e
+
+            Resource.Error(DomainError.UnexpectedException(e))
         }
 
     }
-    override suspend fun updateNote(note: NoteModel) : Result<Unit> {
+    override suspend fun updateNote(note: NoteModel) : Resource<Unit> {
         val noteEntity = note.toDto()
         return try {
             notesDao.updateNote(noteEntity)
-            Result.success(Unit)
+            Resource.Success(Unit)
         } catch (e: SQLiteFullException) {
-            Result.failure(DomainError.Data.NoDiskSpace())
+            Resource.Error(DomainError.StorageError.NoDiskSpace)
         } catch (e: SQLiteException) {
-            Result.failure(DomainError.Data.Other(e.message))
+            Resource.Error(DomainError.StorageError.Other(e.message))
         } catch (e: Exception) {
-            Result.failure(e)
+            if(e is CancellationException) throw e
+
+            Resource.Error(DomainError.UnexpectedException(e))
         }
     }
 
-    override suspend fun findNote(id: Long) : Result<NoteModel> {
+    override suspend fun findNote(id: Long) : Resource<NoteModel> {
         return try {
             val noteEntity = notesDao.findNote(id)
-            Result.success(noteEntity.toDomain())
+            Resource.Success(noteEntity.toDomain())
         } catch (e: SQLiteException) {
-            Result.failure(DomainError.Data.Other(e.message))
+            Resource.Error(DomainError.StorageError.Other(e.message))
         } catch (e: Exception) {
-            Result.failure(e)
+            if(e is CancellationException) throw e
+
+            Resource.Error(DomainError.UnexpectedException(e))
         }
     }
 

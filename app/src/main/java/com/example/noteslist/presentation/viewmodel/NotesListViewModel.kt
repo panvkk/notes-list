@@ -13,6 +13,7 @@ import com.example.noteslist.presentation.di.PresentationComponentHolder
 import com.example.noteslist.presentation.mappers.toUiModel
 import com.example.noteslist.presentation.model.NotesListUiState
 import com.example.noteslist.presentation.model.ViewTypedModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -24,18 +25,21 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class NotesListViewModel(
     private val notesUseCase: NotesUseCase,
     private val updateNoteReadUseCase: UpdateNoteReadUseCase,
     private val getSettingsUseCase: GetSettingsUseCase,
     private val getAppConfigUseCase: GetAppConfigUseCase,
-    private val updateAppConfigUseCase: UpdateAppConfigUseCase
+    private val updateAppConfigUseCase: UpdateAppConfigUseCase,
+    private val applicationScope: CoroutineScope
 ) : ViewModel() {
 
     private val _expandedStackIds = MutableStateFlow<Set<Int>>(emptySet())
@@ -74,7 +78,9 @@ class NotesListViewModel(
         NotesListUiState.Content(emptyList())
     )
 
-    fun onNoteLongClick(noteId: Long) { updateNoteReadUseCase.invoke(noteId) }
+    fun onNoteLongClick(noteId: Long) {
+        applicationScope.launch { updateNoteReadUseCase.invoke(noteId) }
+    }
 
     private fun getDefaultSettings() = SettingsModel(50f, 3)
 
