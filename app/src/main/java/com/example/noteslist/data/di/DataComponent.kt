@@ -13,7 +13,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("s
 class DataComponent(
     private val dependencies: Dependencies
 ) {
-    private val context: Context by lazy { dependencies.getContext() }
+    private val context: Context by lazy { dependencies.getContext().applicationContext }
 
     val notesRepository by lazy {
         NotesRepositoryImpl(

@@ -24,14 +24,8 @@ import kotlinx.coroutines.launch
 internal class NoteDetailsFragment : Fragment() {
 
     private val globalViewModel: GlobalViewModel by activityViewModels()
-    private var subcomponent: NoteDetailsSubComponent? = null
     private val viewModel by viewModels<NoteDetailsViewModel> {
-        subcomponent!!.createNoteDetailsViewModelFactory()
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        subcomponent = PresentationComponentHolder.component.provideNoteDetailsSubComponent()
+        PresentationComponentHolder.getNoteDetailsSubComponent().createNoteDetailsViewModelFactory()
     }
 
     override fun onCreateView(
@@ -59,12 +53,10 @@ internal class NoteDetailsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 globalViewModel.uiState.collect { state ->
-                    if(savedInstanceState == null) {
-                        when(state) {
-                            is GlobalUiState.CreateNote -> viewModel.setNote(null)
-                            is GlobalUiState.EditNote ->  viewModel.setNote(state.noteId)
-                            else -> {  }
-                        }
+                    when(state) {
+                        is GlobalUiState.CreateNote -> viewModel.setNote(null)
+                        is GlobalUiState.EditNote ->  viewModel.setNote(state.noteId)
+                        else -> {  }
                     }
                 }
             }
@@ -76,10 +68,5 @@ internal class NoteDetailsFragment : Fragment() {
                 }
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        subcomponent = null
     }
 }

@@ -3,17 +3,13 @@ package com.example.noteslist.presentation.viewmodel
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.noteslist.NotesListApplication
 import com.example.noteslist.core.MAX_TITLE_LENGTH
 import com.example.noteslist.core.domain.error.NoteValidationException
 import com.example.noteslist.domain.usecase.CreateNoteUseCase
 import com.example.noteslist.domain.usecase.FindNoteUseCase
 import com.example.noteslist.domain.usecase.UpdateNoteUseCase
+import com.example.noteslist.presentation.di.PresentationComponentHolder
 import com.example.noteslist.presentation.mappers.toDomain
 import com.example.noteslist.presentation.mappers.toUiModel
 import com.example.noteslist.presentation.model.DetailsScreenError
@@ -106,6 +102,8 @@ class NoteDetailsViewModel(
     }
 
     fun setNote(newNoteId: Long?) {
+        if(uiState.value.noteId == newNoteId) return
+
         viewModelScope.launch {
             updateError(null)
             if (newNoteId == null) {
@@ -174,6 +172,11 @@ class NoteDetailsViewModel(
             ViewTypedModel.Note(-1, "", "", false, "", false),
             ViewTypedModel.Note(-1, "", "", false, "", false)
         )
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        PresentationComponentHolder.clearNoteDetailsSubComponent()
     }
 
     companion object {

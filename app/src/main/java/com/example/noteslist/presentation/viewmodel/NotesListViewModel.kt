@@ -2,11 +2,7 @@ package com.example.noteslist.presentation.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.noteslist.NotesListApplication
 import com.example.noteslist.domain.model.AppConfig
 import com.example.noteslist.domain.model.SettingsModel
 import com.example.noteslist.domain.usecase.GetAppConfigUseCase
@@ -14,6 +10,7 @@ import com.example.noteslist.domain.usecase.GetSettingsUseCase
 import com.example.noteslist.domain.usecase.NotesUseCase
 import com.example.noteslist.domain.usecase.UpdateAppConfigUseCase
 import com.example.noteslist.domain.usecase.UpdateNoteReadUseCase
+import com.example.noteslist.presentation.di.PresentationComponentHolder
 import com.example.noteslist.presentation.mappers.toUiModel
 import com.example.noteslist.presentation.model.NotesListUiState
 import com.example.noteslist.presentation.model.ViewTypedModel
@@ -26,7 +23,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -161,6 +157,10 @@ class NotesListViewModel(
     }
     fun isStackExpanded(stackId: Int) = _expandedStackIds.value.contains(stackId)
 
+    override fun onCleared() {
+        super.onCleared()
+        PresentationComponentHolder.clearNotesListSubComponent()
+    }
     companion object {
         private const val TAG = "NotesListViewModel"
     }

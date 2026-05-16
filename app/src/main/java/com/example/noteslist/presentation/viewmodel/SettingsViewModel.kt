@@ -1,14 +1,11 @@
 package com.example.noteslist.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.noteslist.NotesListApplication
 import com.example.noteslist.domain.model.SettingsModel
 import com.example.noteslist.domain.usecase.GetSettingsUseCase
 import com.example.noteslist.domain.usecase.UpdateSettingsUseCase
+import com.example.noteslist.presentation.di.PresentationComponentHolder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -44,5 +41,10 @@ class SettingsViewModel(
             val settings = getSettingsUseCase.invokeFirst()
             _uiState.update { settings }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        PresentationComponentHolder.clearSettingsSubComponent()
     }
 }

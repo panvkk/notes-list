@@ -33,18 +33,11 @@ internal class NotesListFragment : Fragment() {
 
     private var _binding: FragmentNotesListBinding? = null
     private val binding get() = _binding!!
-    private var subcomponent: NotesListSubComponent? = null
-
     private val viewModel by viewModels<NotesListViewModel> {
-        subcomponent!!.createNotesListViewModelFactory()
+        PresentationComponentHolder.getNotesListSubComponent().createNotesListViewModelFactory()
     }
     private val globalViewModel: GlobalViewModel by activityViewModels()
     private val notesAdapter by lazy { setupAdapter() }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        subcomponent = PresentationComponentHolder.component.provideNotesListSubComponent()
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -200,6 +193,5 @@ internal class NotesListFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        subcomponent = null
     }
 }
