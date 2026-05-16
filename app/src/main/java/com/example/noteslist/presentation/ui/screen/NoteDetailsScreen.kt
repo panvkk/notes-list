@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -17,19 +16,15 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.noteslist.R
 import com.example.noteslist.presentation.model.DetailsScreenError
 import com.example.noteslist.presentation.ui.component.CustomTextField
@@ -43,9 +38,9 @@ fun NoteDetailsScreen(
     onClickCancel: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val currentNote = viewModel.uiState.collectAsState().value.currentNote
-    val currentError = viewModel.uiState.collectAsState().value.error
-    val isNewNote = viewModel.isNewNote.collectAsState().value
+    val currentNote = viewModel.uiState.collectAsStateWithLifecycle().value.currentNote
+    val currentError = viewModel.uiState.collectAsStateWithLifecycle().value.error
+    val isNewNote = viewModel.isNewNote.collectAsStateWithLifecycle().value
 
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->
@@ -57,10 +52,10 @@ fun NoteDetailsScreen(
     }
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.medium_padding)),
         horizontalAlignment = Alignment.Start,
         modifier = modifier
-            .padding(16.dp)
+            .padding(dimensionResource(R.dimen.large_padding))
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
@@ -70,16 +65,16 @@ fun NoteDetailsScreen(
             modifier = Modifier.fillMaxWidth(),
             maxLines = 1,
             label = { Text(stringResource(R.string.text_field_title_label)) },
-            isError = currentError is DetailsScreenError.Title
+            isError = currentError is DetailsScreenError.HasTitle
         )
-        if(currentError is DetailsScreenError.Title) {
+        if(currentError is DetailsScreenError.HasTitle) {
             Text(
-                text = if(currentError is DetailsScreenError.Title.Empty) stringResource(R.string.empty_title_error)
+                text = if(currentError is DetailsScreenError.HasTitle.Empty) stringResource(R.string.empty_title_error)
                     else stringResource(R.string.title_large_error),
                 style = MaterialTheme.typography.titleSmall,
                 color = colorResource(R.color.error_color),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(start = 4.dp)
+                modifier = Modifier.padding(start = dimensionResource(R.dimen.extra_small_padding))
             )
         }
         CustomTextField(
@@ -94,7 +89,7 @@ fun NoteDetailsScreen(
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .padding(horizontal = 8.dp)
+                    .padding(horizontal = dimensionResource(R.dimen.small_padding))
                     .align(Alignment.CenterVertically)
             )
             Switch(
@@ -113,7 +108,7 @@ fun NoteDetailsScreen(
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
-                        .padding(horizontal = 8.dp)
+                        .padding(horizontal = dimensionResource(R.dimen.small_padding))
                         .align(Alignment.CenterVertically)
                 )
                 Switch(
@@ -130,7 +125,7 @@ fun NoteDetailsScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSecondary,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(dimensionResource(R.dimen.small_padding))
             )
         }
         if(currentError is DetailsScreenError.Other) {
@@ -139,11 +134,11 @@ fun NoteDetailsScreen(
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.error,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(dimensionResource(R.dimen.small_padding))
             )
         }
         Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.medium_padding))
         ) {
             OutlinedButton(
                 onClick = { viewModel.cancel() },

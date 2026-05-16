@@ -11,25 +11,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.noteslist.R
-import com.example.noteslist.presentation.model.DetailsScreenError
-import com.example.noteslist.presentation.ui.component.CustomTextField
 import com.example.noteslist.presentation.ui.component.SettingValueCard
 import com.example.noteslist.presentation.viewmodel.SettingsViewModel
 
@@ -39,13 +31,13 @@ fun SettingsScreen(
     onClickCancel: () -> Unit,
     onClickSave: () -> Unit
 ) {
-    val state = viewModel.uiState.collectAsState().value
+    val state = viewModel.uiState.collectAsStateWithLifecycle().value
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.large_padding)),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .padding(16.dp)
+            .padding(dimensionResource(R.dimen.large_padding))
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
@@ -54,7 +46,7 @@ fun SettingsScreen(
             style = MaterialTheme.typography.headlineMedium
         )
         Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.large_padding)),
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(
@@ -92,7 +84,7 @@ fun SettingsScreen(
                 )
             }
             Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.medium_padding))
             ) {
                 OutlinedButton(
                     onClick = { onClickCancel() },

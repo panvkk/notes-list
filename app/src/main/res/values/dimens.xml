@@ -36,4 +36,14 @@
     <dimen name="title_error_text_size">14sp</dimen>
     <dimen name="error_title_text_size">20sp</dimen>
     <dimen name="text_field_text_size">18sp</dimen>
+<!-- Components -->
+    <dimen name="icon_container_size">52dp</dimen>
+    <dimen name="icon_size">40dp</dimen>
+    <dimen name="border_width">1dp</dimen>
+
+<!-- Paddings -->
+    <dimen name="extra_small_padding">4dp</dimen>
+    <dimen name="small_padding">8dp</dimen>
+    <dimen name="medium_padding">12dp</dimen>
+    <dimen name="large_padding">16dp</dimen>
 </resources>

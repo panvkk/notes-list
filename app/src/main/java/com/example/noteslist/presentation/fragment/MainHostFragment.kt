@@ -36,7 +36,10 @@ class MainHostFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        requireActivity().onBackPressedDispatcher.addCallback(backPressedCallback)
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            backPressedCallback
+        )
 
         val slidingPane = binding.slidingPaneLayout
         slidingPane.lockMode = SlidingPaneLayout.LOCK_MODE_LOCKED // TODO узнать в чём же проблема редких зависаний

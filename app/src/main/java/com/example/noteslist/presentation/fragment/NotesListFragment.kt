@@ -26,7 +26,7 @@ import com.example.noteslist.presentation.viewmodel.GlobalViewModel
 import com.example.noteslist.presentation.viewmodel.NotesListViewModel
 import kotlinx.coroutines.launch
 
-class NotesListFragment : Fragment() {
+internal class NotesListFragment : Fragment() {
 
     private var _binding: FragmentNotesListBinding? = null
     private val binding get() = _binding!!

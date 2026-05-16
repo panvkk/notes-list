@@ -17,7 +17,7 @@ import com.example.noteslist.presentation.ui.screen.SettingsScreen
 import com.example.noteslist.presentation.ui.theme.NotesListTheme
 import com.example.noteslist.presentation.viewmodel.SettingsViewModel
 
-class SettingsFragment : Fragment() {
+internal class SettingsFragment : Fragment() {
 
     private val viewModel: SettingsViewModel = SettingsViewModel()
 
@@ -45,7 +45,9 @@ class SettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        requireActivity().onBackPressedDispatcher.addCallback(backPressedCallback)
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            backPressedCallback)
     }
 
     private val backPressedCallback = object : OnBackPressedCallback(true) {

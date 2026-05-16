@@ -20,7 +20,7 @@ import com.example.noteslist.presentation.viewmodel.NoteDetailsViewModel
 import kotlinx.coroutines.launch
 import kotlin.getValue
 
-class NoteDetailsFragment : Fragment() {
+internal class NoteDetailsFragment : Fragment() {
 
     private val viewModel by viewModels<NoteDetailsViewModel> { NoteDetailsViewModel.factory }
     private val globalViewModel: GlobalViewModel by activityViewModels()
@@ -50,10 +50,12 @@ class NoteDetailsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 globalViewModel.uiState.collect { state ->
-                    when(state) {
-                        is GlobalUiState.CreateNote -> viewModel.setNote(null)
-                        is GlobalUiState.EditNote ->  viewModel.setNote(state.noteId)
-                        else -> {  }
+                    if(savedInstanceState == null) {
+                        when(state) {
+                            is GlobalUiState.CreateNote -> viewModel.setNote(null)
+                            is GlobalUiState.EditNote ->  viewModel.setNote(state.noteId)
+                            else -> {  }
+                        }
                     }
                 }
             }

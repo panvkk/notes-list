@@ -1,8 +1,6 @@
 package com.example.noteslist.presentation.viewmodel
 
-import android.os.Bundle
 import android.util.Log
-import androidx.core.os.BundleCompat
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -21,19 +19,15 @@ import com.example.noteslist.presentation.mappers.toUiModel
 import com.example.noteslist.presentation.model.DetailsScreenError
 import com.example.noteslist.presentation.model.DetailsUiState
 import com.example.noteslist.presentation.model.ViewTypedModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class NoteDetailsViewModel(
@@ -43,8 +37,7 @@ class NoteDetailsViewModel(
     private val findNoteUseCase: FindNoteUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(generateInitialState())
-    val uiState = _uiState.asStateFlow()
+    val uiState = savedStateHandle.getStateFlow(STATE_KEY, generateInitialState())
 
     private val _isNewNote = MutableStateFlow(true)
     val isNewNote = _isNewNote.asStateFlow()
@@ -52,59 +45,68 @@ class NoteDetailsViewModel(
     private val _navigationEvent = Channel<NavigationEvent>()
     val navigationEvent = _navigationEvent.receiveAsFlow()
 
-    val hasUnsavedChanges = _uiState.map { state ->
+    val hasUnsavedChanges = uiState.map { state ->
         state.originalNote != state.currentNote
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), false)
 
 
     init {
-        savedStateHandle.setSavedStateProvider(STATE_BUNDLE_KEY) {
-            Bundle().apply {
-                putParcelable(STATE_KEY, _uiState.value)
-            }
-        }
         // Сделал одну подписку на стейт, чтобы не создавать каждый раз новую корутину в updateNoteTitle()
         // вдруг пользователь печатает слишком быстро
         viewModelScope.launch(Dispatchers.Default) {
-            _uiState.map { it.currentNote.title }
+            uiState.map { it.currentNote.title }
                 .distinctUntilChanged()
                 .collect { title ->
                     val error = if(title.length > MAX_TITLE_LENGTH)
-                        DetailsScreenError.Title.Large()
+                        DetailsScreenError.HasTitle.Large()
                     else null // сброс всех ошибок title при вводе символа
 
-                    if(_uiState.value.error != error)
+                    if(uiState.value.error != error)
                         updateError(error)
                 }
         }
     }
     fun updateNoteTitle(value: String) {
-        _uiState.update { it.copy(currentNote = it.currentNote.copy(title = value)) }
+        savedStateHandle.update(STATE_KEY, { generateInitialState() }) {
+            it.copy(currentNote = it.currentNote.copy(title = value))
+        }
     }
     fun updateNoteDescription(value: String) {
-        _uiState.update { it.copy(currentNote = it.currentNote.copy(description = value)) }
+        savedStateHandle.update(STATE_KEY, { generateInitialState() }) {
+            it.copy(currentNote = it.currentNote.copy(description = value))
+        }
     }
     fun updateIsNoteImportant(value: Boolean) {
-        _uiState.update { it.copy(currentNote = it.currentNote.copy(isImportant = value)) }
+        savedStateHandle.update(STATE_KEY, { generateInitialState() }) {
+            it.copy(currentNote = it.currentNote.copy(isImportant = value))
+        }
     }
     fun updateIsNoteRead(value: Boolean) {
-        _uiState.update { it.copy(currentNote = it.currentNote.copy(isRead = value)) }
+        savedStateHandle.update(STATE_KEY, { generateInitialState() }) {
+            it.copy(currentNote = it.currentNote.copy(isRead = value))
+        }
     }
     private fun setCurrentAndOriginalNotes(value: ViewTypedModel.Note) {
-        _uiState.update { it.copy(currentNote = value, originalNote = value) }
+        savedStateHandle.update(STATE_KEY, { generateInitialState() }) {
+            it.copy(currentNote = value, originalNote = value)
+        }
     }
     private fun setNoteId(value: Long?) {
-        _uiState.update { it.copy(noteId = value) }
+        savedStateHandle.update(STATE_KEY, { generateInitialState() }) {
+            it.copy(noteId = value)
+        }
     }
     private fun updateIsNewNote(value: Boolean) {
         _isNewNote.value = value
     }
     private fun updateError(error: DetailsScreenError?) {
-        _uiState.update { it.copy(error = error) }
+        savedStateHandle.update(STATE_KEY, { generateInitialState() }) {
+            it.copy(error = error)
+        }
     }
 
     fun setNote(newNoteId: Long?) {
-        _uiState.update { it.copy(error = null) }
+        updateError(null)
         if(newNoteId == null) {
             updateIsNewNote(true)
             setNoteId(null)
@@ -125,13 +127,13 @@ class NoteDetailsViewModel(
     }
 
     fun submitNote() {
-        _uiState.value.currentNote.apply {
-            if(_uiState.value.error is DetailsScreenError.Title) return
+        uiState.value.currentNote.apply {
+            if(uiState.value.error is DetailsScreenError.HasTitle) return
 
             val result = if (_isNewNote.value) {
                 createNoteUseCase.invoke(title, description, isImportant)
             } else {
-                updateNoteUseCase.invoke(_uiState.value.currentNote.toDomain())
+                updateNoteUseCase.invoke(uiState.value.currentNote.toDomain())
             }
             result
                 .onSuccess {
@@ -142,10 +144,10 @@ class NoteDetailsViewModel(
                     val msg = exception.message ?: "Unknown error."
                     when (exception) {
                         is NoteValidationException.TitleEmpty -> {
-                            _uiState.update { it.copy(error = DetailsScreenError.Title.Empty()) }
+                            updateError(DetailsScreenError.HasTitle.Empty())
                         }
                         else -> {
-                            _uiState.update { it.copy(error = DetailsScreenError.Other(msg)) }
+                            updateError(DetailsScreenError.Other(msg))
                             Log.e(TAG, msg)
                         }
                     }
@@ -159,11 +161,7 @@ class NoteDetailsViewModel(
         }
     }
     private fun generateInitialState() : DetailsUiState {
-        val savedState = savedStateHandle.get<Bundle>(STATE_BUNDLE_KEY)?.let {
-            BundleCompat.getParcelable(it, STATE_KEY, DetailsUiState::class.java)
-        }
-
-        return savedState ?: DetailsUiState(
+        return DetailsUiState(
             noteId = null,
             ViewTypedModel.Note(-1, "", "", false, "", false),
             ViewTypedModel.Note(-1, "", "", false, "", false)
@@ -172,8 +170,7 @@ class NoteDetailsViewModel(
 
     companion object {
         private const val TAG = "NoteDetailsViewModel"
-        private const val STATE_BUNDLE_KEY = "state_bundle"
-        private const val STATE_KEY = "state"
+        private const val STATE_KEY = "details_state"
         val factory = viewModelFactory {
             initializer {
                 val application = this[APPLICATION_KEY] as NotesListApplication
@@ -186,6 +183,12 @@ class NoteDetailsViewModel(
             }
         }
     }
+}
+
+// Экстеншн, упрощающий обновление стэйта, так как он маппится из SavedStateHandle
+inline fun <T> SavedStateHandle.update(key: String, generateInitialState: () -> T, block: (T) -> T) {
+    val currentState = this.get<T>(key) ?: generateInitialState()
+    this[key] = block(currentState)
 }
 
 sealed interface NavigationEvent {
