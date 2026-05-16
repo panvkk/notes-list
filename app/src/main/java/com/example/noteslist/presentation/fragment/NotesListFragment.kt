@@ -134,11 +134,12 @@ internal class NotesListFragment : Fragment() {
     }
 
     private fun setupLayoutManager() : RecyclerView.LayoutManager {
+        val screenHeight = resources.displayMetrics.heightPixels
         return object : LinearLayoutManager(context) {
             override fun calculateExtraLayoutSpace(state: RecyclerView.State, extraLayoutSpace: IntArray) {
-                // Добавляем по 1500 пикселей сверху и снизу для лучшей работы анимаций в ресайклере
-                extraLayoutSpace[0] = 1500
-                extraLayoutSpace[1] = 1500
+                val extraSpace = screenHeight / 2
+                extraLayoutSpace[0] = extraSpace
+                extraLayoutSpace[1] = extraSpace
             }
         }
     }
