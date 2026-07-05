@@ -4,7 +4,7 @@
 
 [Релизный APK можно скачать здесь (реализована только светлая тема)](https://github.com/panvkk/notes-list/blob/hw3/asynchrony/release_apk/app-release.apk)
 
-[Видео работы приложения]()
+[Видео работы приложения](https://github.com/user-attachments/assets/41bb7aab-c6e9-4955-8896-c1e4504942b4)
 
 # 📸 Screenshots
 
