@@ -8,6 +8,12 @@
 
 # 📸 Screenshots
 
+<p align="center">
+  <img width="250" alt="Main List" src="https://github.com/user-attachments/assets/effe5c45-8e22-46ec-850b-cde87bc10d6e" />
+  <img width="250" alt="Details" src="https://github.com/user-attachments/assets/3dd0d034-72a0-4513-ac66-048760b7845f" />
+  <img width="250" alt="Settings" src="https://github.com/user-attachments/assets/771b8a62-f879-4028-8866-614523d82d45" />
+</p>
+
 # 🛠 Tech Stack
 
 **UI**: Гибрид XML и Jetpack Compose
