@@ -4,8 +4,6 @@
 
 [Релизный APK можно скачать здесь (реализована только светлая тема)](https://github.com/panvkk/notes-list/blob/hw3/asynchrony/release_apk/app-release.apk)
 
-[Видео работы приложения](https://github.com/user-attachments/assets/41bb7aab-c6e9-4955-8896-c1e4504942b4)
-
 # 📸 Screenshots
 
 <p align="center">
@@ -13,6 +11,8 @@
   <img width="250" alt="Details" src="https://github.com/user-attachments/assets/1e1cc63e-ca75-48c1-b848-8b563df333d6" />
   <img width="250" alt="Settings" src="https://github.com/user-attachments/assets/771b8a62-f879-4028-8866-614523d82d45" />
 </p>
+
+[Видео работы приложения](https://github.com/user-attachments/assets/41bb7aab-c6e9-4955-8896-c1e4504942b4)
 
 # 🛠 Tech Stack
 
