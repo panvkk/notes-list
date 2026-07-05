@@ -14,3 +14,4 @@ capture/
 deps.txt
 local.properties
 app/schemas/
+app/release/
