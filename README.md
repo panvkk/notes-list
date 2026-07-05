@@ -12,7 +12,7 @@
   <img width="250" alt="Settings" src="https://github.com/user-attachments/assets/771b8a62-f879-4028-8866-614523d82d45" />
 </p>
 
-[Видео работы приложения](https://github.com/user-attachments/assets/41bb7aab-c6e9-4955-8896-c1e4504942b4)
+[Видео работы приложения](https://github.com/user-attachments/assets/cb0283e1-94d1-426f-b472-87ca0c042542)
 
 # 🛠 Tech Stack
 
