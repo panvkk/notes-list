@@ -16,7 +16,7 @@
 
 # 🛠 Tech Stack
 
-**UI**: Гибрид XML и Jetpack Compose
+**UI**: Гибрид XML, Custom View и Jetpack Compose
 
 **Architecture**: Clean Architecture (Data, Domain, Presentation).
 
